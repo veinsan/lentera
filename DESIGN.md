@@ -15,15 +15,15 @@ colors:
   surface-muted: "#EEEDE7"
   border: "#DDDBD3"
   focus: "#3B5BDB"
-  risk-low: "#DCE6EE"
-  risk-watch: "#F6D58E"
-  risk-high: "#EC8A3A"
-  risk-critical: "#A93A1C"
+  risk-low: "#E2A27A"
+  risk-watch: "#CF7448"
+  risk-high: "#B04A26"
+  risk-critical: "#7A2610"
   on-risk-light: "#16203A"
   on-risk-dark: "#FFFFFF"
   uncertain: "#7A7F8C"
   chart-at-risk: "#A93A1C"
-  chart-not-at-risk: "#3E6E9E"
+  chart-not-at-risk: "#2F6DB5"
   chart-neutral: "#9AA1AE"
   success: "#2F7D5B"
   danger: "#B42318"
@@ -110,7 +110,7 @@ components:
     rounded: "{rounded.full}"
   tier-badge-high:
     backgroundColor: "{colors.risk-high}"
-    textColor: "{colors.on-risk-light}"
+    textColor: "{colors.on-risk-dark}"
     rounded: "{rounded.full}"
   tier-badge-critical:
     backgroundColor: "{colors.risk-critical}"
@@ -148,9 +148,9 @@ All token values are proposals awaiting the owner's confirmation.
 - `{colors.accent}` (`brand-accent` in code, because shadcn/ui uses `accent` for hover surfaces) for the active sidebar item, the current step in a flow, and the single most important number on a page. Never for risk.
 - `{colors.background}` for the page, `{colors.surface}` for cards and tables, `{colors.surface-muted}` for table headers, chips, and scenario panels.
 - `{colors.ink}` for body text, `{colors.ink-muted}` for secondary text and axis labels, `{colors.border}` for card and table borders.
-- The four risk tiers use the sequential scale `{colors.risk-low}`, `{colors.risk-watch}`, `{colors.risk-high}`, `{colors.risk-critical}`. The scale runs from pale blue-gray through yellow and orange to dark red, so lightness alone separates the tiers for color-blind users. Tier badges always show the tier name as text as well.
+- The four risk tiers use the sequential scale `{colors.risk-low}`, `{colors.risk-watch}`, `{colors.risk-high}`, `{colors.risk-critical}`. The scale is one orange-red hue from light to dark (hue spread 18 degrees), so lightness alone separates the tiers for color-blind users; it passes the dataviz ordinal checks (monotone lightness, visible steps, Low at 2.17:1 against white). Low and Watch badges use `{colors.on-risk-light}` text (7.4:1 and 4.8:1); High and Critical use `{colors.on-risk-dark}` (5.5:1 and 9.9:1). Tier badges always show the tier name as text as well.
 - `{colors.uncertain}` marks predictions in the uncertain band (probability 0.25 to 0.55) as a dashed outline or a hatched bar segment.
-- Charts that compare outcomes use `{colors.chart-at-risk}` and `{colors.chart-not-at-risk}`. Other series use `{colors.chart-neutral}`.
+- Charts that compare outcomes use `{colors.chart-at-risk}` and `{colors.chart-not-at-risk}` (the pair passes the dataviz categorical checks: CVD separation 22.9, contrast above 3:1). Other series use `{colors.chart-neutral}`.
 - `{colors.success}` and `{colors.danger}` are for form and system states only (saved, failed). They never encode student risk.
 
 ## Typography

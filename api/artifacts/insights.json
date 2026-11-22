@@ -221,7 +221,7 @@
       "recommendations": [
         {
           "code": "no_graded_by_week4",
-          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS. Tambahkan asesmen berbobot rendah sebelum minggu 3."
         },
         {
           "code": "constant_submission_data",
@@ -321,7 +321,7 @@
       "recommendations": [
         {
           "code": "no_graded_by_week4",
-          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS. Tambahkan asesmen berbobot rendah sebelum minggu 3."
         },
         {
           "code": "constant_submission_data",
@@ -329,7 +329,7 @@
         },
         {
           "code": "low_separability",
-          "text": "Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC 0.70). Gunakan prediksi sebagai alasan check-in ringan, bukan keputusan akhir."
+          "text": "Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC 0,70). Gunakan prediksi sebagai alasan check-in ringan, bukan keputusan akhir."
         },
         {
           "code": "high_uncertainty",

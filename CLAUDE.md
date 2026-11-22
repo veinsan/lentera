@@ -12,7 +12,7 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 | Tailwind CSS | 4.3.3, configured in CSS (`web/app/globals.css`), no `tailwind.config` file |
 | shadcn/ui | 4.23, style `base-nova` on Base UI (`@base-ui/react`), copied into `web/components/ui/`; class merging through the `cn` package (`web/lib/utils.ts`) |
 | lucide-react | Icons |
-| Recharts | Charts (planned, added with the first chart page) |
+| Recharts | 3.11, charts in `web/components/charts/` |
 | `@supabase/ssr`, `@supabase/supabase-js` | Auth and database access from the frontend (planned, added in W-02) |
 | pnpm | 12.18, frontend package manager |
 | Python | 3.13 (python.org build; see Local Environment) |
@@ -51,13 +51,13 @@ web/
     ui/                    shadcn/ui components
     layout/                Sidebar, nav links, page header
     charts/                Recharts wrappers that apply chart tokens
-    domain/                Empty state, tier badge, archetype chip, scenario panel, reason list
+    domain/                Empty state, KPI card, section, tier badge, fairness table, API error; planned: archetype chip, scenario panel, reason list
   lib/
     nav.ts                 Sidebar items
     utils.ts               cn() class merging
     supabase/              Browser and server Supabase clients
-    api.ts                 Typed client for the FastAPI service
-    format.ts              Number and probability formatting
+    api.ts                 Typed client for the FastAPI service (`API_URL`, server-side only)
+    format.ts              Number and probability formatting (id-ID, decimal comma)
 api/
   app/
     main.py                FastAPI app, routers, CORS
@@ -82,7 +82,8 @@ data/                      Local only, gitignored
 - Next.js 16 differs from older versions. Before writing Next.js code, read the relevant guide in `web/node_modules/next/dist/docs/` (`web/AGENTS.md`, which `next dev` re-adds; commit it).
 - Cache Components is on: wrap uncached data reads, `cookies()`, `headers()`, `searchParams`, and awaited dynamic `params` in `<Suspense>`. Client components that call `usePathname` in a shared layout also sit inside `<Suspense>` (see `web/components/layout/sidebar.tsx`).
 - Use the `@/` import alias for `web/`.
-- Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only.
+- Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only. It returns `{ ok, data }` or `{ ok: false, error }` instead of throwing, and calls `unstable_rethrow` so Next.js prerender signals pass through; pages render `ApiError` on failure.
+- Charts follow the dataviz rules: categorical and ordinal colors come only from validated tokens, 2px lines, bars at most 24px with 4px rounded ends, solid hairline grids, a legend for two or more series, a hover tooltip with the value first, and no dual axes.
 - Format probabilities and counts through `web/lib/format.ts` so every page shows them the same way.
 - Python: type hints on public functions, pydantic models for request and response bodies.
 - Keep `api/app/rules.py`, `scenarios.py`, and `planner.py` free of I/O so they are unit-testable.
@@ -99,6 +100,8 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Reason codes, decision rules, scenarios, counterfactual, and capacity planner in `api/app/` (no endpoints yet)
 - [x] API endpoints `GET /health`, `/model`, `/insights` (no sign-in yet)
 - [x] App shell: sidebar navigation, page headers, and empty states for every page; login placeholder
+- [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
+- [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [ ] Sign-in with three roles
 - [ ] Cohort upload with data quality report
 - [ ] Dashboard
@@ -125,7 +128,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
-Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`.
+Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Pages that read the API need the local API on port 8000, or `API_URL` in `web/.env.local`.
 
 ## Local Environment
 

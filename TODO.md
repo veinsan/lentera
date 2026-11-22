@@ -38,8 +38,8 @@
 | W-06 | Advisor worklist | Pending | None |
 | W-07 | Student profile | Pending | None |
 | W-08 | Intervention log | Pending | None |
-| W-09 | Course insights page | Pending | None |
-| W-10 | Model and monitoring page | Pending | None |
+| W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |
+| W-10 | Model and monitoring page | In progress | Model card sections, fairness tabs, and charts render from `/model` and were checked at 1440 px. Chart palette and tier ramp pass the dataviz validator. Drift and request statistics wait for API-06 and API-07. |
 | W-11 | Vercel deployment | Pending | None |
 | D-01 | Demo accounts and demo cohort | Pending | None |
 | D-02 | Architecture diagram and demo script | Pending | None |

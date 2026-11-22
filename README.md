@@ -17,7 +17,7 @@ The model service reproduces the DSCO submission; the app features are planned. 
 - Open a student profile with reason codes, a what-if simulator, a counterfactual target, and a message template.
 - Log interventions and follow-ups.
 - Read course design insights per module.
-- Read the model card, fairness breakdown, drift report, and API monitoring.
+- Read the model card, fairness breakdown, drift report, and API monitoring. (The model card, fairness breakdown, and course insights pages work; the rest are planned.)
 
 ## Screenshot or Demo
 

@@ -22,19 +22,24 @@ DSCO = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parents[1] / "dsco"
 LOW_AUC, HIGH_UNCERTAIN, HIGH_BASE_RISK = 0.75, 0.40, 0.58
 
 
+def id_num(x: float, digits: int = 2) -> str:
+    """Indonesian decimal comma, matching the frontend formatting."""
+    return f"{x:.{digits}f}".replace(".", ",")
+
+
 def recommendations(s: dict) -> list[dict]:
     out = []
     if s["graded_share"] == 0:
         out.append(dict(code="no_graded_by_week4", text=(
             "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada "
-            "aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3.")))
+            "aktivitas LMS. Tambahkan asesmen berbobot rendah sebelum minggu 3.")))
     if s["constant_submission_data"]:
         out.append(dict(code="constant_submission_data", text=(
             "Kolom pengumpulan asesmen identik untuk semua mahasiswa sampai minggu 4, sehingga status "
             "pengumpulan tidak bisa membedakan mahasiswa. Jadwalkan tenggat asesmen pertama sebelum minggu 4.")))
     if s["auc"] < LOW_AUC:
         out.append(dict(code="low_separability", text=(
-            f"Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC {s['auc']:.2f}). "
+            f"Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC {id_num(s['auc'])}). "
             "Gunakan prediksi sebagai alasan check-in ringan, bukan keputusan akhir.")))
     if s["uncertain_share"] > HIGH_UNCERTAIN:
         out.append(dict(code="high_uncertainty", text=(

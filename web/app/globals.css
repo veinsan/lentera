@@ -31,16 +31,16 @@
   --input: #dddbd3;
   --ring: #3b5bdb;
 
-  --risk-low: #dce6ee;
-  --risk-watch: #f6d58e;
-  --risk-high: #ec8a3a;
-  --risk-critical: #a93a1c;
+  --risk-low: #e2a27a;
+  --risk-watch: #cf7448;
+  --risk-high: #b04a26;
+  --risk-critical: #7a2610;
   --on-risk-light: #16203a;
   --on-risk-dark: #ffffff;
   --uncertain: #7a7f8c;
 
   --chart-1: #a93a1c; /* at risk */
-  --chart-2: #3e6e9e; /* not at risk */
+  --chart-2: #2f6db5; /* not at risk */
   --chart-3: #9aa1ae; /* neutral */
 
   --sidebar: #1e2a5a;
