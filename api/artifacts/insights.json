@@ -1,0 +1,326 @@
+{
+  "source": "train.csv (26.086 baris) dan label nested OOF seed 42",
+  "overall": {
+    "at_risk_rate": 0.5272176646477037,
+    "uncertain_share": 0.3295637506708579
+  },
+  "cutoffs": {
+    "low_auc": 0.75,
+    "high_uncertain": 0.4,
+    "high_base_risk": 0.58
+  },
+  "modules": {
+    "m01": {
+      "n": 602,
+      "at_risk_rate": 0.30398671096345514,
+      "auc": 0.7630580226143433,
+      "f1": 0.5384615384615384,
+      "uncertain_share": 0.32558139534883723,
+      "graded_share": 0.8704318936877077,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.03322259136212625,
+      "no_submission_share": 0.12790697674418605,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          67.5,
+          70.0,
+          91.5,
+          51.0
+        ],
+        "at_risk": [
+          36.5,
+          43.5,
+          66.0,
+          15.0
+        ]
+      },
+      "presentations": {
+        "p12": {
+          "n": 306,
+          "at_risk_rate": 0.28104575163398693
+        },
+        "p22": {
+          "n": 296,
+          "at_risk_rate": 0.3277027027027027
+        }
+      },
+      "recommendations": []
+    },
+    "m02": {
+      "n": 6368,
+      "at_risk_rate": 0.5230841708542714,
+      "auc": 0.8435966421144125,
+      "f1": 0.7703281027104137,
+      "uncertain_share": 0.3514447236180904,
+      "graded_share": 0.7292713567839196,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.1975502512562814,
+      "no_submission_share": 0.2702575376884422,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          31.0,
+          28.0,
+          27.0,
+          18.0
+        ],
+        "at_risk": [
+          17.0,
+          11.0,
+          12.0,
+          4.0
+        ]
+      },
+      "presentations": {
+        "p11": {
+          "n": 1414,
+          "at_risk_rate": 0.5374823196605375
+        },
+        "p12": {
+          "n": 1819,
+          "at_risk_rate": 0.5222649807586586
+        },
+        "p21": {
+          "n": 1281,
+          "at_risk_rate": 0.5534738485558157
+        },
+        "p22": {
+          "n": 1854,
+          "at_risk_rate": 0.4919093851132686
+        }
+      },
+      "recommendations": []
+    },
+    "m03": {
+      "n": 3568,
+      "at_risk_rate": 0.6199551569506726,
+      "auc": 0.8702074898515473,
+      "f1": 0.8310867733782645,
+      "uncertain_share": 0.24355381165919282,
+      "graded_share": 0.7323430493273543,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.1412556053811659,
+      "no_submission_share": 0.2676569506726457,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          42.0,
+          55.0,
+          90.0,
+          28.0
+        ],
+        "at_risk": [
+          13.0,
+          17.0,
+          72.0,
+          7.0
+        ]
+      },
+      "presentations": {
+        "p21": {
+          "n": 1596,
+          "at_risk_rate": 0.6535087719298246
+        },
+        "p22": {
+          "n": 1972,
+          "at_risk_rate": 0.5927991886409736
+        }
+      },
+      "recommendations": [
+        {
+          "code": "high_base_risk",
+          "text": "Tingkat at-risk historis 62%, di atas rata-rata seluruh modul. Alokasikan kapasitas konselor lebih besar untuk modul ini."
+        }
+      ]
+    },
+    "m04": {
+      "n": 6303,
+      "at_risk_rate": 0.5238775186419166,
+      "auc": 0.8415037709013209,
+      "f1": 0.7668833003673354,
+      "uncertain_share": 0.33491987942249724,
+      "graded_share": 0.7333016024115501,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.11597651911788037,
+      "no_submission_share": 0.24321751546882436,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          110.0,
+          97.0,
+          137.0,
+          126.0
+        ],
+        "at_risk": [
+          52.0,
+          34.0,
+          59.0,
+          41.0
+        ]
+      },
+      "presentations": {
+        "p11": {
+          "n": 1285,
+          "at_risk_rate": 0.5011673151750973
+        },
+        "p12": {
+          "n": 1823,
+          "at_risk_rate": 0.523861766319254
+        },
+        "p21": {
+          "n": 1168,
+          "at_risk_rate": 0.565068493150685
+        },
+        "p22": {
+          "n": 2027,
+          "at_risk_rate": 0.5145535273803651
+        }
+      },
+      "recommendations": []
+    },
+    "m05": {
+      "n": 2342,
+      "at_risk_rate": 0.43936806148590946,
+      "auc": 0.8301325535110139,
+      "f1": 0.723589001447178,
+      "uncertain_share": 0.34671221178479933,
+      "graded_share": 0.0,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.11827497865072588,
+      "no_submission_share": 0.0,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          57.0,
+          59.0,
+          129.0,
+          57.0
+        ],
+        "at_risk": [
+          15.0,
+          14.0,
+          92.0,
+          15.0
+        ]
+      },
+      "presentations": {
+        "p12": {
+          "n": 844,
+          "at_risk_rate": 0.4158767772511848
+        },
+        "p21": {
+          "n": 554,
+          "at_risk_rate": 0.4963898916967509
+        },
+        "p22": {
+          "n": 944,
+          "at_risk_rate": 0.4269067796610169
+        }
+      },
+      "recommendations": [
+        {
+          "code": "no_graded_by_week4",
+          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+        }
+      ]
+    },
+    "m06": {
+      "n": 5066,
+      "at_risk_rate": 0.5825108566916699,
+      "auc": 0.866886810817826,
+      "f1": 0.818516738747397,
+      "uncertain_share": 0.2726016581129096,
+      "graded_share": 0.7179234109751284,
+      "assessments_due_mean": 1.2080536912751678,
+      "placeholder_share": 0.1212001579155152,
+      "no_submission_share": 0.28187919463087246,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          55.0,
+          44.0,
+          51.0,
+          63.0
+        ],
+        "at_risk": [
+          24.0,
+          18.0,
+          18.0,
+          28.0
+        ]
+      },
+      "presentations": {
+        "p11": {
+          "n": 1054,
+          "at_risk_rate": 0.6129032258064516
+        },
+        "p12": {
+          "n": 1567,
+          "at_risk_rate": 0.5717932354818124
+        },
+        "p21": {
+          "n": 990,
+          "at_risk_rate": 0.5949494949494949
+        },
+        "p22": {
+          "n": 1455,
+          "at_risk_rate": 0.563573883161512
+        }
+      },
+      "recommendations": [
+        {
+          "code": "high_base_risk",
+          "text": "Tingkat at-risk historis 58%, di atas rata-rata seluruh modul. Alokasikan kapasitas konselor lebih besar untuk modul ini."
+        }
+      ]
+    },
+    "m07": {
+      "n": 1837,
+      "at_risk_rate": 0.4055525313010343,
+      "auc": 0.6959854463210169,
+      "f1": 0.5912183055040198,
+      "uncertain_share": 0.5389221556886228,
+      "graded_share": 0.0,
+      "assessments_due_mean": 1.0,
+      "placeholder_share": 0.18127381600435494,
+      "no_submission_share": 0.0,
+      "weekly_median_interactions": {
+        "not_at_risk": [
+          12.0,
+          9.0,
+          5.0,
+          5.0
+        ],
+        "at_risk": [
+          7.0,
+          6.0,
+          2.0,
+          0.0
+        ]
+      },
+      "presentations": {
+        "p12": {
+          "n": 757,
+          "at_risk_rate": 0.37780713342140027
+        },
+        "p21": {
+          "n": 626,
+          "at_risk_rate": 0.4329073482428115
+        },
+        "p22": {
+          "n": 454,
+          "at_risk_rate": 0.41409691629955947
+        }
+      },
+      "recommendations": [
+        {
+          "code": "no_graded_by_week4",
+          "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+        },
+        {
+          "code": "low_separability",
+          "text": "Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC 0.70). Gunakan prediksi sebagai alasan check-in ringan, bukan keputusan akhir."
+        },
+        {
+          "code": "high_uncertainty",
+          "text": "54% mahasiswa berada di zona tidak pasti (probabilitas 0,25 sampai 0,55). Prioritaskan konselor untuk meninjau kelompok ini."
+        }
+      ]
+    }
+  }
+}

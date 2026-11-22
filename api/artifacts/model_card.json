@@ -1,0 +1,1018 @@
+{
+  "model": {
+    "model_version": "cat_clean_rank-seed42-v1",
+    "threshold": 0.375,
+    "params": {
+      "iterations": 500,
+      "depth": 6,
+      "learning_rate": 0.05,
+      "l2_leaf_reg": 3.0,
+      "loss_function": "Logloss",
+      "random_seed": 42,
+      "thread_count": 8,
+      "verbose": false,
+      "allow_writing_files": false
+    },
+    "cat_features": [
+      "code_module",
+      "code_presentation",
+      "gender",
+      "region",
+      "highest_education",
+      "imd_band",
+      "age_band",
+      "disability",
+      "cohort"
+    ],
+    "n_features": 77,
+    "n_train": 26086,
+    "input_sha256": {
+      "train.csv": "1d65730e2f8627089cdb4258941324ef0c5ac0d3d0c58045ee1d496218089788",
+      "test.csv": "7bcd123cefe6fb5329f06a5c6bc1aa3bd7ffe58fe9d275c251652bcca03d6ab9",
+      "sample_submission.csv": "7b6b512e01cb05d81285d56e722f5f345a2e9a931899fed129f6c1a537d7904b"
+    },
+    "model_sha256": "4c486fdcb9553c7ac706156aaf926f75fee33a2648b8f9cef55bbf04b04a6d9e",
+    "versions": {
+      "catboost": "1.2.10",
+      "pandas": "3.1.1",
+      "numpy": "2.5.4",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "protocol": {
+    "outer": "StratifiedGroupKFold 5-fold, strata module x presentation x target, baris duplikat dikelompokkan",
+    "inner": "3-fold di dalam setiap outer train untuk memilih threshold",
+    "seeds": [
+      42,
+      137,
+      20261031
+    ],
+    "early_stopping": "tidak ada pada outer validation",
+    "inference": "satu CatBoost dilatih pada seluruh 26.086 baris train, seed 42"
+  },
+  "nested": {
+    "per_seed": [
+      {
+        "seed": 42,
+        "f1": 0.77376576081355,
+        "precision": 0.7334245147844209,
+        "recall": 0.8188031702174071,
+        "auc": 0.8453152484089199
+      },
+      {
+        "seed": 137,
+        "f1": 0.774437131970904,
+        "precision": 0.7394985777601376,
+        "recall": 0.8128408347269687,
+        "auc": 0.8458718594580507
+      },
+      {
+        "seed": 20261031,
+        "f1": 0.7732726520479933,
+        "precision": 0.7352960461609075,
+        "recall": 0.815385734021668,
+        "auc": 0.8454664313040883
+      }
+    ],
+    "mean_f1": 0.7738251816108157,
+    "sd_f1": 0.0004772501063916756
+  },
+  "segments_seed42": {
+    "all": {
+      "f1": 0.77376576081355,
+      "precision": 0.7334245147844209,
+      "recall": 0.8188031702174071,
+      "auc": 0.8453152484089199,
+      "n": 26086,
+      "positive_rate": 0.5885915816913286
+    },
+    "active": {
+      "f1": 0.7061303033079813,
+      "precision": 0.6625397644226636,
+      "recall": 0.7558607160372732,
+      "auc": 0.799807352157045,
+      "n": 22349,
+      "positive_rate": 0.5204259698420511
+    },
+    "hard": {
+      "f1": 0.6366448542534205,
+      "precision": 0.5960124749387391,
+      "recall": 0.6832226762002043,
+      "auc": 0.7574623624645579,
+      "n": 19680,
+      "positive_rate": 0.4561991869918699
+    },
+    "m07": {
+      "f1": 0.5912183055040198,
+      "precision": 0.5481651376146789,
+      "recall": 0.6416107382550336,
+      "auc": 0.6959854463210169,
+      "n": 1837,
+      "positive_rate": 0.47468698965704953
+    },
+    "no_activity": {
+      "f1": 0.9765142150803461,
+      "precision": 0.9548751007252216,
+      "recall": 0.9991568296795953,
+      "auc": 0.909973904114106,
+      "n": 3737,
+      "positive_rate": 0.9962536794219963
+    }
+  },
+  "comparison": [
+    {
+      "method": "route_m07",
+      "seeds": 2,
+      "f1": 0.774278851932753,
+      "f1_sd": 0.00026521838596516023,
+      "auc": 0.8457138493666646,
+      "hard_f1": 0.6364066791179595,
+      "m07_f1": 0.5972885918763923,
+      "decision": "ditolak",
+      "reason": "Gain rata-rata hanya 0,000177 terhadap satu CatBoost; tidak membenarkan model kedua."
+    },
+    {
+      "method": "blend_rank",
+      "seeds": 2,
+      "f1": 0.7741962357876089,
+      "f1_sd": 4.752140261926607e-05,
+      "auc": 0.8466356800393577,
+      "hard_f1": 0.6374868783945431,
+      "m07_f1": 0.5906403293453681,
+      "decision": "ditolak",
+      "reason": "Rata-rata LightGBM+CatBoost tidak unggul konsisten; F1 M07 turun 0,0071 pada seed 137."
+    },
+    {
+      "method": "cat_clean_rank",
+      "seeds": 2,
+      "f1": 0.774101446392227,
+      "f1_sd": 0.0003356855786770252,
+      "auc": 0.8455935539334853,
+      "hard_f1": 0.6362958891291228,
+      "m07_f1": 0.591598968156211,
+      "decision": "dipilih",
+      "reason": "Gain clean+rank konsisten pada tiga seed dengan budget 500 trees yang sama."
+    },
+    {
+      "method": "pooled_rank_c1",
+      "seeds": 2,
+      "f1": 0.7740102909569375,
+      "f1_sd": 0.0005273316884421009,
+      "auc": 0.8466293805064057,
+      "hard_f1": 0.6363777283102571,
+      "m07_f1": 0.5849248631370099,
+      "decision": "ditolak",
+      "reason": "Kalibrasi intercept module/cohort menurunkan F1 M07 0,015 sampai 0,018 pada seed 137."
+    },
+    {
+      "method": "pooled_rank_c01",
+      "seeds": 2,
+      "f1": 0.7738326862667717,
+      "f1_sd": 8.578295119832102e-05,
+      "auc": 0.8466357154134313,
+      "hard_f1": 0.6368915198219841,
+      "m07_f1": 0.5819359991900056,
+      "decision": "ditolak",
+      "reason": "Kalibrasi intercept module/cohort menurunkan F1 M07 0,015 sampai 0,018 pada seed 137."
+    },
+    {
+      "method": "lgb_raw",
+      "seeds": 2,
+      "f1": 0.7733849003441907,
+      "f1_sd": 0.00020000531618669104,
+      "auc": 0.8450253048141183,
+      "hard_f1": 0.6348115275580736,
+      "m07_f1": 0.5865731905399305,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "cat_motif_rank",
+      "seeds": 2,
+      "f1": 0.7732965594944217,
+      "f1_sd": 0.0004235295428627328,
+      "auc": 0.8453186472678312,
+      "hard_f1": 0.6352034756548524,
+      "m07_f1": 0.588746428219529,
+      "decision": "ditolak",
+      "reason": "Fitur motif empat minggu tidak konsisten menaikkan F1."
+    },
+    {
+      "method": "cat_clean",
+      "seeds": 2,
+      "f1": 0.7732885485255536,
+      "f1_sd": 0.00022821845638970606,
+      "auc": 0.8456632202237306,
+      "hard_f1": 0.6360312543844833,
+      "m07_f1": 0.6004196194773073,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "lgb_clean",
+      "seeds": 2,
+      "f1": 0.7728515620463099,
+      "f1_sd": 0.0011931883839828017,
+      "auc": 0.8451890572967962,
+      "hard_f1": 0.6356037584046171,
+      "m07_f1": 0.592939470269445,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "lgb_expert_motif_rank",
+      "seeds": 2,
+      "f1": 0.7726421289833767,
+      "f1_sd": 0.0001903008360356062,
+      "auc": 0.845521614859007,
+      "hard_f1": 0.6349838821416547,
+      "m07_f1": 0.5860349049733142,
+      "decision": "ditolak",
+      "reason": "Expert segmen sulit tidak memberi gain konsisten; F1 M07 turun pada seed kedua."
+    },
+    {
+      "method": "lgb_clean_rank",
+      "seeds": 2,
+      "f1": 0.7722770181387633,
+      "f1_sd": 0.00015613602604885868,
+      "auc": 0.8449387503515371,
+      "hard_f1": 0.6353924192630656,
+      "m07_f1": 0.5817525361353897,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "lgb_motif_rank",
+      "seeds": 2,
+      "f1": 0.7722069368760034,
+      "f1_sd": 0.0006440536494057847,
+      "auc": 0.8451583673400517,
+      "hard_f1": 0.63432567734425,
+      "m07_f1": 0.5836264273065885,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "cat_raw_legacy",
+      "seeds": 2,
+      "f1": 0.7718589298266114,
+      "f1_sd": 0.0009698074239810062,
+      "auc": 0.8444826842111224,
+      "hard_f1": 0.6346787350899354,
+      "m07_f1": 0.5872523268429167,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "cat_raw",
+      "seeds": 2,
+      "f1": 0.7714215551020226,
+      "f1_sd": 0.0008256017838815799,
+      "auc": 0.8444382602702771,
+      "hard_f1": 0.6338130088347322,
+      "m07_f1": 0.5853569129044259,
+      "decision": "pembanding",
+      "reason": null
+    },
+    {
+      "method": "mlp_motif_rank",
+      "seeds": 1,
+      "f1": 0.7625583124873234,
+      "f1_sd": 0.0,
+      "auc": 0.8310634291394722,
+      "hard_f1": 0.6210050949513664,
+      "m07_f1": 0.5850340136054422,
+      "decision": "ditolak",
+      "reason": "Screening satu seed F1 0,762558, di bawah baseline; tidak dituning lanjut."
+    }
+  ],
+  "ablation": [
+    {
+      "name": "cat_raw",
+      "label": "Raw, kategori dinormalisasi",
+      "f1_seed42": 0.7722471568859042,
+      "f1_seed137": 0.770595953318141
+    },
+    {
+      "name": "cat_clean",
+      "label": "Clean + fitur deterministik",
+      "f1_seed42": 0.7730603300691639,
+      "f1_seed137": 0.7735167669819433
+    },
+    {
+      "name": "cat_clean_rank",
+      "label": "Clean + rank fold-local",
+      "f1_seed42": 0.77376576081355,
+      "f1_seed137": 0.774437131970904
+    },
+    {
+      "name": "cat_motif_rank",
+      "label": "+ motif empat minggu",
+      "f1_seed42": 0.7737200890372844,
+      "f1_seed137": 0.7728730299515589
+    }
+  ],
+  "leaderboard": {
+    "public_f1": 0.78443,
+    "private_f1": null,
+    "submission_ref": 57840543,
+    "submission_sha256": "7e36b66a4e94eb846e83afa3a48ab3e36388bc61fffc9437457be020d4838c66",
+    "submitted_utc": "2026-10-31 13:53:00.967000"
+  },
+  "presentation_stress": {
+    "note": "Satu presentation di-hold-out per run; menguji transfer ke cohort baru.",
+    "per_presentation": [
+      {
+        "presentation": "P11",
+        "threshold": 0.37,
+        "f1": 0.7795711876656227,
+        "precision": 0.7701094716801523,
+        "recall": 0.7892682926829269,
+        "auc": 0.8423393437692451,
+        "n": 3753,
+        "positive_rate": 0.5598188116173728
+      },
+      {
+        "presentation": "P12",
+        "threshold": 0.4,
+        "f1": 0.7431269091918912,
+        "precision": 0.7275693311582382,
+        "recall": 0.7593643586833144,
+        "auc": 0.8254792463514582,
+        "n": 7116,
+        "positive_rate": 0.5168634064080945
+      },
+      {
+        "presentation": "P21",
+        "threshold": 0.35000000000000003,
+        "f1": 0.7811277910937303,
+        "precision": 0.7068493150684931,
+        "recall": 0.8728502960248097,
+        "auc": 0.8318254356047237,
+        "n": 6215,
+        "positive_rate": 0.7047465808527755
+      },
+      {
+        "presentation": "P22",
+        "threshold": 0.405,
+        "f1": 0.7474,
+        "precision": 0.6961624441132638,
+        "recall": 0.8067789291882557,
+        "auc": 0.8115072542812314,
+        "n": 9002,
+        "positive_rate": 0.5963119306820707
+      }
+    ]
+  },
+  "calibration": {
+    "bins": [
+      {
+        "lower": -0.001,
+        "upper": 0.1,
+        "n": 999.0,
+        "predicted": 0.07485981332281849,
+        "observed": 0.09309309309309309
+      },
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "n": 3380.0,
+        "predicted": 0.15241525977773615,
+        "observed": 0.15680473372781065
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.3,
+        "n": 3584.0,
+        "predicted": 0.24867696134127046,
+        "observed": 0.255859375
+      },
+      {
+        "lower": 0.3,
+        "upper": 0.4,
+        "n": 3144.0,
+        "predicted": 0.3483377972297055,
+        "observed": 0.34923664122137404
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "n": 2604.0,
+        "predicted": 0.4491303937665147,
+        "observed": 0.44969278033794163
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "n": 2146.0,
+        "predicted": 0.5488732037614439,
+        "observed": 0.5298229263746506
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "n": 1756.0,
+        "predicted": 0.650152263734812,
+        "observed": 0.623006833712984
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "n": 1600.0,
+        "predicted": 0.7507079811311493,
+        "observed": 0.75375
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "n": 1632.0,
+        "predicted": 0.8516467269811665,
+        "observed": 0.852328431372549
+      },
+      {
+        "lower": 0.9,
+        "upper": 1.0,
+        "n": 5241.0,
+        "predicted": 0.9688544287681861,
+        "observed": 0.9761495897729441
+      }
+    ],
+    "ece": 0.007507729820964006,
+    "brier": 0.15841054022393897
+  },
+  "capacity_curve": [
+    {
+      "share": 0.05,
+      "n": 1304,
+      "precision": 0.9976993865030674,
+      "recall": 0.09459754235439541,
+      "expected_at_risk": 1294.0564314001163
+    },
+    {
+      "share": 0.1,
+      "n": 2608,
+      "precision": 0.995398773006135,
+      "recall": 0.18875881625827093,
+      "expected_at_risk": 2577.981533972567
+    },
+    {
+      "share": 0.15,
+      "n": 3912,
+      "precision": 0.9887525562372188,
+      "recall": 0.2812477277684869,
+      "expected_at_risk": 3840.9269726073303
+    },
+    {
+      "share": 0.2,
+      "n": 5217,
+      "precision": 0.9762315506996359,
+      "recall": 0.37031920308296373,
+      "expected_at_risk": 5056.145896888715
+    },
+    {
+      "share": 0.25,
+      "n": 6521,
+      "precision": 0.9543014875019169,
+      "recall": 0.4524830945975424,
+      "expected_at_risk": 6182.196115656741
+    },
+    {
+      "share": 0.3,
+      "n": 7825,
+      "precision": 0.9238338658146965,
+      "recall": 0.5256307714680434,
+      "expected_at_risk": 7201.750104984914
+    },
+    {
+      "share": 0.35,
+      "n": 9130,
+      "precision": 0.8902519167579409,
+      "recall": 0.5909983276376063,
+      "expected_at_risk": 8116.220033613006
+    },
+    {
+      "share": 0.4,
+      "n": 10434,
+      "precision": 0.8552808127276212,
+      "recall": 0.6488766087399113,
+      "expected_at_risk": 8932.59046818791
+    },
+    {
+      "share": 0.45,
+      "n": 11738,
+      "precision": 0.8197307888907821,
+      "recall": 0.6996291718170581,
+      "expected_at_risk": 9660.95966808538
+    },
+    {
+      "share": 0.5,
+      "n": 13043,
+      "precision": 0.7870888599248639,
+      "recall": 0.7464553188395259,
+      "expected_at_risk": 10313.650839026279
+    },
+    {
+      "share": 0.55,
+      "n": 14347,
+      "precision": 0.7569526730326898,
+      "recall": 0.7896458954409947,
+      "expected_at_risk": 10897.759186264426
+    },
+    {
+      "share": 0.6,
+      "n": 15651,
+      "precision": 0.7280046003450259,
+      "recall": 0.8284737875372646,
+      "expected_at_risk": 11418.530613502311
+    },
+    {
+      "share": 0.65,
+      "n": 16955,
+      "precision": 0.6992037746977293,
+      "recall": 0.8619937468188759,
+      "expected_at_risk": 11882.054767255315
+    },
+    {
+      "share": 0.7,
+      "n": 18260,
+      "precision": 0.6711938663745892,
+      "recall": 0.8911510215952883,
+      "expected_at_risk": 12293.810178750271
+    },
+    {
+      "share": 0.75,
+      "n": 19564,
+      "precision": 0.6449601308525864,
+      "recall": 0.9174725514433214,
+      "expected_at_risk": 12654.80605965002
+    },
+    {
+      "share": 0.8,
+      "n": 20868,
+      "precision": 0.6202798543224075,
+      "recall": 0.9411764705882353,
+      "expected_at_risk": 12967.533060900638
+    },
+    {
+      "share": 0.85,
+      "n": 22173,
+      "precision": 0.5968069273440672,
+      "recall": 0.9621900676216099,
+      "expected_at_risk": 13234.877125784684
+    },
+    {
+      "share": 0.9,
+      "n": 23477,
+      "precision": 0.5731567065638711,
+      "recall": 0.9784047116992656,
+      "expected_at_risk": 13455.995203970753
+    },
+    {
+      "share": 0.95,
+      "n": 24781,
+      "precision": 0.5495742706105484,
+      "recall": 0.9902566712717226,
+      "expected_at_risk": 13627.179507982064
+    },
+    {
+      "share": 1.0,
+      "n": 26086,
+      "precision": 0.5272176646477037,
+      "recall": 1.0,
+      "expected_at_risk": 13734.251900671108
+    }
+  ],
+  "per_module": {
+    "m01": {
+      "n": 602,
+      "base_rate": 0.30398671096345514,
+      "flag_rate": 0.2574750830564784,
+      "precision": 0.5870967741935483,
+      "recall": 0.4972677595628415,
+      "f1": 0.5384615384615384,
+      "auc": 0.7630580226143433
+    },
+    "m02": {
+      "n": 6368,
+      "base_rate": 0.5230841708542714,
+      "flag_rate": 0.5777324120603015,
+      "precision": 0.7338950801848328,
+      "recall": 0.8105673971780246,
+      "f1": 0.7703281027104137,
+      "auc": 0.8435966421144125
+    },
+    "m03": {
+      "n": 3568,
+      "base_rate": 0.6199551569506726,
+      "flag_rate": 0.7107623318385651,
+      "precision": 0.7779968454258676,
+      "recall": 0.8919529837251357,
+      "f1": 0.8310867733782645,
+      "auc": 0.8702074898515473
+    },
+    "m04": {
+      "n": 6303,
+      "base_rate": 0.5238775186419166,
+      "flag_rate": 0.5990798032682849,
+      "precision": 0.71875,
+      "recall": 0.8219261053906723,
+      "f1": 0.7668833003673354,
+      "auc": 0.8415037709013209
+    },
+    "m05": {
+      "n": 2342,
+      "base_rate": 0.43936806148590946,
+      "flag_rate": 0.4457728437233134,
+      "precision": 0.7183908045977011,
+      "recall": 0.7288629737609329,
+      "f1": 0.723589001447178,
+      "auc": 0.8301325535110139
+    },
+    "m06": {
+      "n": 5066,
+      "base_rate": 0.5825108566916699,
+      "flag_rate": 0.6498223450454007,
+      "precision": 0.7761239368165249,
+      "recall": 0.8658082006099628,
+      "f1": 0.818516738747397,
+      "auc": 0.866886810817826
+    },
+    "m07": {
+      "n": 1837,
+      "base_rate": 0.4055525313010343,
+      "flag_rate": 0.47468698965704953,
+      "precision": 0.5481651376146789,
+      "recall": 0.6416107382550336,
+      "f1": 0.5912183055040198,
+      "auc": 0.6959854463210169
+    }
+  },
+  "fairness": {
+    "gender": {
+      "f": {
+        "n": 11818,
+        "base_rate": 0.5177695041462176,
+        "flag_rate": 0.574631917414114,
+        "precision": 0.7233102635841555,
+        "recall": 0.8027455466579506,
+        "f1": 0.7609604957397367,
+        "auc": 0.8346717975569122
+      },
+      "m": {
+        "n": 14268,
+        "base_rate": 0.5350434538828147,
+        "flag_rate": 0.6001541911970844,
+        "precision": 0.7414457549924092,
+        "recall": 0.8316740895991617,
+        "f1": 0.7839723405568932,
+        "auc": 0.8534389572568146
+      }
+    },
+    "disability": {
+      "n": {
+        "n": 23530,
+        "base_rate": 0.5169995750106248,
+        "flag_rate": 0.5745006374840629,
+        "precision": 0.7303595206391478,
+        "recall": 0.8115906288532676,
+        "f1": 0.768835416423315,
+        "auc": 0.8447549522992711
+      },
+      "y": {
+        "n": 2556,
+        "base_rate": 0.621283255086072,
+        "flag_rate": 0.7183098591549296,
+        "precision": 0.7559912854030502,
+        "recall": 0.8740554156171285,
+        "f1": 0.8107476635514018,
+        "auc": 0.8392502133771884
+      }
+    },
+    "age_band": {
+      "0-35": {
+        "n": 18359,
+        "base_rate": 0.5495942044773681,
+        "flag_rate": 0.6263413039925921,
+        "precision": 0.7357161492303679,
+        "recall": 0.8384539147670962,
+        "f1": 0.7837324563435083,
+        "auc": 0.8451909114978137
+      },
+      "35-55": {
+        "n": 7547,
+        "base_rate": 0.4763482178349013,
+        "flag_rate": 0.5016562872664635,
+        "precision": 0.7274167987321711,
+        "recall": 0.7660639777468706,
+        "f1": 0.746240346836472,
+        "auc": 0.840587044534413
+      },
+      "55<=": {
+        "n": 180,
+        "base_rate": 0.37777777777777777,
+        "flag_rate": 0.38333333333333336,
+        "precision": 0.6811594202898551,
+        "recall": 0.6911764705882353,
+        "f1": 0.6861313868613139,
+        "auc": 0.8469012605042018
+      }
+    },
+    "imd_band": {
+      "-": {
+        "n": 2797,
+        "base_rate": 0.6042188058634251,
+        "flag_rate": 0.7079013228459063,
+        "precision": 0.7454545454545455,
+        "recall": 0.8733727810650888,
+        "f1": 0.8043596730245232,
+        "auc": 0.8464745594201505
+      },
+      "0-10%": {
+        "n": 2671,
+        "base_rate": 0.649569449644328,
+        "flag_rate": 0.7660052414825907,
+        "precision": 0.7590420332355816,
+        "recall": 0.8951008645533142,
+        "f1": 0.8214758000528961,
+        "auc": 0.8418249217961034
+      },
+      "20-30%": {
+        "n": 2939,
+        "base_rate": 0.5930588635590337,
+        "flag_rate": 0.6822048315753658,
+        "precision": 0.7586034912718205,
+        "recall": 0.8726333907056799,
+        "f1": 0.811632870864461,
+        "auc": 0.8532188956494876
+      },
+      "30-40%": {
+        "n": 2814,
+        "base_rate": 0.5330490405117271,
+        "flag_rate": 0.6179815209665956,
+        "precision": 0.7096032202415181,
+        "recall": 0.8226666666666667,
+        "f1": 0.7619635690027786,
+        "auc": 0.8332886859462202
+      },
+      "40-50%": {
+        "n": 2634,
+        "base_rate": 0.5353075170842825,
+        "flag_rate": 0.6082004555808656,
+        "precision": 0.7297128589263421,
+        "recall": 0.8290780141843972,
+        "f1": 0.7762284196547145,
+        "auc": 0.8424297733277708
+      },
+      "50-60%": {
+        "n": 2531,
+        "base_rate": 0.5203476886606084,
+        "flag_rate": 0.5649940734887396,
+        "precision": 0.7412587412587412,
+        "recall": 0.8048595292331056,
+        "f1": 0.7717510010921005,
+        "auc": 0.8462470869468952
+      },
+      "60-70%": {
+        "n": 2277,
+        "base_rate": 0.4787000439174352,
+        "flag_rate": 0.5164690382081687,
+        "precision": 0.717687074829932,
+        "recall": 0.7743119266055046,
+        "f1": 0.7449249779346867,
+        "auc": 0.8356808854331714
+      },
+      "70-80%": {
+        "n": 2307,
+        "base_rate": 0.48244473342002603,
+        "flag_rate": 0.5093194625054183,
+        "precision": 0.7225531914893617,
+        "recall": 0.7628032345013477,
+        "f1": 0.7421328671328671,
+        "auc": 0.8341595669271786
+      },
+      "80-90%": {
+        "n": 2200,
+        "base_rate": 0.4590909090909091,
+        "flag_rate": 0.48454545454545456,
+        "precision": 0.7082551594746717,
+        "recall": 0.7475247524752475,
+        "f1": 0.7273603082851637,
+        "auc": 0.832036775106082
+      },
+      "90-100%": {
+        "n": 2017,
+        "base_rate": 0.4179474467030243,
+        "flag_rate": 0.4184432325235498,
+        "precision": 0.7274881516587678,
+        "recall": 0.7283511269276394,
+        "f1": 0.7279193835210432,
+        "auc": 0.8423675483640201
+      },
+      "?": {
+        "n": 899,
+        "base_rate": 0.3359288097886541,
+        "flag_rate": 0.3236929922135706,
+        "precision": 0.6391752577319587,
+        "recall": 0.6158940397350994,
+        "f1": 0.627318718381113,
+        "auc": 0.7878187848735954
+      }
+    },
+    "highest_education": {
+      "-": {
+        "n": 279,
+        "base_rate": 0.6953405017921147,
+        "flag_rate": 0.8028673835125448,
+        "precision": 0.78125,
+        "recall": 0.9020618556701031,
+        "f1": 0.8373205741626795,
+        "auc": 0.8443298969072165
+      },
+      "a level": {
+        "n": 11201,
+        "base_rate": 0.48076064637085975,
+        "flag_rate": 0.5187036871707883,
+        "precision": 0.7235800344234079,
+        "recall": 0.7806870937790158,
+        "f1": 0.751049575703439,
+        "auc": 0.8409373367612669
+      },
+      "he qualification": {
+        "n": 3834,
+        "base_rate": 0.4368805425143453,
+        "flag_rate": 0.4384454877412624,
+        "precision": 0.7275431290898274,
+        "recall": 0.7301492537313433,
+        "f1": 0.7288438617401669,
+        "auc": 0.8389447851064271
+      },
+      "lower than a level": {
+        "n": 10533,
+        "base_rate": 0.6097028386974271,
+        "flag_rate": 0.7185037501186746,
+        "precision": 0.7407505285412262,
+        "recall": 0.8729367798193709,
+        "f1": 0.8014295925661187,
+        "auc": 0.8363020391546603
+      },
+      "post graduate qualification": {
+        "n": 239,
+        "base_rate": 0.32217573221757323,
+        "flag_rate": 0.29707112970711297,
+        "precision": 0.7464788732394366,
+        "recall": 0.6883116883116883,
+        "f1": 0.7162162162162162,
+        "auc": 0.851290684624018
+      }
+    }
+  },
+  "tiers": {
+    "critical": {
+      "n": 6106,
+      "at_risk_rate": 0.9626596790042581,
+      "share_of_at_risk": 0.4273976586926489
+    },
+    "high": {
+      "n": 4123,
+      "at_risk_rate": 0.7104050448702401,
+      "share_of_at_risk": 0.21297171526212463
+    },
+    "watch": {
+      "n": 5465,
+      "at_risk_rate": 0.4761207685269899,
+      "share_of_at_risk": 0.18919508470879082
+    },
+    "low": {
+      "n": 10392,
+      "at_risk_rate": 0.22555812163202463,
+      "share_of_at_risk": 0.17043554133643568
+    }
+  },
+  "archetypes": {
+    "silent": {
+      "n": 3045,
+      "at_risk_rate": 0.9875205254515599,
+      "mean_probability": 0.9839336565352732
+    },
+    "no_lms_record": {
+      "n": 692,
+      "at_risk_rate": 0.796242774566474,
+      "mean_probability": 0.8140072944590065
+    },
+    "missed_submission": {
+      "n": 2669,
+      "at_risk_rate": 0.8853503184713376,
+      "mean_probability": 0.8836789939570896
+    },
+    "low_score": {
+      "n": 2957,
+      "at_risk_rate": 0.6641866756848157,
+      "mean_probability": 0.6583668282589695
+    },
+    "fading": {
+      "n": 5608,
+      "at_risk_rate": 0.37910128388017117,
+      "mean_probability": 0.3810308435009759
+    },
+    "engaged": {
+      "n": 11115,
+      "at_risk_rate": 0.3366621682411156,
+      "mean_probability": 0.33582815585864617
+    }
+  },
+  "importance": {
+    "by_signal": {
+      "submission": {
+        "label": "Pengumpulan asesmen",
+        "group": "actionable",
+        "value": 8.928156063069759
+      },
+      "timeliness": {
+        "label": "Ketepatan waktu",
+        "group": "actionable",
+        "value": 6.417344060936506
+      },
+      "score": {
+        "label": "Nilai",
+        "group": "actionable",
+        "value": 15.354340457924163
+      },
+      "active_days": {
+        "label": "Hari aktif",
+        "group": "actionable",
+        "value": 5.901372746746697
+      },
+      "recency": {
+        "label": "Aktivitas terakhir",
+        "group": "actionable",
+        "value": 7.332905114076221
+      },
+      "volume": {
+        "label": "Volume interaksi",
+        "group": "actionable",
+        "value": 11.133291252661376
+      },
+      "week4_trend": {
+        "label": "Aktivitas minggu 4",
+        "group": "actionable",
+        "value": 10.102664710279338
+      },
+      "breadth": {
+        "label": "Ragam materi",
+        "group": "actionable",
+        "value": 5.559062813232041
+      },
+      "no_lms_record": {
+        "label": "Catatan LMS",
+        "group": "actionable",
+        "value": 0.0
+      },
+      "course": {
+        "label": "Course",
+        "group": "context",
+        "value": 10.517249834703213
+      },
+      "registration": {
+        "label": "Registrasi",
+        "group": "context",
+        "value": 4.126811709691213
+      },
+      "workload": {
+        "label": "Beban studi",
+        "group": "context",
+        "value": 2.843857647028884
+      },
+      "prior_attempts": {
+        "label": "Percobaan sebelumnya",
+        "group": "context",
+        "value": 1.2455897100730273
+      },
+      "demographics": {
+        "label": "Demografi",
+        "group": "context",
+        "value": 10.537353879577507
+      }
+    },
+    "top_features": {
+      "no_submission_by_cutoff": 8.703541917652533,
+      "code_module": 7.144043734406808,
+      "avg_score_cohort_pct": 5.8340535323936065,
+      "active_days_cohort_pct": 4.351964462882341,
+      "week4_interactions_cohort_pct": 3.9968440826151443,
+      "highest_education": 3.7783122039460384,
+      "last_activity_day_cohort_pct": 3.5385005011556587,
+      "imd_band": 3.0017695543862293,
+      "studied_credits": 2.843857647028884,
+      "registration_days_from_start_cohort_pct": 2.0927008272473007,
+      "avg_score": 2.0698554581205646,
+      "registration_days_from_start": 2.0341108824439127,
+      "avg_submission_delay": 1.8251211588057843,
+      "late_to_early_interactions_ratio": 1.7673361608910043,
+      "unique_sites_cohort_pct": 1.7363878541513778
+    }
+  },
+  "evaluation_notes": {
+    "calibration_and_tiers": "Probabilitas OOF seed 42 dengan threshold tetap 0,375; skor kalibrasi, bukan evaluasi independen.",
+    "per_module_and_fairness": "Label nested seed 42 (threshold dari inner fold)."
+  }
+}

@@ -40,4 +40,5 @@ API and model, from the repository root:
 2. Install Python 3.13 and uv, then run `uv sync` in `api/`.
 3. Retrain the model with `uv run python scripts/train.py` (optional; the artifacts are committed).
 4. Check parity with the DSCO submission with `uv run python scripts/parity_check.py <path-to-dsco-workspace>`.
-5. Run the tests with `uv run python -m pytest`.
+5. Rebuild the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
+6. Run the tests with `uv run python -m pytest`.

@@ -1,0 +1,87 @@
+"""Build api/artifacts/insights.json: per-module course design insights from training data and nested OOF labels.
+
+Run from api/: uv run python scripts/build_insights.py [path/to/dsco]
+"""
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from sklearn.metrics import f1_score, roc_auc_score
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from app import rules  # noqa: E402
+from app.pipeline.features import WEEKS, normalize, placeholder_activity  # noqa: E402
+
+DATA = ROOT.parent / "data"
+DSCO = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parents[1] / "dsco"
+
+# Recommendation cutoffs are proposals awaiting owner confirmation (TODO DEC-05).
+LOW_AUC, HIGH_UNCERTAIN, HIGH_BASE_RISK = 0.75, 0.40, 0.58
+
+
+def recommendations(s: dict) -> list[dict]:
+    out = []
+    if s["graded_share"] == 0:
+        out.append(dict(code="no_graded_by_week4", text=(
+            "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada "
+            "aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3.")))
+    if s["auc"] < LOW_AUC:
+        out.append(dict(code="low_separability", text=(
+            f"Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC {s['auc']:.2f}). "
+            "Gunakan prediksi sebagai alasan check-in ringan, bukan keputusan akhir.")))
+    if s["uncertain_share"] > HIGH_UNCERTAIN:
+        out.append(dict(code="high_uncertainty", text=(
+            f"{s['uncertain_share']:.0%} mahasiswa berada di zona tidak pasti (probabilitas 0,25 sampai 0,55). "
+            "Prioritaskan konselor untuk meninjau kelompok ini.")))
+    if s["at_risk_rate"] >= HIGH_BASE_RISK:
+        out.append(dict(code="high_base_risk", text=(
+            f"Tingkat at-risk historis {s['at_risk_rate']:.0%}, di atas rata-rata seluruh modul. "
+            "Alokasikan kapasitas konselor lebih besar untuk modul ini.")))
+    return out
+
+
+def main() -> None:
+    train = pd.read_csv(DATA / "train.csv")
+    oof = pd.read_csv(DSCO / "outputs/experiments/cat_clean_rank_42/oof.csv")
+    assert (oof.id == train.id).all()
+    d = normalize(train)
+    d["y"], d["p"], d["label"] = train.at_risk, oof.probability, oof.prediction
+    d["placeholder"] = placeholder_activity(train).to_numpy()
+
+    modules = {}
+    for mod, g in d.groupby("code_module"):
+        active = g[~g.placeholder]
+        weekly = {("at_risk" if k else "not_at_risk"): [float(v) for v in a[WEEKS].median()]
+                  for k, a in active.groupby("y")}
+        s = dict(
+            n=int(len(g)), at_risk_rate=float(g.y.mean()),
+            auc=float(roc_auc_score(g.y, g.p)), f1=float(f1_score(g.y, g.label)),
+            uncertain_share=float(rules.uncertain(g.p).mean()),
+            graded_share=float(g.has_score.mean()),
+            assessments_due_mean=float(g.assessments_due_total.mean()),
+            placeholder_share=float(g.placeholder.mean()),
+            no_submission_share=float(g.no_submission_by_cutoff.mean()),
+            weekly_median_interactions=weekly,
+            presentations={pr: dict(n=int(len(h)), at_risk_rate=float(h.y.mean()))
+                           for pr, h in g.groupby("code_presentation")},
+        )
+        s["recommendations"] = recommendations(s)
+        modules[mod] = s
+
+    out = dict(
+        source="train.csv (26.086 baris) dan label nested OOF seed 42",
+        overall=dict(at_risk_rate=float(d.y.mean()), uncertain_share=float(rules.uncertain(d.p).mean())),
+        cutoffs=dict(low_auc=LOW_AUC, high_uncertain=HIGH_UNCERTAIN, high_base_risk=HIGH_BASE_RISK),
+        modules=modules,
+    )
+    (ROOT / "artifacts/insights.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
+    for mod, s in modules.items():
+        print(mod, s["n"], f"risk={s['at_risk_rate']:.3f} auc={s['auc']:.3f} unc={s['uncertain_share']:.3f} "
+              f"graded={s['graded_share']:.2f}", [r["code"] for r in s["recommendations"]])
+
+
+if __name__ == "__main__":
+    main()

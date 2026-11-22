@@ -10,14 +10,15 @@
 | DEC-05 | Confirm playbook minutes, effectiveness defaults, tier cutoffs 0.6 and 0.85, low-score cutoff 60, and scenario levers | Pending | Owner reviews `PRD.md` section 5.1 and `ARCHITECTURE.md` scenarios. |
 | DEC-06 | Confirm with the DSCO committee that a TypeScript frontend is acceptable | Pending | Owner asks the committee. |
 | DEC-07 | Confirm design tokens | Pending | Owner reviews `DESIGN.md`. |
+| DEC-08 | Private leaderboard F1 for the model card | Pending | `dsco/outputs/submissions/ledger.json` has `private_score` null; owner supplies the value and the ledger is updated before the model card is rebuilt. |
 | S-01 | Scaffold `web/` and `api/` | In progress | `api/` has `pyproject.toml`, uv env on Python 3.13, and pytest (3 passed). `web/` waits for DEC-03; FastAPI `/health` is part of API-01. |
 | S-02 | Supabase project, schema, RLS | Pending | Owner creates the Supabase project and shares the URL and keys through `.env.local`. |
 | ML-01 | Port `clean_rank` preprocessing with fit state | Done | `api/app/pipeline/features.py` output equals DSCO `FoldFeatures("clean_rank").transform(..., "cat")` with `assert_frame_equal` on train (26,086 x 77) and test (6,502 x 77). Single-row scoring equals batch scoring (pytest). |
 | ML-02 | Train final model and write artifacts | Done | `uv run python scripts/train.py` writes `model.cbm`, `fit_state.json`, `model_meta.json` in 46 s; `train.csv` SHA256 matches the DSCO experiment summary. |
 | ML-03 | Parity check against the submitted predictions | Done | 6,502 of 6,502 labels match `dsco/outputs/final/submission.csv`; maximum probability difference 1.1e-16; 3,875 flagged; 179 rows within 0.01 of the threshold. |
-| ML-04 | Build `model_card.json` and `insights.json` | Pending | None |
-| ML-05 | SHAP reason codes | Pending | None |
-| ML-06 | Tier, uncertain band, archetype, playbook rules | Pending | None |
+| ML-04 | Build `model_card.json` and `insights.json` | Done | `scripts/build_model_card.py` reproduces nested mean F1 0.773825, seed SD 0.000477, ECE 0.0075, public F1 0.78443, and the tier table in `PRD.md`. `scripts/build_insights.py` flags M07 (no graded work, AUC 0.696, 53.9% uncertain), M05 (no graded work), M03 and M06 (high base risk). |
+| ML-05 | SHAP reason codes | Done | SHAP plus expected value equals the raw logit (max error 1.2e-14 on test); reasons for 6,502 rows take 3.8 s; pytest covers additivity and placeholder folding. |
+| ML-06 | Tier, uncertain band, archetype, playbook rules | Done | Archetype counts on `train.csv` equal `PRD.md` section 5.1; pytest covers every branch (12 tests pass in total). |
 | ML-07 | Scenario levers and counterfactual | Pending | None |
 | ML-08 | Capacity planner | Pending | None |
 | API-01 | Health, model, insights endpoints | Pending | None |
