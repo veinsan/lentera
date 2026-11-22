@@ -1,0 +1,40 @@
+{
+  "model_version": "cat_clean_rank-seed42-v1",
+  "threshold": 0.375,
+  "params": {
+    "iterations": 500,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "l2_leaf_reg": 3.0,
+    "loss_function": "Logloss",
+    "random_seed": 42,
+    "thread_count": 8,
+    "verbose": false,
+    "allow_writing_files": false
+  },
+  "cat_features": [
+    "code_module",
+    "code_presentation",
+    "gender",
+    "region",
+    "highest_education",
+    "imd_band",
+    "age_band",
+    "disability",
+    "cohort"
+  ],
+  "n_features": 77,
+  "n_train": 26086,
+  "input_sha256": {
+    "train.csv": "1d65730e2f8627089cdb4258941324ef0c5ac0d3d0c58045ee1d496218089788",
+    "test.csv": "7bcd123cefe6fb5329f06a5c6bc1aa3bd7ffe58fe9d275c251652bcca03d6ab9",
+    "sample_submission.csv": "7b6b512e01cb05d81285d56e722f5f345a2e9a931899fed129f6c1a537d7904b"
+  },
+  "model_sha256": "4c486fdcb9553c7ac706156aaf926f75fee33a2648b8f9cef55bbf04b04a6d9e",
+  "versions": {
+    "catboost": "1.2.10",
+    "pandas": "3.1.1",
+    "numpy": "2.5.4",
+    "scikit-learn": "1.9.1"
+  }
+}

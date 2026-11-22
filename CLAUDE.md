@@ -12,20 +12,19 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 | Recharts | Charts |
 | `@supabase/ssr`, `@supabase/supabase-js` | Auth and database access from the frontend |
 | pnpm | Frontend package manager (pending owner confirmation) |
-| Python | 3.12 |
+| Python | 3.13 (python.org build; see Local Environment) |
 | FastAPI | API service |
 | catboost | 1.2.10 |
-| pandas | 3.1.0 |
+| pandas | 3.1.1 |
 | numpy | 2.5.4 |
 | scikit-learn | 1.9.1 |
-| shap | Pending: record the version after S-01 |
-| uv | Python package manager (pending owner confirmation) |
-| pytest | API tests |
+| uv | Python package manager for `api/` |
+| pytest | API tests, run as `uv run python -m pytest` |
 | Supabase | Postgres, Auth, RLS, Storage |
 | Vercel | Frontend hosting |
 | Azure Container Apps | API hosting, image from `ghcr.io` |
 
-The ML library versions match `dsco/outputs/audit/requirements-lock.txt`. Changing them can change probabilities near the threshold, so a version change requires a new parity check (`skills/verify-model-parity/SKILL.md`).
+The ML library versions match `dsco/outputs/audit/requirements-lock.txt`, except pandas 3.1.1 instead of 3.1.0. The parity check passed with 3.1.1 (6,502 of 6,502 labels, maximum probability difference 1.1e-16). Changing them can change probabilities near the threshold, so a version change requires a new parity check (`skills/verify-model-parity/SKILL.md`).
 
 ## Design System
 
@@ -86,8 +85,9 @@ data/                      Local only, gitignored
 
 ## Features
 
-No features are implemented yet. The planned pages and their steps are in `ARCHITECTURE.md`.
+The planned pages and their steps are in `ARCHITECTURE.md`.
 
+- [x] Model artifacts and parity check (`api/artifacts/`, `api/scripts/parity_check.py`)
 - [ ] Sign-in with three roles
 - [ ] Cohort upload with data quality report
 - [ ] Dashboard
@@ -109,11 +109,15 @@ No features are implemented yet. The planned pages and their steps are in `ARCHI
 
 ## Testing
 
-- API: `uv run pytest` from `api/`.
+- API: `uv run python -m pytest` from `api/`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
-Pending: confirm these commands after S-01.
+Pending: confirm the frontend commands after S-01.
+
+## Local Environment
+
+Windows Smart App Control on the owner's machine blocks unsigned executables and DLLs. It blocks the uv-managed Python 3.12, the pandas 3.1.0 wheel, and the `pytest.exe` launcher. Use the python.org Python 3.13 (`api/.python-version`) and run tools as `uv run python -m <tool>`.
 
 ## Build
 

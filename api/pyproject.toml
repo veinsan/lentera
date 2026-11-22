@@ -1,0 +1,21 @@
+[project]
+name = "lentera-api"
+version = "0.1.0"
+description = "Lentera model service: preprocessing, CatBoost scoring, and planning for the DSCO at-risk model"
+requires-python = "==3.13.*"
+dependencies = [
+    "catboost==1.2.10",
+    "numpy==2.5.4",
+    "pandas==3.1.1",
+    "scikit-learn==1.9.1",
+    "fastapi[standard]",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

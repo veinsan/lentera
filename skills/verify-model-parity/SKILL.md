@@ -15,7 +15,7 @@ The deployed model must reproduce the DSCO submission and every displayed metric
 
 ## Procedure
 
-1. From `api/`, run `uv run python scripts/parity_check.py`. Pending: confirm the command once ML-03 exists.
+1. From `api/`, run `uv run python scripts/parity_check.py`. The script reads the DSCO workspace from `../../dsco` by default; pass another path as the first argument. Exit code 1 means a label mismatch.
 2. Read its output and confirm:
    - 6,502 of 6,502 test labels equal the reference submission at threshold 0.375.
    - The maximum absolute probability difference against the reference probabilities. Report the value; any label mismatch is a failure.

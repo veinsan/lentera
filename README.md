@@ -8,7 +8,7 @@ At the week 4 cutoff, an institution knows which students the model flags but no
 
 ## Key Features
 
-All features are planned. See `PRD.md` for scope and `TODO.md` for status.
+The model service reproduces the DSCO submission; the app features are planned. See `PRD.md` for scope and `TODO.md` for status.
 
 - Upload a week 4 cohort CSV and review a data quality report before scoring.
 - See the cohort's risk tiers, archetypes, and module by presentation risk heatmap.
@@ -32,4 +32,12 @@ A screenshot or demo is not yet available.
 
 ## Installation and Setup
 
-Setup steps are pending until the scaffolding step S-01 in `ARCHITECTURE.md` is done. The competition data files go in `data/` locally and are not committed.
+The competition data files go in `data/` locally and are not committed. Frontend setup is pending until step S-01 in `ARCHITECTURE.md` is done.
+
+API and model, from the repository root:
+
+1. Copy `train.csv`, `test.csv`, and `sample_submission.csv` into `data/`.
+2. Install Python 3.13 and uv, then run `uv sync` in `api/`.
+3. Retrain the model with `uv run python scripts/train.py` (optional; the artifacts are committed).
+4. Check parity with the DSCO submission with `uv run python scripts/parity_check.py <path-to-dsco-workspace>`.
+5. Run the tests with `uv run python -m pytest`.

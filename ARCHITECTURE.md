@@ -1,6 +1,6 @@
 # Architecture: Lentera
 
-Lentera is a new repository. Everything below is planned; nothing is implemented yet. The source model and its evaluation live in the DSCO workspace (`C:\Users\riant\Projects\dsco`), referred to here as `dsco/`.
+Steps marked Done in `TODO.md` are implemented; everything else below is planned. The source model and its evaluation live in the DSCO workspace (`C:\Users\riant\Projects\dsco`), referred to here as `dsco/`.
 
 ## Technical Stack
 
@@ -8,9 +8,9 @@ Lentera is a new repository. Everything below is planned; nothing is implemented
 | --- | --- | --- |
 | Frontend | Next.js (App Router, TypeScript), Tailwind CSS, shadcn/ui, Recharts | Agreed. Exact Next.js version is recorded in `CLAUDE.md` after scaffolding. |
 | Frontend package manager | pnpm | Proposal awaiting the owner's confirmation |
-| Backend | FastAPI on Python 3.12 | Agreed |
-| ML libraries | catboost 1.2.10, pandas 3.1.0, numpy 2.5.4, scikit-learn 1.9.1 (the versions locked in `dsco/outputs/audit/requirements-lock.txt`), shap | Agreed versions; shap version set at scaffolding |
-| Python package manager | uv | Proposal awaiting the owner's confirmation |
+| Backend | FastAPI on Python 3.13 | Agreed. 3.13 because Smart App Control blocks the uv-managed 3.12 on the owner's machine. |
+| ML libraries | catboost 1.2.10, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1. SHAP values come from CatBoost itself. | Done. Matches `dsco/outputs/audit/requirements-lock.txt` except pandas 3.1.1; parity check passed. |
+| Python package manager | uv | In use for `api/` |
 | Database and auth | Supabase (Postgres, Auth, row level security, Storage) | Agreed |
 | Frontend hosting | Vercel | Agreed |
 | API hosting | Docker image built by GitHub Actions, pushed to GitHub Container Registry (`ghcr.io`), run on Azure Container Apps | Agreed: Azure. Container Apps over App Service is a proposal awaiting the owner's confirmation. |
@@ -31,7 +31,7 @@ flowchart LR
   end
   subgraph Azure["Azure Container Apps"]
     API["FastAPI<br/>validate, preprocess, score,<br/>SHAP, archetype, plan, simulate"]
-    ART["api/artifacts<br/>model.cbm, fit_state, model_card.json,<br/>insights.json, train_reference.parquet"]
+    ART["api/artifacts<br/>model.cbm, fit_state, model_meta.json,<br/>model_card.json, insights.json, train_reference.parquet"]
   end
   subgraph Supabase
     AUTH["Auth"]
@@ -98,7 +98,7 @@ flowchart LR
 web/                  Next.js app
 api/
   app/                FastAPI service: main.py, auth.py, pipeline/, explain.py, rules.py, scenarios.py, planner.py, drift.py
-  artifacts/          model.cbm, fit_state.json, model_card.json, insights.json, train_reference.parquet
+  artifacts/          model.cbm, fit_state.json, model_meta.json, model_card.json, insights.json, train_reference.parquet
   scripts/            train.py, build_model_card.py, build_insights.py, build_reference.py, parity_check.py
   tests/              pytest
   Dockerfile
