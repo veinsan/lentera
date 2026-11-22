@@ -1,8 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 /** Per-request Supabase client for Server Components; queries run as the signed-in user, so RLS applies. */
 export async function createClient() {
+  // supabase-js reads Date.now() while loading the session; connection() keeps that out of prerendering.
+  await connection();
   const cookieStore = await cookies();
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {

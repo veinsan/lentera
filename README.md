@@ -17,7 +17,7 @@ The model service reproduces the DSCO submission; the app features are planned. 
 - Open a student profile with reason codes, a what-if simulator, a counterfactual target, and a message template.
 - Log interventions and follow-ups.
 - Read course design insights per module.
-- Read the model card, fairness breakdown, drift report, and API monitoring. (The model card, fairness breakdown, and course insights pages work; the rest are planned.)
+- Read the model card, fairness breakdown, drift report, and API monitoring. (Sign-in, cohort upload, the model card, fairness breakdown, and course insights work; the rest are planned.)
 
 ## Screenshot or Demo
 
@@ -42,6 +42,6 @@ API and model, from the repository root:
 2. Install Python 3.13 and uv, then run `uv sync` in `api/`.
 3. Retrain the model with `uv run python scripts/train.py` (optional; the artifacts are committed).
 4. Check parity with the DSCO submission with `uv run python scripts/parity_check.py <path-to-dsco-workspace>`.
-5. Rebuild the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
+5. Rebuild the input schema with `uv run python scripts/build_input_schema.py`, and the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
 6. Run the tests with `uv run python -m pytest`.
 7. Start the API with `uv run python -m uvicorn app.main:app --reload` and open `http://localhost:8000/docs`.

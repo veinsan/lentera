@@ -152,6 +152,7 @@ All token values are proposals awaiting the owner's confirmation.
 - `{colors.uncertain}` marks predictions in the uncertain band (probability 0.25 to 0.55) as a dashed outline or a hatched bar segment.
 - Charts that compare outcomes use `{colors.chart-at-risk}` and `{colors.chart-not-at-risk}` (the pair passes the dataviz categorical checks: CVD separation 22.9, contrast above 3:1). Other series use `{colors.chart-neutral}`.
 - `{colors.success}` and `{colors.danger}` are for form and system states only (saved, failed). They never encode student risk.
+- Warnings in system messages (data quality warnings, module metrics that need attention) use `{colors.risk-high}` text, always with a warning icon and a text label, because the palette has no separate warning token.
 
 ## Typography
 

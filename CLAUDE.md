@@ -60,6 +60,8 @@ web/
     supabase/              Browser and server Supabase clients
 proxy.ts                   Session refresh and sign-in redirect (Next.js 16 name for middleware)
     api.ts                 Typed client for the FastAPI service (`API_URL`, server-side only)
+    api-browser.ts         File uploads from the browser to the API with the user's token (`NEXT_PUBLIC_API_URL`)
+    labels.ts              Indonesian labels for archetypes and playbook actions
     format.ts              Number and probability formatting (id-ID, decimal comma)
 api/
   app/
@@ -83,6 +85,7 @@ data/                      Local only, gitignored
 
 - TypeScript strict mode, no `any`. Functional components with typed props.
 - Next.js 16 differs from older versions. Before writing Next.js code, read the relevant guide in `web/node_modules/next/dist/docs/` (`web/AGENTS.md`, which `next dev` re-adds; commit it).
+- `web/lib/supabase/server.ts` calls `connection()` before reading cookies, because supabase-js reads `Date.now()` while loading the session and Cache Components rejects that during prerendering.
 - Cache Components is on: wrap uncached data reads, `cookies()`, `headers()`, `searchParams`, and awaited dynamic `params` in `<Suspense>`. Client components that call `usePathname` in a shared layout also sit inside `<Suspense>` (see `web/components/layout/sidebar.tsx`).
 - Use the `@/` import alias for `web/`.
 - Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only. It returns `{ ok, data }` or `{ ok: false, error }` instead of throwing, and calls `unstable_rethrow` so Next.js prerender signals pass through; pages render `ApiError` on failure.
@@ -105,6 +108,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] App shell: sidebar navigation, page headers, and empty states for every page
 - [x] Supabase schema with RLS (`supabase/migrations/0001_init.sql`), demo accounts (`api/scripts/seed_demo_users.py`)
 - [x] Sign-in, role-filtered sidebar, sign-out, role gate for coordinator and admin pages; API token verification
+- [x] Cohort upload: data quality gate, scoring with reason codes, storage in Supabase, upload page with report and summary
 - [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [ ] Sign-in with three roles
@@ -135,7 +139,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
-Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Pages that read the API need the local API on port 8000, or `API_URL` in `web/.env.local`.
+Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Pages that read the API need the local API on port 8000, or `API_URL` (server) and `NEXT_PUBLIC_API_URL` (browser uploads) in `web/.env.local`.
 
 ## Local Environment
 

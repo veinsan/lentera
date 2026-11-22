@@ -23,7 +23,7 @@
 | ML-08 | Capacity planner | Done | Plan plus reach curve for the test cohort in 0.09 s; pytest checks capacity, reach equal to summed probabilities, automated assignment, scenario labeling, and override validation (27 tests pass in total). |
 | API-01 | Health, model, insights endpoints | Done | `api/app/main.py` loads artifacts once at startup; live server answered `/health`, `/model` (20 KB, 10 ms), `/insights` (6 KB, 3 ms), `/docs` with 200; pytest checks contents and CORS (31 tests pass in total). Sign-in for `/model` and `/insights` and request statistics in `/model` arrive with API-02 and API-07. |
 | API-02 | JWT verification and roles | Done | ES256 tokens verified against the project JWKS (`api/app/auth.py`); `/model` and `/insights` need sign-in. Real demo tokens get 200, a bad token and no token get 401; pytest covers signature, expiry, audience, issuer, missing profile, and role checks (44 tests pass). |
-| API-03 | Cohort validation and scoring | Pending | None |
+| API-03 | Cohort validation and scoring | Done | `POST /cohorts/validate` and `POST /cohorts` (`app/quality.py`, `app/scoring.py`, `app/store.py`). Uploading `test.csv` as the coordinator stored 6,502 students and predictions in 10.7 s API time (13.6 s wall), 3,875 flagged; the report lists the GGG repair for 372 rows. The advisor (M03, M06) sees 2,072 predictions and gets 403 on upload. pytest: 55 pass, including scoring from CSV text that reproduces the submission. |
 | API-04 | Simulate and counterfactual endpoints | Pending | None |
 | API-05 | Plan endpoints | Pending | None |
 | API-06 | Drift report | Pending | None |
@@ -31,8 +31,8 @@
 | API-08 | Dockerfile and tests | Pending | None |
 | API-09 | GitHub Actions deploy to Azure | Pending | Depends on DEC-04. |
 | W-01 | Design tokens and app shell | Done | Tokens in `web/app/globals.css`; sidebar with six routes, active state (student profile highlights Daftar Prioritas), Plus Jakarta Sans and JetBrains Mono. Checked in the browser at 1280 px: redirect `/` to `/dashboard`, client navigation, no console errors. |
-| W-02 | Sign-in and role-aware layout | In progress | Login form, `proxy.ts` session refresh and redirect, role-filtered sidebar with user panel and sign-out, role gate on Rencana and Unggah; `pnpm build` and `pnpm lint` pass; signed-out visit to `/model` redirects to `/login`. Pending: owner signs in through the UI with each demo account to confirm the sidebar per role. |
-| W-03 | Cohort upload page | Pending | None |
+| W-02 | Sign-in and role-aware layout | In progress | Login form, `proxy.ts` session refresh and redirect, role-filtered sidebar with user panel and sign-out, role gate on Rencana and Unggah; `pnpm build` and `pnpm lint` pass; signed-out visit to `/model` redirects to `/login`. Coordinator UI checked: six links, user panel, gated pages open. Pending: advisor and admin UI check (RLS for both already verified through the API). |
+| W-03 | Cohort upload page | Done | Checked as the coordinator at 1440 px: an 8-row file showed the quality report (1 placeholder row, 5 relabeled `highest_education` values), scoring returned the summary, and the cohort list refreshed; the test cohort was then deleted. |
 | W-04 | Dashboard | Pending | None |
 | W-05 | Capacity planner page | Pending | None |
 | W-06 | Advisor worklist | Pending | None |
@@ -41,5 +41,5 @@
 | W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |
 | W-10 | Model and monitoring page | In progress | Model card sections, fairness tabs, and charts render from `/model` and were checked at 1440 px. Chart palette and tier ramp pass the dataviz validator. Drift and request statistics wait for API-06 and API-07. |
 | W-11 | Vercel deployment | Pending | None |
-| D-01 | Demo accounts and demo cohort | In progress | `api/scripts/seed_demo_users.py` created admin, coordinator (all modules), and advisor (M03, M06) on Supabase; the password is `DEMO_PASSWORD` in `api/.env`. Demo cohort waits for API-03. |
+| D-01 | Demo accounts and demo cohort | In progress | `api/scripts/seed_demo_users.py` created admin, coordinator (all modules), and advisor (M03, M06) on Supabase; the password is `DEMO_PASSWORD` in `api/.env`. Demo cohort `Kohort uji DSCO (test.csv)` (6,502 rows) is stored. |
 | D-02 | Architecture diagram and demo script | Pending | None |

@@ -105,6 +105,33 @@ export type Insights = {
   modules: Record<string, ModuleInsight>;
 };
 
+export type QualityCheck = {
+  code: string;
+  level: "error" | "warning" | "info";
+  message: string;
+  count: number | null;
+  details: string[] | Record<string, unknown> | null;
+};
+
+export type QualityReport = {
+  status: "ok" | "warning" | "error";
+  can_score: boolean;
+  rows: number;
+  checks: QualityCheck[];
+  repairs: { code: string; message: string; count: number }[];
+  shares: Record<string, number> | null;
+};
+
+export type CohortSummary = {
+  rows: number;
+  flagged: number;
+  expected_at_risk: number;
+  uncertain: number;
+  tiers: Record<Tier, number>;
+  archetypes: Record<string, number>;
+  modules: Record<string, number>;
+};
+
 export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 // Expected failures (API down, non-2xx) come back as values so pages can render an error state.
