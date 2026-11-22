@@ -1,0 +1,8 @@
+# Workflow
+
+- **Proceed within scope.** Read `CLAUDE.md`, `TODO.md`, and the relevant step in `ARCHITECTURE.md` before starting. Work independently on the next unblocked step whose dependencies are Done. Keep each change to one step ID.
+- **Ask when a decision matters.** Ask before expanding scope beyond `PRD.md` section 7, before changing a value listed as pending or awaiting confirmation, and before any action that costs money or touches an external account (Azure, Supabase, Vercel, GitHub settings). A DEC row in `TODO.md` that blocks the step means stop and ask.
+- **Protect model parity.** Any change to `api/app/pipeline/`, model parameters, the threshold, or ML library versions requires the parity check in `skills/verify-model-parity/SKILL.md` before the step is Done.
+- **Verify completion.** Check the step's completion criteria in `ARCHITECTURE.md` and the matching acceptance criteria in `PRD.md`. Run `uv run pytest` for API changes and `pnpm build` for frontend changes, then check the page in a browser. Record the result in the `TODO.md` row. Mark a step Done only after its criteria pass; otherwise record what remains.
+- **Hand off Git commands.** After code changes, summarize the work and provide `git add -- <changed-files>`, `git diff --cached`, `git commit -m "<message>"`, and `git push origin main` (or the branch in use). The user stages, commits, and pushes.
+- **Keep the project documents current.** When an agreed decision changes, update the source document (`PRD.md` for scope, `ARCHITECTURE.md` for technical choices, `DESIGN.md` for visual rules) and the affected `TODO.md` rows in the same change.
