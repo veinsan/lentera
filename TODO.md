@@ -33,9 +33,9 @@
 | W-01 | Design tokens and app shell | Done | Tokens in `web/app/globals.css`; sidebar with six routes, active state (student profile highlights Daftar Prioritas), Plus Jakarta Sans and JetBrains Mono. Checked in the browser at 1280 px: redirect `/` to `/dashboard`, client navigation, no console errors. |
 | W-02 | Sign-in and role-aware layout | In progress | Login form, `proxy.ts` session refresh and redirect, role-filtered sidebar with user panel and sign-out, role gate on Rencana and Unggah; `pnpm build` and `pnpm lint` pass; signed-out visit to `/model` redirects to `/login`. Coordinator UI checked: six links, user panel, gated pages open. Pending: advisor and admin UI check (RLS for both already verified through the API). |
 | W-03 | Cohort upload page | Done | Checked as the coordinator at 1440 px: an 8-row file showed the quality report (1 placeholder row, 5 relabeled `highest_education` values), scoring returned the summary, and the cohort list refreshed; the test cohort was then deleted. |
-| W-04 | Dashboard | Pending | None |
+| W-04 | Dashboard | Done | Coordinator view matches the stored cohort: 6,502 scored, 3,875 flagged, expected 3,430, critical 1,583, uncertain 2,108, tiers 1,583/986/1,306/2,627. Tier segmented bar, archetype and module tables (linked to filtered worklists), module x presentation heatmap of mean probability. Loads in 1.3 to 1.8 s in dev. |
 | W-05 | Capacity planner page | Pending | None |
-| W-06 | Advisor worklist | Pending | None |
+| W-06 | Advisor worklist | Done | Flagged students sorted by probability, 50 per page, filters in the URL (module, tier, archetype, status), top two actionable reasons, playbook action, contact status, CSV export. M03 + Tinggi shows 180 rows; the database and the CSV export both have 180; page 4 shows rows 151 to 180. Advisor view not checked in the UI (RLS verified through the API). |
 | W-07 | Student profile | Pending | None |
 | W-08 | Intervention log | Pending | None |
 | W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |

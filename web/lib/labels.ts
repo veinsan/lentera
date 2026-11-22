@@ -16,3 +16,10 @@ export const ACTION_LABELS: Record<string, string> = {
   auto_nudge: "Nudge otomatis",
   auto_checkin: "Check-in otomatis",
 };
+
+export const CONTACT_STATUS_LABELS: Record<string, string> = {
+  contacted: "Sudah dihubungi",
+  unreachable: "Tidak terjangkau",
+  scheduled: "Dijadwalkan",
+};
+export const NOT_CONTACTED = "Belum dihubungi";

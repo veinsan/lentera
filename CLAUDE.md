@@ -51,7 +51,7 @@ web/
   components/
     ui/                    shadcn/ui components
     layout/                Sidebar, nav links, page header
-    charts/                Recharts wrappers that apply chart tokens
+    charts/                Recharts wrappers that apply chart tokens, plus the HTML heatmap and segmented bar
     domain/                Empty state, KPI card, section, tier badge, fairness table, API error; planned: archetype chip, scenario panel, reason list
   lib/
     nav.ts                 Sidebar items
@@ -61,7 +61,9 @@ web/
 proxy.ts                   Session refresh and sign-in redirect (Next.js 16 name for middleware)
     api.ts                 Typed client for the FastAPI service (`API_URL`, server-side only)
     api-browser.ts         File uploads from the browser to the API with the user's token (`NEXT_PUBLIC_API_URL`)
-    labels.ts              Indonesian labels for archetypes and playbook actions
+    labels.ts              Indonesian labels for archetypes, playbook actions, and contact status
+    data.ts                Supabase reads for the latest cohort, all its predictions (parallel pages of 1,000), and the worklist
+    worklist-params.ts     Worklist filter whitelist and URL query helpers (client-safe, no server imports)
     format.ts              Number and probability formatting (id-ID, decimal comma)
 api/
   app/
@@ -88,6 +90,8 @@ data/                      Local only, gitignored
 - `web/lib/supabase/server.ts` calls `connection()` before reading cookies, because supabase-js reads `Date.now()` while loading the session and Cache Components rejects that during prerendering.
 - Cache Components is on: wrap uncached data reads, `cookies()`, `headers()`, `searchParams`, and awaited dynamic `params` in `<Suspense>`. Client components that call `usePathname` in a shared layout also sit inside `<Suspense>` (see `web/components/layout/sidebar.tsx`).
 - Use the `@/` import alias for `web/`.
+- Supabase returns at most 1,000 rows per request. Page with `.range()`; `getCohortPredictions` in `web/lib/data.ts` fetches the pages in parallel.
+- Modules imported by client components must not import `web/lib/data.ts` or `web/lib/supabase/server.ts`, which depend on `next/headers`.
 - Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only. It returns `{ ok, data }` or `{ ok: false, error }` instead of throwing, and calls `unstable_rethrow` so Next.js prerender signals pass through; pages render `ApiError` on failure.
 - Charts follow the dataviz rules: categorical and ordinal colors come only from validated tokens, 2px lines, bars at most 24px with 4px rounded ends, solid hairline grids, a legend for two or more series, a hover tooltip with the value first, and no dual axes.
 - Format probabilities and counts through `web/lib/format.ts` so every page shows them the same way.
@@ -109,6 +113,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Supabase schema with RLS (`supabase/migrations/0001_init.sql`), demo accounts (`api/scripts/seed_demo_users.py`)
 - [x] Sign-in, role-filtered sidebar, sign-out, role gate for coordinator and admin pages; API token verification
 - [x] Cohort upload: data quality gate, scoring with reason codes, storage in Supabase, upload page with report and summary
+- [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
 - [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [ ] Sign-in with three roles

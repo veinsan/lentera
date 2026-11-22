@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CircleAlert } from "lucide-react";
+import { HeatmapTable } from "@/components/charts/heatmap-table";
 import { WeeklyChart } from "@/components/charts/weekly-chart";
 import { ApiError } from "@/components/domain/api-error";
 import { KpiCard } from "@/components/domain/kpi-card";
@@ -116,61 +117,13 @@ function ModuleCard({
 }
 
 function RiskHeatmap({ insights }: { insights: Insights }) {
-  const presentations = [...new Set(Object.values(insights.modules).flatMap((m) => Object.keys(m.presentations)))].sort();
-  const rates = Object.values(insights.modules).flatMap((m) => Object.values(m.presentations).map((p) => p.at_risk_rate));
-  const lo = Math.min(...rates);
-  const hi = Math.max(...rates);
-  // Sequential single hue: the at-risk color mixed into the card surface, 10% to 70%.
-  const share = (rate: number) => Math.round(10 + ((rate - lo) / (hi - lo || 1)) * 60);
-  return (
-    <div>
-      <table className="w-full table-fixed border-separate border-spacing-0.5 text-sm">
-        <thead>
-          <tr>
-            <th className="w-24 text-left text-xs font-semibold text-muted-foreground">Modul</th>
-            {presentations.map((p) => (
-              <th key={p} className="text-xs font-semibold text-muted-foreground">
-                {fmtModule(p)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(insights.modules).map(([code, m]) => (
-            <tr key={code}>
-              <th scope="row" className="text-left text-sm font-medium">
-                {fmtModule(code)}
-              </th>
-              {presentations.map((p) => {
-                const cell = m.presentations[p];
-                if (!cell) return <td key={p} className="rounded-sm bg-background" aria-label="Tidak ada" />;
-                const s = share(cell.at_risk_rate);
-                return (
-                  <td
-                    key={p}
-                    title={`${fmtModule(code)} ${fmtModule(p)}: ${fmtPct(cell.at_risk_rate, 1)} dari ${fmtInt(cell.n)} mahasiswa`}
-                    // Ink text stays above 4.6:1 up to the 70% mix; white never reaches 3.5:1.
-                    className="rounded-sm px-2 py-2 text-center font-mono text-foreground"
-                    style={{ background: `color-mix(in oklch, var(--chart-1) ${s}%, var(--card))` }}
-                  >
-                    {fmtPct(cell.at_risk_rate)}
-                    <span className="block text-[10px] opacity-80">n={fmtInt(cell.n)}</span>
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{fmtPct(lo)}</span>
-        <span
-          className="h-2 w-40 rounded-full"
-          style={{ background: "linear-gradient(to right, color-mix(in oklch, var(--chart-1) 10%, var(--card)), color-mix(in oklch, var(--chart-1) 70%, var(--card)))" }}
-          aria-hidden
-        />
-        <span>{fmtPct(hi)}</span>
-      </div>
-    </div>
+  const rows = Object.keys(insights.modules);
+  const cols = [...new Set(Object.values(insights.modules).flatMap((m) => Object.keys(m.presentations)))].sort();
+  const cells = Object.fromEntries(
+    Object.entries(insights.modules).map(([code, m]) => [
+      code,
+      Object.fromEntries(Object.entries(m.presentations).map(([p, c]) => [p, { value: c.at_risk_rate, n: c.n }])),
+    ]),
   );
+  return <HeatmapTable rows={rows} cols={cols} cells={cells} format={(v) => fmtPct(v)} label="tingkat at-risk" />;
 }
