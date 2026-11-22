@@ -11,7 +11,7 @@ Steps marked Done in `TODO.md` are implemented; everything else below is planned
 | Backend | FastAPI on Python 3.13 | Agreed. 3.13 because Smart App Control blocks the uv-managed 3.12 on the owner's machine. |
 | ML libraries | catboost 1.2.10, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1. SHAP values come from CatBoost itself. | Done. Matches `dsco/outputs/audit/requirements-lock.txt` except pandas 3.1.1; parity check passed. |
 | Python package manager | uv | In use for `api/` |
-| Database and auth | Supabase (Postgres, Auth, row level security, Storage) | Agreed |
+| Database and auth | Supabase (Postgres, Auth, row level security, Storage); asymmetric ES256 JWT signing keys and `sb_publishable_`/`sb_secret_` API keys | Done for schema and auth |
 | Frontend hosting | Vercel | Agreed |
 | API hosting | Docker image built by GitHub Actions, pushed to GitHub Container Registry (`ghcr.io`), run on Azure Container Apps | Agreed: Azure. Container Apps over App Service is a proposal awaiting the owner's confirmation. |
 | Model artifact storage | Committed to the GitHub repository under `api/artifacts/` | Agreed |
@@ -71,11 +71,11 @@ flowchart LR
 
 | Table | Columns | Access |
 | --- | --- | --- |
-| `profiles` | `id` (auth user), `full_name`, `role` (`advisor`, `coordinator`, `admin`), `modules` (text array) | User reads own row; admin manages all |
+| `profiles` | `id` (auth user), `full_name`, `role` (`advisor`, `coordinator`, `admin`), `modules` (text array, lowercase codes such as `m07`) | User reads own row; admin reads and updates all |
 | `cohorts` | `id`, `name`, `uploaded_by`, `uploaded_at`, `storage_path`, `n_rows`, `model_version`, `status`, `quality_report` (jsonb), `drift_report` (jsonb) | Read by all signed-in users; written by the API |
 | `students` | `id`, `cohort_id`, `source_id` (CSV `id`), `code_module`, `code_presentation`, `raw` (jsonb of the CSV row) | Advisors and coordinators read rows in their modules |
-| `predictions` | `student_id`, `model_version`, `probability`, `flagged`, `tier`, `uncertain`, `archetype`, `reasons` (jsonb), `recommended_action` | Same as `students` |
-| `interventions` | `id`, `student_id`, `advisor_id`, `action_type`, `contact_status`, `issue_category`, `notes`, `follow_up_on`, `created_at` | Advisors create and read rows in their modules |
+| `predictions` | `student_id`, `cohort_id`, `code_module` (copied for RLS and dashboard queries), `model_version`, `probability`, `flagged`, `tier`, `uncertain`, `archetype`, `reasons` (jsonb), `recommended_action` | Same as `students` |
+| `interventions` | `id`, `student_id`, `code_module`, `advisor_id` (defaults to the signed-in user), `action_type`, `contact_status`, `issue_category`, `notes`, `follow_up_on`, `created_at` | Users with the module create and read rows; insert only, as an append log |
 | `plans` | `id`, `cohort_id`, `created_by`, `params` (jsonb), `result` (jsonb), `created_at` | Coordinators and admins |
 | `request_log` | `id`, `user_id`, `endpoint`, `status_code`, `latency_ms`, `cohort_id`, `created_at` | Admins read; the API writes |
 

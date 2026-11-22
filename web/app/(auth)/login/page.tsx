@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lamp } from "lucide-react";
+import { LoginForm } from "@/components/domain/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Masuk" };
@@ -16,8 +17,8 @@ export default function LoginPage() {
           <CardTitle>Masuk</CardTitle>
           <CardDescription>Masuk dengan akun Lentera Anda.</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Formulir masuk ditambahkan bersama Supabase Auth.
+        <CardContent>
+          <LoginForm />
         </CardContent>
       </Card>
     </main>

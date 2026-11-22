@@ -1,13 +1,14 @@
-"""Lentera API. Run from api/: uv run python -m fastapi dev app/main.py"""
+"""Lentera API. Run from api/: uv run --env-file .env python -m uvicorn app.main:app --reload"""
 from __future__ import annotations
 
 import json
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth import User, current_user
 from app.model import ARTIFACTS, Model
 
 
@@ -36,12 +37,11 @@ def health(request: Request) -> dict:
             "image_tag": os.getenv("IMAGE_TAG", "local")}
 
 
-# Pending API-02: /model and /insights require a signed-in user.
 @app.get("/model")
-def model_card(request: Request) -> dict:
+def model_card(request: Request, user: User = Depends(current_user)) -> dict:
     return request.app.state.model_card
 
 
 @app.get("/insights")
-def insights(request: Request) -> dict:
+def insights(request: Request, user: User = Depends(current_user)) -> dict:
     return request.app.state.insights

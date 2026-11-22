@@ -108,9 +108,9 @@ export type Insights = {
 export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 // Expected failures (API down, non-2xx) come back as values so pages can render an error state.
-async function get<T>(path: string): Promise<Result<T>> {
+async function get<T>(path: string, token: string): Promise<Result<T>> {
   try {
-    const res = await fetch(`${API_URL}${path}`);
+    const res = await fetch(`${API_URL}${path}`, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) return { ok: false, error: `API ${path} returned ${res.status}` };
     return { ok: true, data: (await res.json()) as T };
   } catch (err) {
@@ -119,5 +119,6 @@ async function get<T>(path: string): Promise<Result<T>> {
   }
 }
 
-export const getModelCard = () => get<ModelCard>("/model");
-export const getInsights = () => get<Insights>("/insights");
+// token: the signed-in user's Supabase access token (getCurrentUser().accessToken); the API verifies it.
+export const getModelCard = (token: string) => get<ModelCard>("/model", token);
+export const getInsights = (token: string) => get<Insights>("/insights", token);

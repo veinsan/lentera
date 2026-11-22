@@ -3,14 +3,18 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
+from app.auth import User, current_user
 from app.main import app
 from app.model import ARTIFACTS
 
 
 @pytest.fixture(scope="module")
 def client():
+    # Token verification is covered in test_auth.py; here a signed-in advisor is assumed.
+    app.dependency_overrides[current_user] = lambda: User("u-test", "advisor", ("m03",))
     with TestClient(app) as c:
         yield c
+    app.dependency_overrides.clear()
 
 
 def test_health_reports_loaded_model(client):
@@ -26,6 +30,15 @@ def test_endpoints_return_artifact_contents(client, path, artifact):
     r = client.get(path)
     assert r.status_code == 200
     assert r.json() == json.loads((ARTIFACTS / artifact).read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("path", ["/model", "/insights"])
+def test_endpoints_require_sign_in(client, path):
+    override = app.dependency_overrides.pop(current_user)
+    try:
+        assert client.get(path).status_code == 401
+    finally:
+        app.dependency_overrides[current_user] = override
 
 
 def test_cors_allows_local_frontend(client):

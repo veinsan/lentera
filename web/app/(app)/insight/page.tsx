@@ -7,6 +7,7 @@ import { KpiCard } from "@/components/domain/kpi-card";
 import { Section } from "@/components/domain/section";
 import { PageHeader } from "@/components/layout/page-header";
 import { getInsights, type Insights, type ModuleInsight } from "@/lib/api";
+import { getCurrentUser } from "@/lib/auth";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ export default function Page() {
 }
 
 async function InsightContent() {
-  const res = await getInsights();
+  const res = await getInsights((await getCurrentUser()).accessToken);
   if (!res.ok) return <ApiError />;
   const insights = res.data;
   const modules = Object.entries(insights.modules);

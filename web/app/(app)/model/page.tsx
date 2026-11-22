@@ -14,6 +14,7 @@ import { TierBadge } from "@/components/domain/tier-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getModelCard, type ModelCard, type Tier } from "@/lib/api";
+import { getCurrentUser } from "@/lib/auth";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +47,7 @@ const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
 
 async function ModelContent() {
-  const res = await getModelCard();
+  const res = await getModelCard((await getCurrentUser()).accessToken);
   if (!res.ok) return <ApiError />;
   const card = res.data;
   const { nested, leaderboard, calibration, segments_seed42: seg } = card;

@@ -5,23 +5,26 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/nav";
 
-/** Static links for the prerendered shell; NavLinks replaces them once the pathname is known. */
+/** Placeholder rows while the session streams in, so no link appears that the role cannot open. */
 export function NavLinksFallback() {
-  return <LinkList active={null} />;
+  return (
+    <ul className="flex flex-col gap-1" aria-hidden>
+      {NAV_ITEMS.slice(0, 4).map((item) => (
+        <li key={item.href} className="h-9 animate-pulse rounded-md bg-white/10" />
+      ))}
+    </ul>
+  );
 }
 
-export function NavLinks() {
+/** allowed: hrefs the signed-in role may open (icons stay on the client, so only strings cross the boundary). */
+export function NavLinks({ allowed }: { allowed: string[] }) {
   const pathname = usePathname();
   // The student profile belongs to the worklist.
   const active = pathname.startsWith("/mahasiswa") ? "/prioritas" : pathname;
-  return <LinkList active={active} />;
-}
-
-function LinkList({ active }: { active: string | null }) {
   return (
     <ul className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const isActive = active !== null && (active === href || active.startsWith(`${href}/`));
+      {NAV_ITEMS.filter((item) => allowed.includes(item.href)).map(({ href, label, icon: Icon }) => {
+        const isActive = active === href || active.startsWith(`${href}/`);
         return (
           <li key={href}>
             <Link
