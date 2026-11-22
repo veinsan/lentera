@@ -19,8 +19,8 @@
 | ML-04 | Build `model_card.json` and `insights.json` | Done | `scripts/build_model_card.py` reproduces nested mean F1 0.773825, seed SD 0.000477, ECE 0.0075, public F1 0.78443, and the tier table in `PRD.md`. `scripts/build_insights.py` flags M07 (no graded work, AUC 0.696, 53.9% uncertain), M05 (no graded work), M03 and M06 (high base risk). |
 | ML-05 | SHAP reason codes | Done | SHAP plus expected value equals the raw logit (max error 1.2e-14 on test); reasons for 6,502 rows take 3.8 s; pytest covers additivity and placeholder folding. |
 | ML-06 | Tier, uncertain band, archetype, playbook rules | Done | Archetype counts on `train.csv` equal `PRD.md` section 5.1; pytest covers every branch (12 tests pass in total). |
-| ML-07 | Scenario levers and counterfactual | Pending | None |
-| ML-08 | Capacity planner | Pending | None |
+| ML-07 | Scenario levers and counterfactual | Done | `recompute_activity` reproduces the dataset aggregates (max error 5e-8); counterfactual for 3,875 flagged test students in 0.57 s; pytest covers lever consistency, submit scope, and the counterfactual contract. |
+| ML-08 | Capacity planner | Done | Plan plus reach curve for the test cohort in 0.09 s; pytest checks capacity, reach equal to summed probabilities, automated assignment, scenario labeling, and override validation (27 tests pass in total). |
 | API-01 | Health, model, insights endpoints | Pending | None |
 | API-02 | JWT verification and roles | Pending | None |
 | API-03 | Cohort validation and scoring | Pending | None |

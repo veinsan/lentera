@@ -69,7 +69,8 @@ Pending: the owner sets the final-round presentation date, which fixes the build
   - **Acceptance criteria:** The student profile lists the student's top SHAP contributions in two groups: actionable signals (activity, submission, and score features) and context (demographic, course, and registration features). Each item has a one-line explanation, such as "Terakhir aktif 9 hari sebelum cutoff".
   - **Acceptance criteria:** The profile states that context features are never grounds for an intervention on their own.
 - As an advisor, I want to see what would bring a student below the threshold so that I can give the student a concrete target.
-  - **Acceptance criteria:** The profile shows the smallest combination of predefined actionable levers (for example, submit the pending assessment, be active on more days in the next week) that moves the predicted probability below 0.375, with the probability before and after.
+  - **Acceptance criteria:** The profile shows the smallest combination of predefined actionable levers (for example, submit the pending assessment, be active on more days in week 4) that moves the predicted probability below 0.375, with the probability before and after. When no combination reaches 0.375, the profile shows the combination with the largest reduction.
+  - **Acceptance criteria:** Only levers that lower the student's probability on their own are offered.
   - **Acceptance criteria:** The section is labeled as a model scenario, not a causal effect. Students without recorded online activity get an administrative check instead of a scenario.
 - As an advisor, I want a message template for the recommended intervention so that I can contact the student quickly.
   - **Acceptance criteria:** The profile shows an Indonesian message template for the student's archetype, filled with the student's module, missed assessment, and last active day.
@@ -101,7 +102,7 @@ Pending: the owner sets the final-round presentation date, which fixes the build
 - FR-04: The API marks a prediction as uncertain when the probability is between 0.25 and 0.55.
 - FR-05: The API assigns each student exactly one archetype, checked in this order: Silent (placeholder activity block and no submission by cutoff), No LMS record (placeholder activity block), Missed submission (`no_submission_by_cutoff` is 1), Low score (`has_score` is 1 and `avg_score` below 60), Fading (week 4 interactions below half of week 1 interactions), Engaged (all others).
 - FR-06: The API computes SHAP values for every scored student and stores the top contributions, grouped as actionable or context.
-- FR-07: The API computes a counterfactual for a flagged student: the smallest set of predefined levers that moves the probability below 0.375, searched over at most three levers.
+- FR-07: The API computes a counterfactual for a flagged student: the smallest set of predefined levers that moves the probability below 0.375, searched over at most three levers, plus the combination with the largest reduction. Levers that do not lower the student's probability on their own are excluded.
 - FR-08: The API recomputes the probability for a user-chosen set of lever values (what-if).
 
 ### Planning and intervention

@@ -71,13 +71,17 @@ def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
     placeholder = x.no_activity == 1
     if signal in ACTIVITY and placeholder:
         return "Tidak ada catatan aktivitas LMS yang valid"
+    if signal in {"submission", "timeliness"} and r.no_submission_by_cutoff == 0 and r.assessment_completion_rate == 0:
+        # M05 and M07: identical submission columns for every student, so they say nothing about this student.
+        return "Data pengumpulan di course ini sama untuk semua mahasiswa sampai minggu 4"
     if signal == "submission":
         due, missed = r.assessments_due_total, r.assessments_due_total * (1 - r.assessment_completion_rate)
         if r.no_submission_by_cutoff == 1:
             return f"Belum mengumpulkan {round(missed)} dari {round(due)} asesmen yang sudah jatuh tempo"
-        return f"Sudah mengumpulkan {round(r.submitted_count)} asesmen dari {round(due)} yang jatuh tempo"
+        return f"Sudah mengumpulkan {round(due - missed)} asesmen dari {round(due)} yang jatuh tempo"
     if signal == "timeliness":
-        if r.submitted_count == 0:
+        # submitted_count and delays are placeholders (1, -1) when nothing was submitted; completion rate is reliable.
+        if r.assessment_completion_rate == 0:
             return "Belum ada pengumpulan untuk dinilai ketepatan waktunya"
         if r.late_submission_count > 0:
             return f"{round(r.late_submission_count)} pengumpulan terlambat"

@@ -28,6 +28,10 @@ def recommendations(s: dict) -> list[dict]:
         out.append(dict(code="no_graded_by_week4", text=(
             "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada "
             "aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3.")))
+    if s["constant_submission_data"]:
+        out.append(dict(code="constant_submission_data", text=(
+            "Kolom pengumpulan asesmen identik untuk semua mahasiswa sampai minggu 4, sehingga status "
+            "pengumpulan tidak bisa membedakan mahasiswa. Jadwalkan tenggat asesmen pertama sebelum minggu 4.")))
     if s["auc"] < LOW_AUC:
         out.append(dict(code="low_separability", text=(
             f"Model paling sulit membedakan mahasiswa berisiko di modul ini (AUC {s['auc']:.2f}). "
@@ -64,6 +68,8 @@ def main() -> None:
             assessments_due_mean=float(g.assessments_due_total.mean()),
             placeholder_share=float(g.placeholder.mean()),
             no_submission_share=float(g.no_submission_by_cutoff.mean()),
+            constant_submission_data=bool(
+                g[["assessment_completion_rate", "no_submission_by_cutoff", "has_score"]].nunique().eq(1).all()),
             weekly_median_interactions=weekly,
             presentations={pr: dict(n=int(len(h)), at_risk_rate=float(h.y.mean()))
                            for pr, h in g.groupby("code_presentation")},
@@ -78,6 +84,14 @@ def main() -> None:
         modules=modules,
     )
     (ROOT / "artifacts/insights.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
+
+    # Targets for the week4_median lever in app/scenarios.py: not-at-risk students with a real activity block.
+    safe = d[~d.placeholder & d.y.eq(0)]
+    cohort = safe.code_module + "_" + safe.code_presentation
+    reference = dict(
+        week4_median_not_at_risk={k: float(v) for k, v in safe.week4_interactions.groupby(cohort).median().items()},
+        global_week4_median_not_at_risk=float(safe.week4_interactions.median()))
+    (ROOT / "artifacts/scenario_reference.json").write_text(json.dumps(reference, indent=2))
     for mod, s in modules.items():
         print(mod, s["n"], f"risk={s['at_risk_rate']:.3f} auc={s['auc']:.3f} unc={s['uncertain_share']:.3f} "
               f"graded={s['graded_share']:.2f}", [r["code"] for r in s["recommendations"]])

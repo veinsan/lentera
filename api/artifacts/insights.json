@@ -20,6 +20,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.03322259136212625,
       "no_submission_share": 0.12790697674418605,
+      "constant_submission_data": false,
       "weekly_median_interactions": {
         "not_at_risk": [
           67.5,
@@ -56,6 +57,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.1975502512562814,
       "no_submission_share": 0.2702575376884422,
+      "constant_submission_data": false,
       "weekly_median_interactions": {
         "not_at_risk": [
           31.0,
@@ -100,6 +102,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.1412556053811659,
       "no_submission_share": 0.2676569506726457,
+      "constant_submission_data": false,
       "weekly_median_interactions": {
         "not_at_risk": [
           42.0,
@@ -141,6 +144,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.11597651911788037,
       "no_submission_share": 0.24321751546882436,
+      "constant_submission_data": false,
       "weekly_median_interactions": {
         "not_at_risk": [
           110.0,
@@ -185,6 +189,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.11827497865072588,
       "no_submission_share": 0.0,
+      "constant_submission_data": true,
       "weekly_median_interactions": {
         "not_at_risk": [
           57.0,
@@ -217,6 +222,10 @@
         {
           "code": "no_graded_by_week4",
           "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+        },
+        {
+          "code": "constant_submission_data",
+          "text": "Kolom pengumpulan asesmen identik untuk semua mahasiswa sampai minggu 4, sehingga status pengumpulan tidak bisa membedakan mahasiswa. Jadwalkan tenggat asesmen pertama sebelum minggu 4."
         }
       ]
     },
@@ -230,6 +239,7 @@
       "assessments_due_mean": 1.2080536912751678,
       "placeholder_share": 0.1212001579155152,
       "no_submission_share": 0.28187919463087246,
+      "constant_submission_data": false,
       "weekly_median_interactions": {
         "not_at_risk": [
           55.0,
@@ -279,6 +289,7 @@
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.18127381600435494,
       "no_submission_share": 0.0,
+      "constant_submission_data": true,
       "weekly_median_interactions": {
         "not_at_risk": [
           12.0,
@@ -311,6 +322,10 @@
         {
           "code": "no_graded_by_week4",
           "text": "Belum ada asesmen yang dinilai sampai minggu 4, sehingga deteksi dini hanya bergantung pada aktivitas LMS dan status pengumpulan. Tambahkan asesmen berbobot rendah sebelum minggu 3."
+        },
+        {
+          "code": "constant_submission_data",
+          "text": "Kolom pengumpulan asesmen identik untuk semua mahasiswa sampai minggu 4, sehingga status pengumpulan tidak bisa membedakan mahasiswa. Jadwalkan tenggat asesmen pertama sebelum minggu 4."
         },
         {
           "code": "low_separability",
