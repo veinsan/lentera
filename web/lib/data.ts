@@ -100,3 +100,56 @@ export async function getWorklist(cohortId: string, filters: WorklistFilters, pa
 export function topReasons(actionable: Reason[] | null, n = 2): Reason[] {
   return (actionable ?? []).filter((r) => r.shap > 0).slice(0, n);
 }
+
+export type StudentProfile = {
+  id: number;
+  source_id: number;
+  code_module: string;
+  code_presentation: string;
+  cohort: { name: string };
+  raw: Record<string, number | string | null>;
+  prediction: {
+    probability: number;
+    flagged: boolean;
+    tier: Tier;
+    uncertain: boolean;
+    archetype: string;
+    recommended_action: string;
+    reasons: { actionable: Reason[]; context: Reason[] };
+  } | null;
+};
+
+export type Intervention = {
+  id: number;
+  advisor_id: string;
+  action_type: string;
+  contact_status: string;
+  issue_category: string | null;
+  notes: string;
+  follow_up_on: string | null;
+  created_at: string;
+};
+
+/** One student with prediction and intervention history; null when absent or outside the user's modules (RLS). */
+export async function getStudentProfile(id: number): Promise<{ student: StudentProfile; interventions: Intervention[] } | null> {
+  const supabase = await createClient();
+  const [{ data: student }, { data: interventions }] = await Promise.all([
+    supabase
+      .from("students")
+      .select(
+        "id, source_id, code_module, code_presentation, raw, cohort:cohorts(name), prediction:predictions(probability, flagged, tier, uncertain, archetype, recommended_action, reasons)",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("interventions")
+      .select("id, advisor_id, action_type, contact_status, issue_category, notes, follow_up_on, created_at")
+      .eq("student_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
+  if (!student) return null;
+  // PostgREST may return a one-to-one embed as an object or a one-element array.
+  const s = student as unknown as StudentProfile & { prediction: unknown };
+  const prediction = Array.isArray(s.prediction) ? (s.prediction[0] ?? null) : s.prediction;
+  return { student: { ...s, prediction } as StudentProfile, interventions: (interventions ?? []) as Intervention[] };
+}

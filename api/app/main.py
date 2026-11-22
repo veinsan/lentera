@@ -10,8 +10,9 @@ import httpx
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
-from app import quality
+from app import quality, rules, scenarios
 from app.auth import User, current_user, require_role
 from app.explain import Explainer
 from app.model import ARTIFACTS, Model
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
     app.state.model = Model()
     app.state.explainer = Explainer(app.state.model)
     app.state.schema = quality.load_schema()
+    app.state.targets = scenarios.load_targets()
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
     yield
@@ -102,3 +104,48 @@ def create_cohort(request: Request, file: UploadFile = File(...), name: str = Fo
         raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
     return {"cohort_id": cohort_id, "summary": summarize(scored), "quality_report": report,
             "seconds": round(time.perf_counter() - started, 2)}
+
+
+def _student_frame(request: Request, student_id: int, user: User, store: SupabaseStore):
+    """Stored raw row for one student; 404 also when the student is outside the user's modules."""
+    try:
+        student = store.get_student(student_id)
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+    if student is None or not user.sees(student["code_module"]):
+        raise HTTPException(404, "Mahasiswa tidak ditemukan.")
+    return quality.frame_from_records([student["raw"]], request.app.state.schema)
+
+
+@app.get("/students/{student_id}/counterfactual")
+def student_counterfactual(student_id: int, request: Request, user: User = Depends(current_user),
+                           store: SupabaseStore = Depends(get_store)) -> dict:
+    raw = _student_frame(request, student_id, user, store)
+    model = request.app.state.model
+    result = scenarios.counterfactual(model, raw, request.app.state.targets)[0]
+    arch = str(rules.archetype(raw)[0])
+    book = rules.PLAYBOOK[arch]
+    return {**result, "threshold": model.threshold, "archetype": arch,
+            "playbook": {k: book[k] for k in ("action", "label", "description", "minutes")},
+            "message": rules.message(arch, raw.iloc[0]),
+            "levers": [{"key": k, "label": scenarios.LEVER_LABELS[k]} for k in scenarios.LEVERS]}
+
+
+class SimulateBody(BaseModel):
+    levers: list[str]
+
+
+@app.post("/students/{student_id}/simulate")
+def student_simulate(student_id: int, body: SimulateBody, request: Request, user: User = Depends(current_user),
+                     store: SupabaseStore = Depends(get_store)) -> dict:
+    unknown = set(body.levers) - set(scenarios.LEVERS)
+    if unknown:
+        raise HTTPException(422, f"Lever tidak dikenal: {', '.join(sorted(unknown))}")
+    raw = _student_frame(request, student_id, user, store)
+    model = request.app.state.model
+    p = scenarios.simulate(model, raw, body.levers, request.app.state.targets)[0]
+    base = float(model.predict_proba(raw)[0])
+    if p != p:  # NaN: placeholder activity block, scenarios do not apply
+        return {"applicable": False, "base": base, "probability": None, "levers": body.levers}
+    return {"applicable": True, "base": base, "probability": float(p), "levers": body.levers,
+            "flagged": bool(p >= model.threshold)}

@@ -131,6 +131,14 @@ def validate(text_frame: pd.DataFrame, schema: dict) -> tuple[dict, pd.DataFrame
     return _report(checks, repairs, n, shares), df[schema["columns"]]
 
 
+def frame_from_records(records: list[dict], schema: dict) -> pd.DataFrame:
+    """Rebuild a typed raw frame from stored students.raw rows (numbers as JSON numbers, missing as null)."""
+    df = pd.DataFrame(records)[schema["columns"]]
+    for c in schema["numeric"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
+
+
 def _report(checks: list, repairs: list, rows: int, shares: dict | None) -> dict:
     levels = {c["level"] for c in checks}
     status = "error" if "error" in levels else "warning" if "warning" in levels else "ok"

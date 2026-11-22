@@ -24,7 +24,7 @@
 | API-01 | Health, model, insights endpoints | Done | `api/app/main.py` loads artifacts once at startup; live server answered `/health`, `/model` (20 KB, 10 ms), `/insights` (6 KB, 3 ms), `/docs` with 200; pytest checks contents and CORS (31 tests pass in total). Sign-in for `/model` and `/insights` and request statistics in `/model` arrive with API-02 and API-07. |
 | API-02 | JWT verification and roles | Done | ES256 tokens verified against the project JWKS (`api/app/auth.py`); `/model` and `/insights` need sign-in. Real demo tokens get 200, a bad token and no token get 401; pytest covers signature, expiry, audience, issuer, missing profile, and role checks (44 tests pass). |
 | API-03 | Cohort validation and scoring | Done | `POST /cohorts/validate` and `POST /cohorts` (`app/quality.py`, `app/scoring.py`, `app/store.py`). Uploading `test.csv` as the coordinator stored 6,502 students and predictions in 10.7 s API time (13.6 s wall), 3,875 flagged; the report lists the GGG repair for 372 rows. The advisor (M03, M06) sees 2,072 predictions and gets 403 on upload. pytest: 55 pass, including scoring from CSV text that reproduces the submission. |
-| API-04 | Simulate and counterfactual endpoints | Pending | None |
+| API-04 | Simulate and counterfactual endpoints | Done | `GET /students/{id}/counterfactual` (also returns playbook, filled message, lever list) and `POST /students/{id}/simulate`; 404 outside the user's modules. Live check on student 1001: base 0.84623 equals the stored prediction; closest combination 0.795. JWT verification now has a 30 s clock leeway after a fresh token failed with `ImmatureSignatureError` on this machine. pytest: 60 pass. |
 | API-05 | Plan endpoints | Pending | None |
 | API-06 | Drift report | Pending | None |
 | API-07 | Request logging | Pending | None |
@@ -36,8 +36,8 @@
 | W-04 | Dashboard | Done | Coordinator view matches the stored cohort: 6,502 scored, 3,875 flagged, expected 3,430, critical 1,583, uncertain 2,108, tiers 1,583/986/1,306/2,627. Tier segmented bar, archetype and module tables (linked to filtered worklists), module x presentation heatmap of mean probability. Loads in 1.3 to 1.8 s in dev. |
 | W-05 | Capacity planner page | Pending | None |
 | W-06 | Advisor worklist | Done | Flagged students sorted by probability, 50 per page, filters in the URL (module, tier, archetype, status), top two actionable reasons, playbook action, contact status, CSV export. M03 + Tinggi shows 180 rows; the database and the CSV export both have 180; page 4 shows rows 151 to 180. Advisor view not checked in the UI (RLS verified through the API). |
-| W-07 | Student profile | Pending | None |
-| W-08 | Intervention log | Pending | None |
+| W-07 | Student profile | Done | Checked as the coordinator at 1440 px for a missed-submission student (1001) and a silent student with placeholder activity (1792): probability, tier, archetype and playbook, reason lists with SHAP bars, scenario panel (what-if toggle gave 80% from 85%), message template, weekly chart against module medians. |
+| W-08 | Intervention log | Done | A saved note appeared in the history and the worklist status filter showed the student as contacted; the test note was then deleted. |
 | W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |
 | W-10 | Model and monitoring page | In progress | Model card sections, fairness tabs, and charts render from `/model` and were checked at 1440 px. Chart palette and tier ramp pass the dataviz validator. Drift and request statistics wait for API-06 and API-07. |
 | W-11 | Vercel deployment | Pending | None |

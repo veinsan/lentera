@@ -53,7 +53,7 @@ flowchart LR
 ### Components
 
 - **Next.js app (`web/`).** Renders every page. The dashboard and worklist read the latest cohort straight from Supabase with the user's session; aggregates are computed on the server from all visible predictions, fetched in parallel pages of 1,000 (the PostgREST row limit). Reads cohort, student, prediction, intervention, and plan rows from Supabase with the signed-in user's session, so row level security applies. Calls the API for work that needs the model: cohort scoring, what-if, counterfactual, capacity planning, and drift. Writes intervention records directly to Supabase.
-- **FastAPI service (`api/`).** Loads the model and fit state once at startup. Verifies the Supabase access token on each request with the project's JWKS endpoint and reads the user's role from `profiles`. Writes scored cohorts and the request log to Supabase with the service role key.
+- **FastAPI service (`api/`).** Loads the model and fit state once at startup. Verifies the Supabase access token on each request with the project's JWKS endpoint (30 second clock leeway) and reads the user's role from `profiles`. Student endpoints rebuild the stored `students.raw` row, which reproduces the stored probability exactly. Writes scored cohorts and the request log to Supabase with the service role key.
 - **Preprocessing (`api/app/pipeline/`).** A port of `features()` and `FoldFeatures` from `dsco/src/train_only.py` in `clean_rank` mode: category normalization, the `GGG` to `M07` repair and the M05/P12/261-day repair, placeholder activity detection (`interaction_volume` not equal to the sum of the four weekly columns), score and per-assessment placeholders set to missing, ratio and recency features, and seven cohort percentile ranks computed against the training distribution with a global fallback for unseen cohorts. The fit state (category levels and sorted rank references per cohort) is saved from training and loaded at inference, so a single uploaded row is ranked the same way as in the submitted model.
 - **Explanation (`api/app/explain.py`).** CatBoost SHAP values (`get_feature_importance(type="ShapValues")`). The 77 model features are summed into 14 signals, which keeps SHAP additive: 9 actionable (submission, timeliness, score, active days, recency, volume, week 4 activity, breadth, LMS record) and 5 context (course, registration, workload, prior attempts, demographics). For a row with the placeholder activity block, the five activity signals fold into the LMS record signal. Each signal has an Indonesian sentence built from the student's raw values.
 - **Rules (`api/app/rules.py`).** Tier, uncertain band, archetype, playbook, and Indonesian message templates, as defined in `PRD.md` sections 5 and 5.1. Pure functions with unit tests.
@@ -92,7 +92,7 @@ flowchart LR
 | `POST /cohorts` | Coordinator, admin | Validate, score, explain, and store a cohort |
 | `GET /cohorts/{id}/drift` | Signed in | PSI report for a stored cohort |
 | `POST /students/{id}/simulate` | Signed in | Probability for user-chosen lever values |
-| `GET /students/{id}/counterfactual` | Signed in | Smallest lever set below the threshold |
+| `GET /students/{id}/counterfactual` | Signed in | Smallest lever set below the threshold, largest reduction, helpful single levers, plus the playbook entry, the filled message template, and the lever list for the what-if panel |
 | `POST /plans/preview` | Coordinator, admin | Allocation and reach curve without saving |
 | `POST /plans` | Coordinator, admin | Allocation saved to `plans` |
 

@@ -114,6 +114,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Sign-in, role-filtered sidebar, sign-out, role gate for coordinator and admin pages; API token verification
 - [x] Cohort upload: data quality gate, scoring with reason codes, storage in Supabase, upload page with report and summary
 - [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
+- [x] Student profile: reason codes, scenario panel (what-if and counterfactual), message template, weekly chart, intervention log and history
 - [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [ ] Sign-in with three roles

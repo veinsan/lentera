@@ -132,6 +132,22 @@ export type CohortSummary = {
   modules: Record<string, number>;
 };
 
+export type Combo = { levers: string[]; labels: string[]; probability: number };
+
+export type Counterfactual = {
+  applicable: boolean;
+  base: number;
+  reason: "placeholder_activity" | "not_flagged" | "no_combination_below_threshold" | null;
+  best: Combo | null;
+  closest: Combo | null;
+  single: { lever: string; label: string; probability: number }[];
+  threshold: number;
+  archetype: string;
+  playbook: { action: string; label: string; description: string; minutes: number };
+  message: string;
+  levers: { key: string; label: string }[];
+};
+
 export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 // Expected failures (API down, non-2xx) come back as values so pages can render an error state.
@@ -149,3 +165,5 @@ async function get<T>(path: string, token: string): Promise<Result<T>> {
 // token: the signed-in user's Supabase access token (getCurrentUser().accessToken); the API verifies it.
 export const getModelCard = (token: string) => get<ModelCard>("/model", token);
 export const getInsights = (token: string) => get<Insights>("/insights", token);
+export const getCounterfactual = (studentId: number, token: string) =>
+  get<Counterfactual>(`/students/${studentId}/counterfactual`, token);

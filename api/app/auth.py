@@ -43,9 +43,13 @@ def signing_key(token: str):
     return _jwks().get_signing_key_from_jwt(token).key
 
 
+CLOCK_LEEWAY_SECONDS = 30  # a fresh token's iat can be ahead of this host's clock
+
+
 def verify(token: str) -> dict:
     return jwt.decode(token, signing_key(token), algorithms=["ES256"], audience="authenticated",
-                      issuer=f"{_supabase_url()}/auth/v1", options={"require": ["exp", "sub"]})
+                      issuer=f"{_supabase_url()}/auth/v1", options={"require": ["exp", "sub"]},
+                      leeway=CLOCK_LEEWAY_SECONDS)
 
 
 def fetch_profile(user_id: str) -> dict | None:

@@ -14,9 +14,9 @@ OTHER_KEY = ec.generate_private_key(ec.SECP256R1())
 PROFILES = {"u-advisor": {"role": "advisor", "modules": ["m03"]}, "u-coord": {"role": "coordinator", "modules": []}}
 
 
-def token(sub="u-advisor", key=KEY, exp_in=3600, aud="authenticated", iss=f"{URL}/auth/v1"):
+def token(sub="u-advisor", key=KEY, exp_in=3600, aud="authenticated", iss=f"{URL}/auth/v1", iat_offset=0):
     now = int(time.time())
-    return jwt.encode({"sub": sub, "aud": aud, "iss": iss, "iat": now, "exp": now + exp_in}, key, algorithm="ES256")
+    return jwt.encode({"sub": sub, "aud": aud, "iss": iss, "iat": now + iat_offset, "exp": now + exp_in}, key, algorithm="ES256")
 
 
 @pytest.fixture
@@ -53,12 +53,17 @@ def test_missing_or_malformed_token_is_401(client, headers):
 
 @pytest.mark.parametrize("bad", [
     dict(key=OTHER_KEY),            # wrong signature
-    dict(exp_in=-10),               # expired
+    dict(exp_in=-120),              # expired beyond the clock leeway
     dict(aud="anon"),               # wrong audience
     dict(iss="https://evil/auth/v1"),  # wrong issuer
 ])
 def test_rejected_claims_are_401(client, bad):
     assert client.get("/me", headers=bearer(token(**bad))).status_code == 401
+
+
+def test_small_clock_skew_is_tolerated(client):
+    # Supabase can issue a token whose iat is a few seconds ahead of the API host's clock.
+    assert client.get("/me", headers=bearer(token(iat_offset=10))).status_code == 200
 
 
 def test_user_without_profile_is_403(client):

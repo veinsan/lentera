@@ -6,6 +6,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export type UploadResponse<T> = { status: number; body: T | { detail: string } };
 
+export async function postJson<T>(path: string, body: unknown): Promise<UploadResponse<T>> {
+  const { data } = await createClient().auth.getSession();
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${data.session?.access_token ?? ""}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return { status: res.status, body: await res.json() };
+  } catch {
+    return { status: 0, body: { detail: "API model tidak dapat dihubungi." } };
+  }
+}
+
 export async function postFile<T>(path: string, file: File, fields: Record<string, string> = {}): Promise<UploadResponse<T>> {
   const { data } = await createClient().auth.getSession();
   const form = new FormData();

@@ -23,3 +23,13 @@ export const CONTACT_STATUS_LABELS: Record<string, string> = {
   scheduled: "Dijadwalkan",
 };
 export const NOT_CONTACTED = "Belum dihubungi";
+
+export const ISSUE_LABELS: Record<string, string> = {
+  access: "Akses atau teknis",
+  workload: "Beban studi",
+  financial: "Finansial",
+  personal: "Pribadi atau kesehatan",
+  academic: "Pemahaman materi",
+  withdrawn: "Sudah mundur",
+  other: "Lainnya",
+};

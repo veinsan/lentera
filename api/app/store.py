@@ -61,6 +61,12 @@ class SupabaseStore:
             raise
         return cohort_id
 
+    def get_student(self, student_id: int) -> dict | None:
+        r = self.rest.get("/students", params={"id": f"eq.{student_id}", "select": "id,cohort_id,code_module,raw"})
+        r.raise_for_status()
+        rows = r.json()
+        return rows[0] if rows else None
+
     def delete_cohort(self, cohort_id: str, path: str) -> None:
         # Students, predictions, and plans cascade from the cohort row.
         self.rest.delete("/cohorts", params={"id": f"eq.{cohort_id}"})
