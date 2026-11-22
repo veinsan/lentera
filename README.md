@@ -42,3 +42,4 @@ API and model, from the repository root:
 4. Check parity with the DSCO submission with `uv run python scripts/parity_check.py <path-to-dsco-workspace>`.
 5. Rebuild the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
 6. Run the tests with `uv run python -m pytest`.
+7. Start the API with `uv run python -m uvicorn app.main:app --reload` and open `http://localhost:8000/docs`.

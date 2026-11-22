@@ -11,7 +11,7 @@
 | DEC-06 | Confirm with the DSCO committee that a TypeScript frontend is acceptable | Pending | Owner asks the committee. |
 | DEC-07 | Confirm design tokens | Pending | Owner reviews `DESIGN.md`. |
 | DEC-08 | Private leaderboard F1 for the model card | Pending | `dsco/outputs/submissions/ledger.json` has `private_score` null; owner supplies the value and the ledger is updated before the model card is rebuilt. |
-| S-01 | Scaffold `web/` and `api/` | In progress | `api/` has `pyproject.toml`, uv env on Python 3.13, and pytest (3 passed). `web/` waits for DEC-03; FastAPI `/health` is part of API-01. |
+| S-01 | Scaffold `web/` and `api/` | In progress | `api/` has `pyproject.toml`, uv env on Python 3.13, and pytest (3 passed). `/health` runs with `uv run python -m uvicorn app.main:app`. `web/` waits for DEC-03. |
 | S-02 | Supabase project, schema, RLS | Pending | Owner creates the Supabase project and shares the URL and keys through `.env.local`. |
 | ML-01 | Port `clean_rank` preprocessing with fit state | Done | `api/app/pipeline/features.py` output equals DSCO `FoldFeatures("clean_rank").transform(..., "cat")` with `assert_frame_equal` on train (26,086 x 77) and test (6,502 x 77). Single-row scoring equals batch scoring (pytest). |
 | ML-02 | Train final model and write artifacts | Done | `uv run python scripts/train.py` writes `model.cbm`, `fit_state.json`, `model_meta.json` in 46 s; `train.csv` SHA256 matches the DSCO experiment summary. |
@@ -21,7 +21,7 @@
 | ML-06 | Tier, uncertain band, archetype, playbook rules | Done | Archetype counts on `train.csv` equal `PRD.md` section 5.1; pytest covers every branch (12 tests pass in total). |
 | ML-07 | Scenario levers and counterfactual | Done | `recompute_activity` reproduces the dataset aggregates (max error 5e-8); counterfactual for 3,875 flagged test students in 0.57 s; pytest covers lever consistency, submit scope, and the counterfactual contract. |
 | ML-08 | Capacity planner | Done | Plan plus reach curve for the test cohort in 0.09 s; pytest checks capacity, reach equal to summed probabilities, automated assignment, scenario labeling, and override validation (27 tests pass in total). |
-| API-01 | Health, model, insights endpoints | Pending | None |
+| API-01 | Health, model, insights endpoints | Done | `api/app/main.py` loads artifacts once at startup; live server answered `/health`, `/model` (20 KB, 10 ms), `/insights` (6 KB, 3 ms), `/docs` with 200; pytest checks contents and CORS (31 tests pass in total). Sign-in for `/model` and `/insights` and request statistics in `/model` arrive with API-02 and API-07. |
 | API-02 | JWT verification and roles | Pending | None |
 | API-03 | Cohort validation and scoring | Pending | None |
 | API-04 | Simulate and counterfactual endpoints | Pending | None |

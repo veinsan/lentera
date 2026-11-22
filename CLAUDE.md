@@ -88,6 +88,8 @@ data/                      Local only, gitignored
 The planned pages and their steps are in `ARCHITECTURE.md`.
 
 - [x] Model artifacts and parity check (`api/artifacts/`, `api/scripts/parity_check.py`)
+- [x] Reason codes, decision rules, scenarios, counterfactual, and capacity planner in `api/app/` (no endpoints yet)
+- [x] API endpoints `GET /health`, `/model`, `/insights` (no sign-in yet)
 - [ ] Sign-in with three roles
 - [ ] Cohort upload with data quality report
 - [ ] Dashboard
@@ -110,6 +112,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 ## Testing
 
 - API: `uv run python -m pytest` from `api/`.
+- Local API server: `uv run python -m uvicorn app.main:app --reload` from `api/`, then open `http://localhost:8000/docs`. `CORS_ORIGINS` (comma-separated) sets the allowed frontend origins; the default is `http://localhost:3000`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
