@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+  Tokens from DESIGN.md. Change a value here and in DESIGN.md together.
+  shadcn/ui names (--primary, --muted, --accent, ...) map onto DESIGN.md roles; shadcn's --accent is the hover
+  surface, so the DESIGN.md amber accent is --brand-accent (Tailwind: brand-accent).
+*/
+:root {
+  --background: #f6f5f1;
+  --foreground: #16203a;
+  --card: #ffffff;
+  --card-foreground: #16203a;
+  --popover: #ffffff;
+  --popover-foreground: #16203a;
+  --primary: #1e2a5a;
+  --primary-hover: #2c3b78;
+  --primary-foreground: #ffffff;
+  --secondary: #eeede7;
+  --secondary-foreground: #16203a;
+  --muted: #eeede7;
+  --muted-foreground: #5a6378;
+  --accent: #eeede7;
+  --accent-foreground: #16203a;
+  --brand-accent: #f2a93b;
+  --brand-accent-foreground: #16203a;
+  --destructive: #b42318;
+  --success: #2f7d5b;
+  --border: #dddbd3;
+  --input: #dddbd3;
+  --ring: #3b5bdb;
+
+  --risk-low: #dce6ee;
+  --risk-watch: #f6d58e;
+  --risk-high: #ec8a3a;
+  --risk-critical: #a93a1c;
+  --on-risk-light: #16203a;
+  --on-risk-dark: #ffffff;
+  --uncertain: #7a7f8c;
+
+  --chart-1: #a93a1c; /* at risk */
+  --chart-2: #3e6e9e; /* not at risk */
+  --chart-3: #9aa1ae; /* neutral */
+
+  --sidebar: #1e2a5a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #f2a93b;
+  --sidebar-primary-foreground: #16203a;
+  --sidebar-accent: #f2a93b;
+  --sidebar-accent-foreground: #16203a;
+  --sidebar-border: rgb(255 255 255 / 0.12);
+  --sidebar-ring: #3b5bdb;
+
+  --shadow-overlay: 0 8px 24px rgb(22 32 58 / 0.12);
+}
+
+@theme inline {
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-risk-low: var(--risk-low);
+  --color-risk-watch: var(--risk-watch);
+  --color-risk-high: var(--risk-high);
+  --color-risk-critical: var(--risk-critical);
+  --color-on-risk-light: var(--on-risk-light);
+  --color-on-risk-dark: var(--on-risk-dark);
+  --color-uncertain: var(--uncertain);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-overlay: var(--shadow-overlay);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

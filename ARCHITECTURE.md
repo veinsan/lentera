@@ -6,8 +6,8 @@ Steps marked Done in `TODO.md` are implemented; everything else below is planned
 
 | Area | Choice | Status |
 | --- | --- | --- |
-| Frontend | Next.js (App Router, TypeScript), Tailwind CSS, shadcn/ui, Recharts | Agreed. Exact Next.js version is recorded in `CLAUDE.md` after scaffolding. |
-| Frontend package manager | pnpm | Proposal awaiting the owner's confirmation |
+| Frontend | Next.js 16.4.6 (App Router, TypeScript, Cache Components), Tailwind CSS 4, shadcn/ui on Base UI, Recharts | Agreed; versions in `CLAUDE.md` |
+| Frontend package manager | pnpm | Agreed |
 | Backend | FastAPI on Python 3.13 | Agreed. 3.13 because Smart App Control blocks the uv-managed 3.12 on the owner's machine. |
 | ML libraries | catboost 1.2.10, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1. SHAP values come from CatBoost itself. | Done. Matches `dsco/outputs/audit/requirements-lock.txt` except pandas 3.1.1; parity check passed. |
 | Python package manager | uv | In use for `api/` |
@@ -116,7 +116,7 @@ data/                 local only, gitignored: train.csv, test.csv, sample_submis
 
 | ID | Step | Depends on | Completion criteria |
 | --- | --- | --- | --- |
-| S-01 | Scaffold `web/` with Next.js, Tailwind, shadcn/ui and `api/` with FastAPI and uv | None | `pnpm dev` serves the default page; `uv run fastapi dev` serves `GET /health`. |
+| S-01 | Scaffold `web/` with Next.js, Tailwind, shadcn/ui and `api/` with FastAPI and uv | None | `pnpm dev` serves the app; `uv run python -m uvicorn app.main:app` serves `GET /health`. |
 | S-02 | Create the Supabase project and apply the schema migration with RLS | None | All tables exist; an advisor test user can read only students in their modules. |
 | ML-01 | Port `clean_rank` preprocessing into `api/app/pipeline/` with saved fit state | S-01 | Feature frames for `train.csv` and `test.csv` match the DSCO `FoldFeatures(mode="clean_rank")` output column for column. |
 | ML-02 | Train the final model and write `model.cbm` and `fit_state.json` | ML-01 | `api/scripts/train.py` finishes and the artifacts load in a fresh process. |

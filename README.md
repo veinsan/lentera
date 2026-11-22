@@ -32,7 +32,9 @@ A screenshot or demo is not yet available.
 
 ## Installation and Setup
 
-The competition data files go in `data/` locally and are not committed. Frontend setup is pending until step S-01 in `ARCHITECTURE.md` is done.
+The competition data files go in `data/` locally and are not committed.
+
+Frontend, from `web/`: install Node.js and pnpm, run `pnpm install`, then `pnpm dev` and open `http://localhost:3000`.
 
 API and model, from the repository root:
 

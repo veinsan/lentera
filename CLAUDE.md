@@ -6,12 +6,15 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 
 | Tool | Version or role |
 | --- | --- |
-| Next.js | App Router, TypeScript strict mode. Pending: record the exact version after S-01. |
-| Tailwind CSS | Styling, with tokens from `DESIGN.md` as CSS variables |
-| shadcn/ui | Base components, copied into `web/components/ui/` |
-| Recharts | Charts |
-| `@supabase/ssr`, `@supabase/supabase-js` | Auth and database access from the frontend |
-| pnpm | Frontend package manager (pending owner confirmation) |
+| Next.js | 16.4.6, App Router, Turbopack, Cache Components and Partial Prefetching on (`web/next.config.ts`) |
+| React | 19.3.0 |
+| TypeScript | 5.9, strict mode |
+| Tailwind CSS | 4.3.3, configured in CSS (`web/app/globals.css`), no `tailwind.config` file |
+| shadcn/ui | 4.23, style `base-nova` on Base UI (`@base-ui/react`), copied into `web/components/ui/`; class merging through the `cn` package (`web/lib/utils.ts`) |
+| lucide-react | Icons |
+| Recharts | Charts (planned, added with the first chart page) |
+| `@supabase/ssr`, `@supabase/supabase-js` | Auth and database access from the frontend (planned, added in W-02) |
+| pnpm | 12.18, frontend package manager |
 | Python | 3.13 (python.org build; see Local Environment) |
 | FastAPI | API service |
 | catboost | 1.2.10 |
@@ -28,7 +31,7 @@ The ML library versions match `dsco/outputs/audit/requirements-lock.txt`, except
 
 ## Design System
 
-`DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables, and `web/tailwind.config.ts` (or the Tailwind theme block, depending on the scaffolded Tailwind version) maps them to utility names. Change a token in all three places together.
+`DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables in `:root` and maps them to Tailwind utility names in the `@theme inline` block. Change a token in `DESIGN.md` and `globals.css` together. The shadcn/ui variable names map onto `DESIGN.md` roles; shadcn's `accent` is the hover surface, so the `DESIGN.md` amber accent is `brand-accent` in code. Fonts load through `next/font/google` in `web/app/layout.tsx`.
 
 ## Project Structure
 
@@ -46,9 +49,12 @@ web/
       model/               Model and monitoring
   components/
     ui/                    shadcn/ui components
+    layout/                Sidebar, nav links, page header
     charts/                Recharts wrappers that apply chart tokens
-    domain/                Tier badge, archetype chip, scenario panel, reason list
+    domain/                Empty state, tier badge, archetype chip, scenario panel, reason list
   lib/
+    nav.ts                 Sidebar items
+    utils.ts               cn() class merging
     supabase/              Browser and server Supabase clients
     api.ts                 Typed client for the FastAPI service
     format.ts              Number and probability formatting
@@ -73,6 +79,8 @@ data/                      Local only, gitignored
 ## Code Conventions
 
 - TypeScript strict mode, no `any`. Functional components with typed props.
+- Next.js 16 differs from older versions. Before writing Next.js code, read the relevant guide in `web/node_modules/next/dist/docs/` (`web/AGENTS.md`, which `next dev` re-adds; commit it).
+- Cache Components is on: wrap uncached data reads, `cookies()`, `headers()`, `searchParams`, and awaited dynamic `params` in `<Suspense>`. Client components that call `usePathname` in a shared layout also sit inside `<Suspense>` (see `web/components/layout/sidebar.tsx`).
 - Use the `@/` import alias for `web/`.
 - Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only.
 - Format probabilities and counts through `web/lib/format.ts` so every page shows them the same way.
@@ -90,6 +98,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Model artifacts and parity check (`api/artifacts/`, `api/scripts/parity_check.py`)
 - [x] Reason codes, decision rules, scenarios, counterfactual, and capacity planner in `api/app/` (no endpoints yet)
 - [x] API endpoints `GET /health`, `/model`, `/insights` (no sign-in yet)
+- [x] App shell: sidebar navigation, page headers, and empty states for every page; login placeholder
 - [ ] Sign-in with three roles
 - [ ] Cohort upload with data quality report
 - [ ] Dashboard
@@ -116,7 +125,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
-Pending: confirm the frontend commands after S-01.
+Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`.
 
 ## Local Environment
 
@@ -124,7 +133,7 @@ Windows Smart App Control on the owner's machine blocks unsigned executables and
 
 ## Build
 
-- Frontend: `pnpm build` from `web/` compiles with zero TypeScript errors.
+- Frontend: `pnpm build` and `pnpm lint` from `web/`. A successful build reports zero TypeScript errors, prerenders the static pages, and lists `/mahasiswa/[id]` as Partial Prerender.
 - API: `docker build -t lentera-api api/` succeeds and the container answers `GET /health`.
 
 ## Git Rules

@@ -145,7 +145,7 @@ All token values are proposals awaiting the owner's confirmation.
 ## Colors
 
 - `{colors.primary}` for the sidebar, primary buttons, and links. `{colors.primary-hover}` for their hover state.
-- `{colors.accent}` for the active sidebar item, the current step in a flow, and the single most important number on a page. Never for risk.
+- `{colors.accent}` (`brand-accent` in code, because shadcn/ui uses `accent` for hover surfaces) for the active sidebar item, the current step in a flow, and the single most important number on a page. Never for risk.
 - `{colors.background}` for the page, `{colors.surface}` for cards and tables, `{colors.surface-muted}` for table headers, chips, and scenario panels.
 - `{colors.ink}` for body text, `{colors.ink-muted}` for secondary text and axis labels, `{colors.border}` for card and table borders.
 - The four risk tiers use the sequential scale `{colors.risk-low}`, `{colors.risk-watch}`, `{colors.risk-high}`, `{colors.risk-critical}`. The scale runs from pale blue-gray through yellow and orange to dark red, so lightness alone separates the tiers for color-blind users. Tier badges always show the tier name as text as well.
