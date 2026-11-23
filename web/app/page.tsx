@@ -5,6 +5,7 @@ import { ArrowDown, ArrowRight, KeyRound, Lock, ScanEye, UserRoundCheck } from "
 import { LanternMark, Wordmark } from "@/components/brand/lantern-mark";
 import { DemoSignIn } from "@/components/domain/demo-sign-in";
 import { KaggleScores } from "@/components/domain/kaggle-scores";
+import { LandingMenu } from "@/components/layout/landing-menu";
 import { HeroSky } from "@/components/sky/sky-stage";
 import { LinkButton } from "@/components/ui/link-button";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
@@ -19,6 +20,11 @@ export const metadata: Metadata = {
 };
 
 const { model, cohort, quality, plan, sky } = landing;
+const SECTIONS = [
+  ["#cara-kerja", "Cara kerja"],
+  ["#keamanan", "Keamanan"],
+  ["#bukti", "Bukti model"],
+] as const;
 const TIERS = [
   ["critical", "Kritis", "bg-tier-critical"],
   ["high", "Tinggi", "bg-tier-high"],
@@ -49,11 +55,23 @@ export default function Landing() {
       </main>
       <Close />
       <footer className="bg-night px-6 pb-10 text-sm text-night-muted">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-night-line pt-6">
-          <span className="inline-flex items-center gap-2 text-night-ink">
-            <LanternMark className="h-5" star="var(--starlight)" /> Lentera, untuk babak final DSCO 2026
-          </span>
-          <span>Data dari {cohort.name} dengan ID mahasiswa anonim dari kompetisi.</span>
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 border-t border-night-line pt-6 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-2">
+            <Link href="/" className="inline-flex items-center gap-2 self-start rounded-lg text-night-ink">
+              <LanternMark className="h-5" star="var(--starlight)" /> Lentera, untuk babak final DSCO 2026
+            </Link>
+            <span>Data dari {cohort.name} dengan ID mahasiswa anonim dari kompetisi.</span>
+          </div>
+          <nav aria-label="Navigasi footer" className="flex flex-wrap gap-x-1 gap-y-1">
+            {SECTIONS.map(([href, label]) => (
+              <a key={href} href={href} className="inline-flex min-h-11 items-center rounded-full px-3 transition-colors hover:bg-white/10 hover:text-night-ink">
+                {label}
+              </a>
+            ))}
+            <Link href="/login" className="inline-flex min-h-11 items-center rounded-full px-3 font-semibold text-night-ink transition-colors hover:bg-white/10">
+              Masuk ke demo
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>
@@ -67,23 +85,22 @@ function LandingNav() {
         aria-label="Navigasi halaman"
         className="glass-night mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 rounded-full !bg-[rgb(8_22_52/0.92)] pr-2 pl-5 text-night-ink"
       >
-        <Link href="/" aria-label="Lentera" className="rounded-lg">
+        <Link href="/" aria-label="Lentera" className="inline-flex min-h-11 items-center rounded-lg">
           <Wordmark star="var(--starlight)" />
         </Link>
         <div className="hidden items-center gap-1 text-sm text-night-ink md:flex">
-          {[
-            ["#cara-kerja", "Cara kerja"],
-            ["#keamanan", "Keamanan"],
-            ["#bukti", "Bukti model"],
-          ].map(([href, label]) => (
+          {SECTIONS.map(([href, label]) => (
             <a key={href} href={href} className="rounded-full px-3.5 py-2 transition-colors hover:bg-white/10 hover:text-night-ink">
               {label}
             </a>
           ))}
         </div>
-        <LinkButton href="/login" className="glass-lens bg-white font-semibold text-night hover:bg-white/90">
-          Masuk ke demo
-        </LinkButton>
+        <div className="flex items-center gap-1">
+          <LinkButton href="/login" className="glass-lens bg-white font-semibold text-night hover:bg-white/90">
+            Masuk ke demo
+          </LinkButton>
+          <LandingMenu links={SECTIONS} />
+        </div>
       </nav>
     </header>
   );
@@ -396,7 +413,7 @@ function Proof() {
           [
             "F1 di kohort uji, dicek dengan hasil akhir",
             fmtNum(test.f1, 4),
-            `${fmtInt(test.n)} mahasiswa, presisi ${fmtNum(test.precision, 3)} dan recall ${fmtNum(test.recall, 3)}, dengan ambang yang dipilih sebelum label dibuka`,
+            `${fmtInt(test.n)} mahasiswa, presisi ${fmtNum(test.precision, 3)} dan recall ${fmtNum(test.recall, 3)}, dengan ambang yang ditetapkan sebelum status akhir dipakai`,
           ],
           [
             "Rencana kontak, dicek dengan hasil akhir",
@@ -419,7 +436,7 @@ function Proof() {
           Angka yang bisa dicek ulang.
         </h2>
         <p className="mt-4 text-[17px] leading-relaxed text-ink-2">
-          Validasi dan kalibrasi dihitung ulang dari pipeline DSCO, hasil di kohort uji dicek dengan label asli, dan skor Kaggle diambil dari leaderboard kompetisi. Model card lengkap,
+          Validasi dan kalibrasi dihitung ulang dari pipeline DSCO, hasil di kohort uji dicek dengan status akhir mahasiswa, dan skor Kaggle diambil dari leaderboard kompetisi. Model card lengkap,
           fairness per kelompok, dan drift ada di halaman Model setelah masuk.
         </p>
       </div>

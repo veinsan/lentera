@@ -106,7 +106,11 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
               <span className="text-ink-3">pilih lever di atas</span>
             )}
           </div>
-          {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+          {error && (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {error}
+            </p>
+          )}
         </>
       )}
     </div>

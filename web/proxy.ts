@@ -1,8 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Routes anyone may open: the landing page, sign-in, and the presenter's demo links (which sign in themselves).
-const PUBLIC = (path: string) => path === "/" || path.startsWith("/login") || path.startsWith("/demo/");
+// App routes that need a session. Anything else (landing, sign-in, demo links, unknown paths) passes through, so an
+// unknown URL shows the 404 page instead of the sign-in page.
+const APP_ROUTES = ["/dashboard", "/prioritas", "/rencana", "/insight", "/model", "/unggah", "/mahasiswa"];
+const PROTECTED = (path: string) => APP_ROUTES.some((r) => path === r || path.startsWith(`${r}/`));
 
 /**
  * Refreshes the Supabase session cookies and makes the optimistic sign-in redirect.
@@ -27,7 +29,7 @@ export async function proxy(request: NextRequest) {
   const signedIn = Boolean(data?.claims);
   const path = request.nextUrl.pathname;
 
-  if (!signedIn && !PUBLIC(path)) return redirectWithCookies(request, "/login", response);
+  if (!signedIn && PROTECTED(path)) return redirectWithCookies(request, "/login", response);
   if (signedIn && path.startsWith("/login")) return redirectWithCookies(request, "/dashboard", response);
   return response;
 }

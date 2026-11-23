@@ -18,7 +18,10 @@ import { cn } from "@/lib/utils";
 import { parseWorklistParams, toQuery, type WorklistFilters } from "@/lib/worklist-params";
 import { TIER_LABELS } from "@/components/domain/tier-badge";
 
-export const metadata: Metadata = { title: "Daftar prioritas" };
+export const metadata: Metadata = {
+  title: "Daftar prioritas",
+  description: "Mahasiswa ter-flag diurutkan dari probabilitas tertinggi, dengan alasan utama, tindakan playbook, dan status kontak.",
+};
 
 const ALL_MODULES = ["m01", "m02", "m03", "m04", "m05", "m06", "m07"];
 
@@ -155,7 +158,7 @@ async function Worklist({ searchParams }: Pick<PageProps<"/prioritas">, "searchP
           />
         )}
         {pages > 1 && (
-          <nav aria-label="Halaman daftar" className="flex items-center justify-between gap-3 text-sm">
+          <nav aria-label="Halaman daftar" className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <span className="text-ink-3">
               Halaman <b className="font-semibold text-ink">{page}</b> dari {pages}
             </span>

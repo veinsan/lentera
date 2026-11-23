@@ -22,7 +22,7 @@ export function MobileNav({ allowed, role, who }: { allowed: string[]; role: Rol
   return (
     <>
       <header className="glass sticky top-2 z-30 mx-3 mt-2 flex h-14 items-center justify-between rounded-[22px] px-4 lg:hidden">
-        <Link href="/" aria-label="Lentera, ke halaman depan" className="text-ink">
+        <Link href="/" aria-label="Lentera, ke halaman depan" className="inline-flex min-h-11 items-center text-ink">
           <Wordmark star="var(--blue)" />
         </Link>
         <button

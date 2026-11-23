@@ -21,7 +21,10 @@ import { fmtInt, fmtModule, fmtPct, fmtProb } from "@/lib/format";
 import { ACTION_LABELS } from "@/lib/labels";
 import { NIGHT_TIER_COLORS, skyFrom } from "@/lib/sky";
 
-export const metadata: Metadata = { title: "X-Ray kohort" };
+export const metadata: Metadata = {
+  title: "X-Ray kohort",
+  description: "Sebaran risiko kohort minggu ke-4 per tier, archetype, dan modul, dengan jumlah mahasiswa yang perlu dihubungi lebih dulu.",
+};
 
 const TIER_STYLE: Record<string, Pick<Segment, "className" | "textClassName">> = {
   // Label ink per fill: white only where it clears 4.5:1 (Kritis); ink elsewhere.

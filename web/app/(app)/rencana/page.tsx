@@ -12,7 +12,10 @@ import { getLatestCohort } from "@/lib/data";
 import { fmtInt, fmtPct } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Rencana intervensi" };
+export const metadata: Metadata = {
+  title: "Rencana intervensi",
+  description: "Bagi jam konselor ke tindakan playbook dan lihat berapa mahasiswa berisiko yang terjangkau.",
+};
 
 export default function Page() {
   return (

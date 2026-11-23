@@ -1,8 +1,9 @@
 """Build api/artifacts/test_evaluation.json: the served model against the real outcomes of the DSCO test cohort.
 
-Run from api/: uv run python scripts/build_test_evaluation.py [path/to/ground_truth.csv]
-The default label file is data/ground_truth.csv (local only, like the rest of data/). The threshold was fixed
-without these labels (expected-F1 plug-in rule), so this is an independent evaluation: never tune on it.
+Run from api/: uv run python scripts/build_test_evaluation.py [path/to/test_outcomes.csv]
+The default outcome file is data/test_outcomes.csv (id, at_risk; local only, like the rest of data/). The threshold
+was fixed before these outcomes were used (expected-F1 plug-in rule), so this is an independent evaluation: never
+tune, retrain, or pick features on it.
 Only aggregates are written; no per-student label leaves data/. Rerun build_landing.py afterwards.
 """
 import json
@@ -23,7 +24,7 @@ FAIRNESS = ["gender", "disability", "age_band", "imd_band", "highest_education"]
 
 
 def main() -> None:
-    labels_path = Path(sys.argv[1]) if len(sys.argv) > 1 else DATA / "ground_truth.csv"
+    labels_path = Path(sys.argv[1]) if len(sys.argv) > 1 else DATA / "test_outcomes.csv"
     labels = evaluation.parse_labels(labels_path.read_bytes())
 
     report, typed = quality.validate(quality.read_csv((DATA / "test.csv").read_bytes()), quality.load_schema())

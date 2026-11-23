@@ -253,7 +253,7 @@ function AdvisorBoard({ plan, revision }: { plan: PlanResult; revision: number }
           Tanpa jam konselor, hanya {fmtInt(s.automated_contacts)} pesan otomatis yang terkirim. Tambah konselor untuk mengisi papan.
         </p>
       ) : (
-        <div className="grid auto-cols-[minmax(212px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(212px,1fr))] gap-3">
           {plan.board.columns.map((c) => (
             <AdvisorColumn key={`${revision}-${c.advisor}`} column={c} />
           ))}

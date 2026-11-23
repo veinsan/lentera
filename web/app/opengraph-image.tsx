@@ -23,9 +23,9 @@ export default async function Image() {
             <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, maxWidth: 900 }}>
               Dari prediksi minggu ke-4 ke rencana kontak setiap konselor.
             </div>
+            {/* One text node: Satori needs display flex on a div with several children. */}
             <div style={{ fontSize: 28, color: "#a9b8d9" }}>
-              {fmtInt(cohort.flagged)} dari {fmtInt(cohort.scored)} mahasiswa ter-flag, {plan.advisors} konselor menjangkau {fmtInt(plan.reached)} yang
-              berisiko
+              {`${fmtInt(cohort.flagged)} dari ${fmtInt(cohort.scored)} mahasiswa ter-flag, ${plan.advisors} konselor menjangkau ${fmtInt(plan.reached)} yang berisiko`}
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     app.state.contexts = {}  # cohort_id -> ranking context for what-if; the last few cohorts only
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
-    # Built from the DSCO test labels by scripts/build_test_evaluation.py; absent until the labels are available.
+    # Test cohort outcomes, built by scripts/build_test_evaluation.py; absent until that script has run.
     test_eval = ARTIFACTS / "test_evaluation.json"
     app.state.test_evaluation = json.loads(test_eval.read_text(encoding="utf-8")) if test_eval.exists() else None
     app.state.drift_reference = drift.load_reference(ARTIFACTS / "drift_reference.json")

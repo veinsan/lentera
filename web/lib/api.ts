@@ -175,7 +175,7 @@ export type ModelCard = {
     top_features: Record<string, number>;
   };
   evaluation_notes: Record<string, string>;
-  /** The served model against the DSCO test cohort's real outcomes; null until the labels are available. */
+  /** The served model against the DSCO test cohort's final outcomes; null until build_test_evaluation.py has run. */
   test_evaluation: OutcomeReport | null;
 };
 

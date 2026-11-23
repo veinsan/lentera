@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "@heroui/react";
 import { Check, LoaderCircle, LogOut } from "lucide-react";
 import { DEMO_ROLES } from "@/lib/demo";
 import { signInAs, signOut } from "@/lib/demo-actions";
@@ -22,7 +23,12 @@ export function RoleSwitch({ current }: { current: Role }) {
               type="button"
               disabled={on || pending}
               aria-pressed={on}
-              onClick={() => start(async () => void (await signInAs(r.key)))}
+              onClick={() =>
+                start(async () => {
+                  const res = await signInAs(r.key); // redirects on success
+                  if (res.error) toast.danger(res.error);
+                })
+              }
               className={cn(
                 "flex h-9 items-center gap-2 rounded-xl px-2.5 text-left text-[13px] transition-colors duration-200",
                 on ? "bg-white font-semibold text-ink shadow-[0_1px_3px_rgb(11_27_58/0.12)]" : "text-ink-2 hover:bg-white/60 hover:text-ink",

@@ -88,7 +88,7 @@ api/
     scenarios.py           Levers, what-if, counterfactual
     planner.py             Capacity planner
     drift.py               PSI against the training data
-    evaluation.py          Predictions against real outcomes (test labels, uploaded outcome files)
+    evaluation.py          Predictions against real outcomes (test cohort outcomes, uploaded outcome files)
     monitoring.py          Request statistics from request_log
   artifacts/               Model and generated JSON, committed
   scripts/                 Offline training and artifact builders
@@ -138,7 +138,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [x] Drift report stored per scored cohort (`api/app/drift.py`) and request logging middleware with `GET /monitoring/requests`
 - [x] Deployment: API on Azure Container Apps through GitHub Actions, web on Vercel (see Production)
-- [x] Evaluation against real outcomes: the DSCO test labels (`scripts/build_test_evaluation.py`, Kohort uji tab, landing proof rows) and outcome upload per cohort (`POST /cohorts/{id}/outcomes`, Hasil akhir tab); only aggregates are stored
+- [x] Evaluation against real outcomes: the DSCO test cohort's final outcomes (`scripts/build_test_evaluation.py`, Kohort uji tab, landing proof rows) and outcome upload per cohort (`POST /cohorts/{id}/outcomes`, Hasil akhir tab); only aggregates are stored
 - [x] Star atlas redesign: public landing page (cohort sky, four stages, safety, proof, role entry), liquid glass shell, X-Ray dashboard with the 3D cohort sky, student side sheet over the worklist, command palette, HeroUI kit; landing numbers from `api/scripts/build_landing.py`
 
 ## Do Not
@@ -159,7 +159,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Model training: `uv run --frozen --with torch==2.15.0 python scripts/train.py` from `api/` (about 2 hours on CPU, mostly the DAE), then `uv run --frozen python scripts/train.py --finalize` for the threshold. Keep `--frozen`: `uv run` with resolver options such as `--exclude-newer` re-locks the project and downgrades packages.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role. The owner works in Orca: use its embedded browser through the `orca` CLI (`orca tab create`, `orca screenshot --page <id>`), not Chrome. Start dev servers outside the Claude Code sandbox, or the browser cannot reach them.
-- Test cohort evaluation: `uv run python scripts/build_test_evaluation.py` from `api/` reads `data/ground_truth.csv` and rewrites `api/artifacts/test_evaluation.json`; rerun `build_landing.py` after it. The threshold was chosen without these labels: never tune, retrain, or pick features on them.
+- Test cohort evaluation: `uv run python scripts/build_test_evaluation.py` from `api/` reads `data/test_outcomes.csv` and rewrites `api/artifacts/test_evaluation.json`; rerun `build_landing.py` after it. The threshold was chosen before these outcomes were used: never tune, retrain, or pick features on them.
 - Landing data: `uv run python scripts/build_landing.py` from `api/` rewrites `web/lib/generated/landing.json` from `data/test.csv`, the model, the planner, and `artifacts/model_card.json`. Rerun it after any artifact change. Kaggle scores live in `api/artifacts/kaggle_submissions.csv` (Kaggle CLI export) and reach the model card through `scripts/build_model_card.py`.
 
 Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Port 3000 is often taken by another project on the owner's machine; then run `pnpm dev --port 3001` and start the API with `CORS_ORIGINS=http://localhost:3000,http://localhost:3001`. The web defaults to `http://127.0.0.1:8000` for the API, because `localhost` on Windows tries IPv6 first and adds about 2 s per call. Pages that read the API need the local API on port 8000, or `API_URL` (server) and `NEXT_PUBLIC_API_URL` (browser uploads) in `web/.env.local`.

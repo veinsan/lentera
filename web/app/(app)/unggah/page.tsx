@@ -10,7 +10,10 @@ import { getLatestCohort } from "@/lib/data";
 import { fmtInt } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Unggah kohort" };
+export const metadata: Metadata = {
+  title: "Unggah kohort",
+  description: "Periksa kualitas CSV minggu ke-4, nilai kohort, dan unggah hasil akhir semester untuk mengecek prediksi.",
+};
 
 export default function Page() {
   return (

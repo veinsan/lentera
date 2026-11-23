@@ -21,7 +21,10 @@ import { getLatestOutcome } from "@/lib/data";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Model & monitoring" };
+export const metadata: Metadata = {
+  title: "Model & monitoring",
+  description: "Validasi, kalibrasi, fairness, drift data, dan kesehatan API dari model risiko Lentera.",
+};
 
 export default function Page() {
   return (
@@ -201,8 +204,8 @@ async function ModelContent() {
             content: (
               <div className="flex flex-col gap-5">
                 <p className="max-w-[75ch] text-sm leading-relaxed text-ink-2">
-                  Model yang dilayani dinilai pada {fmtInt(card.test_evaluation.metrics.n)} mahasiswa kohort uji DSCO dengan label hasil akhir
-                  yang asli. Ambang dipilih tanpa label ini, jadi angkanya evaluasi independen. Model ini retrain CPU dari notebook final,
+                  Model yang dilayani dibandingkan dengan status akhir {fmtInt(card.test_evaluation.metrics.n)} mahasiswa kohort uji DSCO.
+                  Ambang ditetapkan sebelum status akhir ini dipakai, jadi angkanya evaluasi independen. Model ini retrain CPU dari notebook final,
                   sehingga F1-nya bisa sedikit berbeda dari skor Kaggle.
                 </p>
                 <OutcomeEvaluation report={card.test_evaluation} />
@@ -276,7 +279,7 @@ async function LatestOutcome({ role }: { role: Role }) {
   return (
     <div className="flex flex-col gap-5">
       <p className="max-w-[75ch] text-sm leading-relaxed text-ink-2">
-        Prediksi {latest.name} dibandingkan dengan hasil akhir yang diunggah{uploaded && <> pada {uploaded}</>}. Label per mahasiswa tidak disimpan,
+        Prediksi {latest.name} dibandingkan dengan hasil akhir yang diunggah{uploaded && <> pada {uploaded}</>}. Status akhir per mahasiswa tidak disimpan,
         hanya angka ringkasnya.
       </p>
       <OutcomeEvaluation report={latest.outcome} />

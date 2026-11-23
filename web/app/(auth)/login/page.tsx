@@ -7,7 +7,10 @@ import { DemoSignIn } from "@/components/domain/demo-sign-in";
 import { fmtInt } from "@/lib/format";
 import { landing } from "@/lib/landing";
 
-export const metadata: Metadata = { title: "Masuk" };
+export const metadata: Metadata = {
+  title: "Masuk",
+  description: "Masuk ke Lentera sebagai koordinator, konselor, atau admin demo dengan satu klik.",
+};
 
 export default function LoginPage() {
   const { cohort, plan } = landing;
@@ -17,7 +20,7 @@ export default function LoginPage() {
       <div className="mx-auto grid w-full max-w-6xl content-between gap-12 px-6 py-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:content-center lg:gap-20 lg:px-10">
         <div className="flex flex-col gap-10 lg:gap-16">
           <div className="flex items-center justify-between gap-4">
-            <Link href="/" aria-label="Lentera, ke halaman depan" className="rounded-lg">
+            <Link href="/" aria-label="Lentera, ke halaman depan" className="inline-flex min-h-11 items-center rounded-lg">
               <Wordmark star="var(--starlight)" />
             </Link>
             <Link

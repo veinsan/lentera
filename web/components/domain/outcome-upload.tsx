@@ -68,7 +68,7 @@ export function OutcomeUpload({ cohortId, cohortName }: { cohortId: string; coho
         </label>
         <div className="flex flex-col justify-end gap-3">
           <p className="text-sm text-ink-3">
-            Hasil akhir dicocokkan dengan prediksi <span className="font-semibold text-ink">{cohortName}</span>. Label per mahasiswa tidak disimpan.
+            Hasil akhir dicocokkan dengan prediksi <span className="font-semibold text-ink">{cohortName}</span>. Status akhir per mahasiswa tidak disimpan.
           </p>
           <Button onPress={upload} isDisabled={!file} isPending={pending}>
             {pending ? "Mengecek prediksi..." : "Cek prediksi dengan hasil akhir"}
@@ -85,7 +85,7 @@ export function OutcomeUpload({ cohortId, cohortName }: { cohortId: string; coho
       {report && (
         <div className="flex flex-col gap-5">
           <p className="text-sm text-ink-2">
-            Sebanyak {fmtInt(report.coverage.matched)} dari {fmtInt(report.coverage.cohort)} mahasiswa punya label.
+            Sebanyak {fmtInt(report.coverage.matched)} dari {fmtInt(report.coverage.cohort)} mahasiswa punya status akhir.
             {report.coverage.unknown_ids > 0 && <> Ada {fmtInt(report.coverage.unknown_ids)} id di file yang tidak ada di kohort ini.</>}
           </p>
           <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">

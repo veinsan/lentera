@@ -4,7 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import { StudentProfileView } from "@/components/domain/student-profile";
 import { LinkButton } from "@/components/ui/link-button";
 
-export const metadata: Metadata = { title: "Profil mahasiswa" };
+export const metadata: Metadata = {
+  title: "Profil mahasiswa",
+  description: "Alasan risiko seorang mahasiswa, skenario perubahan perilaku, template pesan, dan riwayat kontak konselor.",
+};
 
 /** The full page for a direct link or a refresh; from the worklist the same view opens as a side panel. */
 export default function Page({ params }: PageProps<"/mahasiswa/[id]">) {

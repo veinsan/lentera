@@ -12,7 +12,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Insight course" };
+export const metadata: Metadata = {
+  title: "Insight course",
+  description: "Modul dan presentation dengan risiko tertinggi, keandalan prediksi per modul, dan rekomendasi untuk koordinator course.",
+};
 
 export default function Page() {
   return (

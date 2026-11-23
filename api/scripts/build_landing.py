@@ -27,7 +27,7 @@ TIER_ORDER = ["low", "watch", "high", "critical"]
 
 def main() -> None:
     card = json.loads((ROOT / "artifacts/model_card.json").read_text(encoding="utf-8"))
-    test_eval_path = ROOT / "artifacts/test_evaluation.json"  # scripts/build_test_evaluation.py, from the real labels
+    test_eval_path = ROOT / "artifacts/test_evaluation.json"  # scripts/build_test_evaluation.py
     test_eval = json.loads(test_eval_path.read_text(encoding="utf-8")) if test_eval_path.exists() else None
     report, typed = quality.validate(quality.read_csv((DATA / "test.csv").read_bytes()), quality.load_schema())
     assert report["can_score"], report["status"]
@@ -51,7 +51,7 @@ def main() -> None:
             archetypes=len(rules.ARCHETYPES),
             kaggle_public=lb["selected"]["public_f1"], kaggle_private=lb["selected"]["private_f1"],
         ),
-        # The served model against the test cohort's real outcomes; null until the labels are available.
+        # The served model against the test cohort's final outcomes; null until build_test_evaluation.py has run.
         test=test_eval and dict(
             n=test_eval["metrics"]["n"], f1=test_eval["metrics"]["f1"], precision=test_eval["metrics"]["precision"],
             recall=test_eval["metrics"]["recall"], ece=test_eval["calibration"]["ece"],
