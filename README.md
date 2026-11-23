@@ -8,7 +8,7 @@ At the week 4 cutoff, an institution knows which students the model flags but no
 
 ## Key Features
 
-The model service runs the DSCO final model and every feature below is implemented. See `PRD.md` for scope and `TODO.md` for status.
+The model service runs the DSCO final model and every feature below is implemented. See `docs/PRD.md` for scope and `docs/TODO.md` for status.
 
 - Upload a week 4 cohort CSV and review a data quality report before scoring.
 - See the cohort's risk tiers, archetypes, and module by presentation risk heatmap.
@@ -18,10 +18,12 @@ The model service runs the DSCO final model and every feature below is implement
 - Log interventions and follow-ups.
 - Read course design insights per module.
 - Read the model card, fairness breakdown, drift report, and API monitoring.
+- Check the served model against the final outcomes of the DSCO test cohort.
+- After the semester, upload a cohort's final outcomes to estimate whether advisor contacts lowered failure, then check the model's accuracy.
 
-## Screenshot or Demo
+## Live Demo
 
-A screenshot or demo is not yet available.
+Open `https://lentera-khaki.vercel.app` and pick a demo role on the sign-in page; no password is needed. The coordinator sees every module, the advisor sees M03 and M06 only (row level security), and the admin sees everything including API health. Presenter links: `/demo/koordinator`, `/demo/konselor`, `/demo/admin`.
 
 ## Tech Stack and Rationale
 
@@ -30,9 +32,15 @@ A screenshot or demo is not yet available.
 - **LightGBM and a denoising-autoencoder MLP** form the DSCO final model (5-fold CV F1 0.7758; Kaggle F1 0.80150 public, 0.79363 private). The API runs the MLP half in numpy, so the image needs no torch.
 - **Supabase** for authentication, the Postgres database with row level security, and file storage.
 
+## Documentation
+
+The project documents live in `docs/`: `PRD.md` (scope and decision rules), `ARCHITECTURE.md` (system and step plan), `DESIGN.md` (design system), `PRODUCT.md` (product voice), `WORKFLOW.md` (working rules), and `TODO.md` (status with verification evidence). `CLAUDE.md` holds the coding rules for agents and points to them.
+
 ## Installation and Setup
 
-The competition data files go in `data/` locally and are not committed.
+The competition data files go in `data/` locally and are not committed. Copy `api/.env.example` to `api/.env` and `web/.env.example` to `web/.env.local`, then fill in the values; both templates list every variable with its purpose.
+
+Database: create a Supabase project, run the files in `supabase/migrations/` in order in the SQL Editor, turn off new user sign-ups in Authentication, and create the demo accounts with `uv run --env-file .env python scripts/seed_demo_users.py` from `api/`.
 
 Frontend, from `web/`: install Node.js and pnpm, run `pnpm install`, then `pnpm dev` and open `http://localhost:3000`.
 
@@ -40,11 +48,12 @@ API and model, from the repository root:
 
 1. Copy `train.csv`, `test.csv`, and `sample_submission.csv` into `data/`.
 2. Install Python 3.13 and uv, then run `uv sync` in `api/`.
-3. Retrain the model with `uv run python scripts/train.py` (optional; the artifacts are committed).
+3. Retrain the model with `uv run --frozen --with torch==2.15.0 python scripts/train.py`, then `uv run --frozen python scripts/train.py --finalize` (optional; the artifacts are committed, and training takes about 2 hours on CPU).
 4. Check parity with the DSCO submission with `uv run python scripts/parity_check.py <path-to-dsco-workspace>`.
 5. Rebuild the input schema with `uv run python scripts/build_input_schema.py`, and the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
-6. Run the tests with `uv run python -m pytest`.
-7. Start the API with `uv run python -m uvicorn app.main:app --reload` and open `http://localhost:8000/docs`.
+6. Rebuild the landing page numbers with `uv run python scripts/build_landing.py` after any artifact change.
+7. Run the tests with `uv run python -m pytest`.
+8. Start the API with `uv run --env-file .env python -m uvicorn app.main:app --reload` and open `http://localhost:8000/docs` (the deployed API hides the docs).
 
 ## Deployment
 

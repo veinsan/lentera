@@ -29,4 +29,4 @@ The deployed model must reproduce the trained DSCO final model (`dsco/notebooks/
 
 ## Output
 
-Report the commands, the exact-check results, the numpy-versus-torch difference, the agreement with `sub_v5.csv`, the library versions, and any metric that does not match its source, with file references. Record the result in the relevant `TODO.md` row. A failed exact check blocks the step.
+Report the commands, the exact-check results, the numpy-versus-torch difference, the agreement with `sub_v5.csv`, the library versions, and any metric that does not match its source, with file references. Record the result in the relevant `docs/TODO.md` row. A failed exact check blocks the step.

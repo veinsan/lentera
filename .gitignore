@@ -7,14 +7,21 @@ __pycache__/
 node_modules/
 .next/
 
-# Secrets
-.env
-.env.local
-.env.*.local
+# Secrets and pulled env files (.env, .env.local, .env.*); never commit keys
+.env*
+
+# Vercel CLI link
+.vercel
 
 # Competition data stays local
 data/
 
-# Vercel CLI link and pulled env files
-.vercel
-.env*
+# Local design work: impeccable decision mocks and review captures
+.impeccable/mocks/
+.impeccable/review/
+
+# Local handoff notes between chat sessions
+docs/session-summary.md
+
+# Placeholder env templates are committed
+!.env.example

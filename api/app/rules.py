@@ -1,4 +1,4 @@
-"""Decision rules from PRD.md sections 5 and 5.1. Pure functions over raw rows in the DSCO test.csv schema."""
+"""Decision rules from docs/PRD.md sections 5 and 5.1. Pure functions over raw rows in the DSCO test.csv schema."""
 from __future__ import annotations
 
 import numpy as np

@@ -46,7 +46,7 @@ Pending: the owner sets the final-round presentation date, which fixes the build
 - **Academic leader:** Decides how many advisor hours to allocate. Uses the capacity planner to see how many at-risk students each staffing level reaches.
 - **Final-round judges:** Watch the demo and read the model card. They sign in with a demo account.
 - **Project owner:** veinsan's team, which defines scope and presents in the final round.
-- **Builders:** The team's developers and Claude Code, working from this PRD and `ARCHITECTURE.md`.
+- **Builders:** The team's developers and Claude Code, working from this PRD and `docs/ARCHITECTURE.md`.
 
 ## 4. User Stories
 

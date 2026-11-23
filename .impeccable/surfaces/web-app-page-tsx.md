@@ -21,4 +21,4 @@ FIRST VIEWPORT: Full-bleed night plate. Floating glass nav pill at the top (lant
 
 FORM: Star atlas, catalog challenger notation-diagram-systems-star-atlas, won over assigned candidate 5 (KRS form with the dosen wali sign-off) on audience identification and product clarity. Raised by raku firing: the process is shown as deliberate stages, each with a real record. Raised by the futurist book: numerals settle with timed motion on the variable axes, once. Raised by the cracktro queue: one depth clock for parallax, the reading plane holds still. seed:31a3a79784788edd
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, docs/DESIGN.md, and every shipping raster carrying its provenance

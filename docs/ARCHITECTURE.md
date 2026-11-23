@@ -1,6 +1,6 @@
 # Architecture: Lentera
 
-Steps marked Done in `TODO.md` are implemented; everything else below is planned. The source model and its evaluation live in the DSCO workspace (`C:\Users\riant\Projects\dsco`), referred to here as `dsco/`.
+Steps marked Done in `docs/TODO.md` are implemented; everything else below is planned. The source model and its evaluation live in the DSCO workspace (`C:\Users\riant\Projects\dsco`), referred to here as `dsco/`.
 
 ## Technical Stack
 
@@ -9,7 +9,7 @@ Steps marked Done in `TODO.md` are implemented; everything else below is planned
 | Frontend | Next.js 16.4.6 (App Router, TypeScript, Cache Components), Tailwind CSS 4, HeroUI 3 on React Aria, Motion, React Three Fiber, Recharts | Agreed; versions in `CLAUDE.md` |
 | Frontend package manager | pnpm | Agreed |
 | Backend | FastAPI on Python 3.13 | Agreed. 3.13 because Smart App Control blocks the uv-managed 3.12 on the owner's machine. |
-| ML libraries | lightgbm 4.6.0, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1 (quantile transform state), scipy. The DAE-MLP half runs in numpy; torch 2.15.0 is a training-only dependency. SHAP values come from LightGBM TreeSHAP. | Done. Parity check passed 2026-11-23 (`TODO.md` ML-09). |
+| ML libraries | lightgbm 4.6.0, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1 (quantile transform state), scipy. The DAE-MLP half runs in numpy; torch 2.15.0 is a training-only dependency. SHAP values come from LightGBM TreeSHAP. | Done. Parity check passed 2026-11-23 (`docs/TODO.md` ML-09). |
 | Python package manager | uv | In use for `api/` |
 | Database and auth | Supabase (Postgres, Auth, row level security, Storage); asymmetric ES256 JWT signing keys and `sb_publishable_`/`sb_secret_` API keys | Done for schema and auth |
 | Frontend hosting | Vercel | Agreed |
@@ -57,7 +57,7 @@ flowchart LR
 - **FastAPI service (`api/`).** Loads the model and fit state once at startup. Verifies the Supabase access token on each request with the project's JWKS endpoint (30 second clock leeway) and reads the user's role from `profiles`. Student endpoints rebuild the stored `students.raw` row, which reproduces the stored probability exactly. Writes scored cohorts and the request log to Supabase with the service role key.
 - **Preprocessing (`api/app/pipeline/`).** A port of the notebook's `fix_categories`, `undo_imputation`, and `add_features` (`dsco/notebooks/dsco_lgbm_dae_pair_final.ipynb`): category repairs (`GGG`, and M04 or M05 rows that carry M07's pattern, to `M07`), placeholder activity and score columns set to missing, ratio, recency, and week-pattern features, and percentile ranks within each module presentation. The notebook ranks train and test together, so the API ranks an uploaded cohort in a `Context`: the training rows' sorted reference values (`fit_state.npz`) plus the cohort itself. On `test.csv` this reproduces the notebook's 198 features exactly. A what-if row is ranked in its cohort's context with its own original row taken out, so an unchanged row keeps its stored probability, and a lever never moves a student to another module. The DAE input (quantile transform, missing flags, one-hot levels) uses the state saved in `fit_state.npz` and `fit_state.json`.
 - **Explanation (`api/app/explain.py`).** TreeSHAP values of the LightGBM half of the blend (`booster.predict(pred_contrib=True)`); the DAE-MLP half has no per-feature attribution. The 198 model features are summed into 14 signals (a module-presentation percentile `mpq_X` follows its column `X`, and the notebook's segment goes to the signal its value stands for), which keeps SHAP additive: 9 actionable (submission, timeliness, score, active days, recency, volume, week 4 activity, breadth, LMS record) and 5 context (course, registration, workload, prior attempts, demographics). For a row with the placeholder activity block, the five activity signals fold into the LMS record signal. Each signal has an Indonesian sentence built from the student's raw values.
-- **Rules (`api/app/rules.py`).** Tier, uncertain band, archetype, playbook, and Indonesian message templates, as defined in `PRD.md` sections 5 and 5.1. Pure functions with unit tests.
+- **Rules (`api/app/rules.py`).** Tier, uncertain band, archetype, playbook, and Indonesian message templates, as defined in `docs/PRD.md` sections 5 and 5.1. Pure functions with unit tests.
 - **Scenarios (`api/app/scenarios.py`).** Four actionable levers. Each lever edits raw columns and recomputes every aggregate the dataset derives from them, with formulas verified on `train.csv`: volume is the weekly sum, early and late are two-week sums, the late to early ratio is 0 when early is 0, active weeks count the non-zero weeks, per-day and per-week averages divide the volume, span is last minus first activity day, and `interaction_trend` is the least-squares slope over weeks 1 to 4. The data window ends at day 28, so activity levers act on week 4. Lever definitions, awaiting the owner's confirmation:
   - **Submit pending assessments:** only for `no_submission_by_cutoff` 1. Completion rates go to 1, `submitted_count` to at least the due count, and new submissions are on the deadline (delay 0). Every M05 and M07 row has identical submission columns (completion 0, `no_submission_by_cutoff` 0, `has_score` 0), so the lever leaves those modules unchanged.
   - **Return to activity:** for a student last active before day 28, one more active day on day 28 at the student's own interactions per active day.
@@ -129,7 +129,7 @@ data/                 local only, gitignored: train.csv, test.csv, sample_submis
 | ML-03 | Parity check against the training run | ML-02 | `api/scripts/parity_check.py` reports identical features and LightGBM probabilities, the numpy-versus-torch DAE-MLP difference, 6,502 of 6,502 labels equal to the `--finalize` run, and the agreement with `dsco/sub_v5.csv`. |
 | ML-04 | Build `model_card.json` and `insights.json` | ML-02 | Values match the training run's out-of-fold summary (`data/blend/summary.json`: blend F1 0.7758, threshold 0.387). |
 | ML-05 | SHAP reason codes with actionable and context groups | ML-02 | Each test row gets its top contributions; SHAP values plus the expected value sum to the raw logit within 1e-6. |
-| ML-06 | Tier, uncertain band, archetype, and playbook rules | ML-02 | Unit tests cover every rule branch; archetype counts on `train.csv` match `PRD.md` section 5.1. |
+| ML-06 | Tier, uncertain band, archetype, and playbook rules | ML-02 | Unit tests cover every rule branch; archetype counts on `train.csv` match `docs/PRD.md` section 5.1. |
 | ML-07 | Scenario levers and counterfactual search | ML-01, ML-02 | Each lever keeps the documented formulas true; tests confirm the counterfactual result is below the threshold or reports none found. |
 | ML-08 | Capacity planner | ML-06 | With effectiveness 1.0, assigned minutes never exceed capacity, and expected reach equals the sum of probabilities of assigned students. |
 | API-01 | `GET /health`, `/model`, `/insights` | ML-04 | Endpoints return the artifact contents. |
@@ -141,7 +141,7 @@ data/                 local only, gitignored: train.csv, test.csv, sample_submis
 | API-07 | Request logging middleware | S-02, API-01 | Every API call writes one `request_log` row. |
 | API-08 | Dockerfile and pytest suite | API-01 to API-07 | `docker build` succeeds and the container passes `pytest` and `GET /health`. |
 | API-09 | GitHub Actions to ghcr.io to Azure Container Apps | API-08 | A push to `main` that touches `api/` deploys a new revision; the public `/health` returns the new image tag. |
-| W-01 | Design tokens and app shell with sidebar navigation | S-01 | Tokens from `DESIGN.md` exist as CSS variables; every page in the sidebar has a route. |
+| W-01 | Design tokens and app shell with sidebar navigation | S-01 | Tokens from `docs/DESIGN.md` exist as CSS variables; every page in the sidebar has a route. |
 | W-02 | Sign-in and role-aware layout | S-02, W-01 | Each demo role signs in and sees only its permitted pages. |
 | W-03 | Cohort upload page with data quality report | API-03, W-02 | A coordinator uploads `test.csv`, reads the report, and confirms scoring. |
 | W-04 | Dashboard | API-03, W-02 | KPIs, tier and archetype counts, and the module by presentation heatmap match database queries. |

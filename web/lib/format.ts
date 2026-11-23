@@ -19,7 +19,7 @@ export function fmtInt(value: number | null | undefined): string {
   return value == null ? EMPTY : new Intl.NumberFormat("id-ID").format(Math.round(value));
 }
 
-/** Probabilities in tables: two decimals (DESIGN.md Typography). */
+/** Probabilities in tables: two decimals (docs/DESIGN.md Typography). */
 // Two decimals, but a calibrated probability never prints as certainty: 0.995 and above shows as "0,99+".
 export const fmtProb = (value: number | null | undefined) => (value != null && value >= 0.995 ? "0,99+" : fmtNum(value, 2));
 

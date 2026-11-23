@@ -2,7 +2,7 @@
 @import "@heroui/styles";
 
 /*
-  Lentera, star atlas world (.impeccable/surfaces/web-app.md and web-app-page-tsx.md; DESIGN.md is written from the build).
+  Lentera, star atlas world (.impeccable/surfaces/web-app.md and web-app-page-tsx.md; docs/DESIGN.md is written from the build).
   HeroUI reads its own variable names (--background, --surface, --accent, --muted is a text colour); this file sets
   them from the atlas palette and adds the world's own tokens. Warm hues belong to risk tiers only.
 */

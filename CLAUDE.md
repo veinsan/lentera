@@ -1,6 +1,21 @@
 # CLAUDE.md: Lentera
 
-Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coordinators, and academic leaders use it at the week 4 cutoff to plan interventions from model predictions. Read `PRD.md` for scope, `ARCHITECTURE.md` for the system and the step plan, `DESIGN.md` for visual rules, `WORKFLOW.md` for working rules, and `TODO.md` for current status.
+Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coordinators, and academic leaders use it at the week 4 cutoff to plan interventions from model predictions.
+
+## Documents
+
+Every project document lives in `docs/`. This file holds the working rules and points there; read the document that matches the task before changing code.
+
+| Document | Read it for |
+| --- | --- |
+| `docs/PRD.md` | Scope, users, decision rules, acceptance criteria, and what is out of scope |
+| `docs/ARCHITECTURE.md` | The system, its components, and the step plan with completion criteria |
+| `docs/DESIGN.md` | Design tokens, components, and visual rules (change it together with `web/app/globals.css`) |
+| `docs/PRODUCT.md` | Product truth for design work: audience, promise, and voice |
+| `docs/WORKFLOW.md` | How to work: when to proceed, when to ask, how to verify |
+| `docs/TODO.md` | Current status of every step and decision, with verification evidence |
+
+`docs/session-summary.md` is a local handoff note between chat sessions; it is gitignored and may be out of date, so the documents above win.
 
 ## Tech Stack
 
@@ -38,11 +53,12 @@ The served model is the DSCO final notebook `dsco/notebooks/dsco_lgbm_dae_pair_f
 
 ## Design System
 
-`DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables in `:root`, sets HeroUI's own variables from them (`--background`, `--surface`, `--accent`, `--muted` is a text colour in HeroUI), and maps them to Tailwind utility names in the `@theme inline` block. Change a token in `DESIGN.md` and `globals.css` together. Liquid glass (`glass`, `glass-night`, `glass-lens` utilities) is for the navigation layer only; content sits on solid `plate` surfaces. Tier and chart colours were checked with the dataviz palette validator; re-run it before changing them. Fonts load through `next/font/google` in `web/app/layout.tsx`.
+`docs/DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables in `:root`, sets HeroUI's own variables from them (`--background`, `--surface`, `--accent`, `--muted` is a text colour in HeroUI), and maps them to Tailwind utility names in the `@theme inline` block. Change a token in `docs/DESIGN.md` and `globals.css` together. Liquid glass (`glass`, `glass-night`, `glass-lens` utilities) is for the navigation layer only; content sits on solid `plate` surfaces. Tier and chart colours were checked with the dataviz palette validator; re-run it before changing them. Fonts load through `next/font/google` in `web/app/layout.tsx`.
 
 ## Project Structure
 
 ```text
+docs/                      Project documents (see Documents above)
 web/
   app/
     page.tsx               Public landing page (static; numbers from lib/generated/landing.json)
@@ -55,15 +71,15 @@ web/
       prioritas/           Advisor worklist (rows open the student side sheet)
       mahasiswa/[id]/      Student profile as a full page (direct link or refresh)
       insight/             Course insights
-      unggah/              Cohort upload
-      model/               Model and monitoring (tabs: model card, fairness, drift, API health)
+      unggah/              Cohort upload and end-of-semester outcome upload
+      model/               Model and monitoring (tabs: model card, test cohort, final outcomes, fairness, drift, API health)
   components/
     ui/                    DataTable (HeroUI table from column definitions) and LinkButton
     brand/                 Lantern mark and wordmark, liquid lens SVG filter
     sky/                   The React Three Fiber constellation and its client-only loader
     layout/                Sidebar, phone nav, command palette, page header, atlas backdrop
     charts/                Recharts wrappers that apply chart tokens, plus the HTML heatmap and segmented bar
-    domain/                Section, stat, tier badge, archetype chip, student profile and panel, planner, upload, monitoring
+    domain/                Section, stat, tier badge, archetype chip, student profile and panel, planner, upload, monitoring, outcome evaluation and impact
   lib/
     nav.ts                 Sidebar items and presenter shortcuts (1 to 6)
     landing.ts             Typed view of generated/landing.json (api/scripts/build_landing.py)
@@ -71,13 +87,13 @@ web/
     utils.ts               cn() class merging
     auth.ts                getCurrentUser() and requireRole(): the data access layer for the session
     supabase/              Browser and server Supabase clients
-proxy.ts                   Session refresh and sign-in redirect (Next.js 16 name for middleware)
     api.ts                 Typed client for the FastAPI service (`API_URL`, server-side only)
     api-browser.ts         File uploads from the browser to the API with the user's token (`NEXT_PUBLIC_API_URL`)
     labels.ts              Indonesian labels for archetypes, playbook actions, and contact status
     data.ts                Supabase reads for the latest cohort, all its predictions (parallel pages of 1,000), and the worklist
     worklist-params.ts     Worklist filter whitelist and URL query helpers (client-safe, no server imports)
     format.ts              Number and probability formatting (id-ID, decimal comma)
+  proxy.ts                 Session refresh and the sign-in redirect for app routes (Next.js 16 name for middleware)
 api/
   app/
     main.py                FastAPI app, routers, CORS
@@ -93,8 +109,10 @@ api/
   artifacts/               Model and generated JSON, committed
   scripts/                 Offline training and artifact builders
   tests/
-supabase/migrations/       Schema and RLS
+supabase/migrations/       Schema and RLS, applied in order by the owner in the SQL Editor
+infra/                     Azure setup script
 skills/                    Project skills
+.impeccable/               Design direction contracts (surfaces/) and design.json; mocks and review captures stay local
 data/                      Local only, gitignored
 ```
 
@@ -122,7 +140,7 @@ data/                      Local only, gitignored
 
 ## Features
 
-The planned pages and their steps are in `ARCHITECTURE.md`.
+The planned pages and their steps are in `docs/ARCHITECTURE.md`.
 
 - [x] Model artifacts and parity check (`api/artifacts/`, `api/scripts/parity_check.py`)
 - [x] Reason codes, decision rules, scenarios, counterfactual, and capacity planner in `api/app/` (no endpoints yet)
@@ -146,11 +164,11 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Commit `data/`, `.env`, `.env.local`, or any file with a real key. `SUPABASE_SERVICE_ROLE_KEY` exists only in the API environment.
 - Read the session anywhere except through `web/lib/auth.ts`, or set a user's role from the frontend. Roles live in `app_metadata` (secret key only) and are copied into `profiles` by the `on_auth_user_created` trigger.
 - Change the database outside a new file in `supabase/migrations/`. The owner applies migrations in the Supabase SQL Editor.
-- Change preprocessing, model parameters, the threshold, or ML library versions without running the parity check and recording the result in `TODO.md`.
-- Present a scenario, counterfactual, or effectiveness-weighted number without the scenario panel label from `DESIGN.md`.
+- Change preprocessing, model parameters, the threshold, or ML library versions without running the parity check and recording the result in `docs/TODO.md`.
+- Present a scenario, counterfactual, or effectiveness-weighted number without the scenario panel label from `docs/DESIGN.md`.
 - Use context features (demographics, module, registration, studied credits) as the reason for a recommended intervention.
 - Use npm or yarn in `web/`, or pip directly in `api/`. Use pnpm and uv.
-- Add LLM-generated text, an LMS integration, or real message sending. They are out of scope in `PRD.md`.
+- Add LLM-generated text, an LMS integration, or real message sending. They are out of scope in `docs/PRD.md`.
 
 ## Testing
 
@@ -177,7 +195,7 @@ Windows Smart App Control on the owner's machine blocks unsigned executables and
 
 ## Visual World
 
-The design follows the direction contracts in `.impeccable/surfaces/web-app.md` (app) and `.impeccable/surfaces/web-app-page-tsx.md` (landing): a star atlas. Every student is a star whose size and warmth is their risk, archetypes are constellations; liquid glass is the navigation layer over a generated blue atlas plate (`web/public/atlas/`, Figma AI, provenance in the `.json` sidecars); one committed blue for actions; warm hues for risk tiers only, always labelled; Google Sans Flex and Google Sans Code. Product truth for design work is `PRODUCT.md`. Each page title is the screen's finding as one sentence; no eyebrow or kicker above a heading. `DESIGN.md` is written from the built world.
+The design follows the direction contracts in `.impeccable/surfaces/web-app.md` (app) and `.impeccable/surfaces/web-app-page-tsx.md` (landing): a star atlas. Every student is a star whose size and warmth is their risk, archetypes are constellations; liquid glass is the navigation layer over a generated blue atlas plate (`web/public/atlas/`, Figma AI, provenance in the `.json` sidecars); one committed blue for actions; warm hues for risk tiers only, always labelled; Google Sans Flex and Google Sans Code. Product truth for design work is `docs/PRODUCT.md`. Each page title is the screen's finding as one sentence; no eyebrow or kicker above a heading. `docs/DESIGN.md` is written from the built world.
 
 ## Build
 

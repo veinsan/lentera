@@ -36,7 +36,7 @@ A probability per student is what every entry produces. Lentera's mechanism is p
 
 ## Brand Commitments
 
-- Name: Lentera (lantern). Owner decision DEC-01 still pending in `TODO.md`.
+- Name: Lentera (lantern). Owner decision DEC-01 still pending in `docs/TODO.md`.
 
 ## Evidence on Hand
 

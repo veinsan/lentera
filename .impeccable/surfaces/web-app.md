@@ -21,4 +21,4 @@ FIRST VIEWPORT: Floating glass sidebar left (lantern mark, command search, three
 
 FORM: Star atlas, catalog challenger notation-diagram-systems-star-atlas, won over assigned candidate 5 (KRS form with the dosen wali sign-off) on audience identification and product clarity. Raised by the cutting bench: contact state is a mark, not a hue, and the student where the advisor stopped stays flagged on return. Raised by the cracktro queue: one depth clock, background layers drift, the reading plane holds still. Raised by the daylight section: the lit band is what capacity reaches, shadow blue is the queue. seed:31a3a79784788edd
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, docs/DESIGN.md, and every shipping raster carrying its provenance
