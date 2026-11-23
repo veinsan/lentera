@@ -82,6 +82,29 @@ export type Binary = {
   auc: number | null;
 };
 
+/** Binary metrics with the confusion counts, from api/app/evaluation.py. */
+export type OutcomeMetrics = Binary & { accuracy: number; tp: number; fp: number; fn: number; tn: number };
+
+/** Predictions against real outcomes (api/app/evaluation.py): the test cohort artifact or an uploaded outcome file. */
+export type OutcomeReport = {
+  coverage: { cohort: number; labels: number; matched: number; without_label: number; unknown_ids: number };
+  threshold: number;
+  metrics: OutcomeMetrics;
+  calibration: { bins: { lower: number; upper: number; n: number; predicted: number; observed: number }[]; ece: number; brier: number };
+  tiers: Record<Tier, { n: number; at_risk: number; at_risk_rate: number | null; mean_probability: number | null; share_of_at_risk: number }>;
+  archetypes: Record<string, { n: number; flagged: number; at_risk: number; at_risk_rate: number | null; mean_probability: number | null }>;
+  modules: Record<string, OutcomeMetrics>;
+  capacity: { share: number; n: number; expected_at_risk: number; at_risk: number; precision: number; recall: number }[];
+  expected_at_risk: number;
+  at_risk: number;
+  plan?: { advisors: number; hours_per_advisor: number; contacted: number; expected_at_risk: number; at_risk: number };
+  fairness?: Record<string, Record<string, OutcomeMetrics>>;
+  /** Test cohort artifact only. */
+  cohort?: string;
+  /** Uploaded outcome files only. */
+  uploaded_at?: string;
+};
+
 export type SegmentMetrics = {
   f1: number;
   precision: number;
@@ -152,6 +175,8 @@ export type ModelCard = {
     top_features: Record<string, number>;
   };
   evaluation_notes: Record<string, string>;
+  /** The served model against the DSCO test cohort's real outcomes; null until the labels are available. */
+  test_evaluation: OutcomeReport | null;
 };
 
 export type ModuleInsight = {

@@ -1,5 +1,5 @@
 // Server-side reads from Supabase as the signed-in user, so RLS limits every query to the user's modules.
-import type { DriftReport, Tier } from "@/lib/api";
+import type { DriftReport, OutcomeReport, Tier } from "@/lib/api";
 import { createClient } from "@/lib/supabase/server";
 import type { WorklistFilters } from "@/lib/worklist-params";
 
@@ -51,6 +51,18 @@ export async function getLatestDrift(): Promise<{ name: string; uploaded_at: str
     .limit(1)
     .maybeSingle();
   return data && { name: data.name, uploaded_at: data.uploaded_at, drift: data.drift_report as DriftReport | null };
+}
+
+/** Outcome report of the latest cohort (POST /cohorts/{id}/outcomes); null until its real outcomes are uploaded. */
+export async function getLatestOutcome(): Promise<{ name: string; outcome: OutcomeReport | null } | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cohorts")
+    .select("name, outcome_report")
+    .order("uploaded_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data && { name: data.name, outcome: data.outcome_report as OutcomeReport | null };
 }
 
 /** Every prediction the user may see in the cohort, fetched in parallel pages of 1,000. */

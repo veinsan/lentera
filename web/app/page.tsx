@@ -384,12 +384,27 @@ function Safety() {
 }
 
 function Proof() {
+  const test = landing.test;
   const rows: [string, React.ReactNode, string][] = [
     [
       `F1 validasi silang ${model.folds}-fold`,
       `${fmtNum(model.cv_f1, 4)} ± ${fmtNum(model.cv_f1_sd, 4)}`,
       "prediksi out-of-fold dengan ambang plug-in dari probabilitas, tanpa melihat label",
     ],
+    ...(test
+      ? ([
+          [
+            "F1 di kohort uji, dicek dengan hasil akhir",
+            fmtNum(test.f1, 4),
+            `${fmtInt(test.n)} mahasiswa, presisi ${fmtNum(test.precision, 3)} dan recall ${fmtNum(test.recall, 3)}, dengan ambang yang dipilih sebelum label dibuka`,
+          ],
+          [
+            "Rencana kontak, dicek dengan hasil akhir",
+            `${fmtInt(test.plan_at_risk)} / ${fmtInt(test.plan_expected)}`,
+            `mahasiswa yang benar-benar berisiko di antara ${fmtInt(test.plan_contacted)} yang ditelepon konselor, dibanding perkiraan dari probabilitas`,
+          ],
+        ] as [string, React.ReactNode, string][])
+      : []),
     ["Kalibrasi (ECE)", fmtNum(model.ece, 4), "selisih rata-rata antara peluang yang diberikan dan kejadian sebenarnya"],
     [
       "Skor Kaggle",
@@ -404,7 +419,7 @@ function Proof() {
           Angka yang bisa dicek ulang.
         </h2>
         <p className="mt-4 text-[17px] leading-relaxed text-ink-2">
-          Validasi dan kalibrasi dihitung ulang dari pipeline DSCO, skor Kaggle diambil dari leaderboard kompetisi. Model card lengkap,
+          Validasi dan kalibrasi dihitung ulang dari pipeline DSCO, hasil di kohort uji dicek dengan label asli, dan skor Kaggle diambil dari leaderboard kompetisi. Model card lengkap,
           fairness per kelompok, dan drift ada di halaman Model setelah masuk.
         </p>
       </div>

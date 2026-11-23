@@ -82,7 +82,7 @@ class SupabaseStore:
         """All predictions of a cohort for planning, in pages of 1,000 (the PostgREST row limit)."""
         rows, start = [], 0
         while True:
-            r = self.rest.get("/predictions", params={"select": "student_id,code_module,probability,archetype,students(source_id)",
+            r = self.rest.get("/predictions", params={"select": "student_id,code_module,probability,tier,archetype,students(source_id)",
                                                       "cohort_id": f"eq.{cohort_id}", "order": "student_id"},
                               headers={"Range": f"{start}-{start + BATCH - 1}"})
             r.raise_for_status()
@@ -100,6 +100,11 @@ class SupabaseStore:
 
     def set_drift_report(self, cohort_id: str, drift_report: dict) -> None:
         body = json.dumps({"drift_report": drift_report})
+        self.rest.patch("/cohorts", params={"id": f"eq.{cohort_id}"}, content=body,
+                        headers={"Content-Type": "application/json"}).raise_for_status()
+
+    def set_outcome_report(self, cohort_id: str, report: dict) -> None:
+        body = json.dumps({"outcome_report": report})
         self.rest.patch("/cohorts", params={"id": f"eq.{cohort_id}"}, content=body,
                         headers={"Content-Type": "application/json"}).raise_for_status()
 

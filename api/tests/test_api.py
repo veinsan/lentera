@@ -30,7 +30,11 @@ def test_health_reports_loaded_model(client):
 def test_endpoints_return_artifact_contents(client, path, artifact):
     r = client.get(path)
     assert r.status_code == 200
-    assert r.json() == json.loads((ARTIFACTS / artifact).read_text(encoding="utf-8"))
+    body = r.json()
+    if path == "/model":  # the model card plus the test cohort evaluation, when its artifact exists
+        test_eval = ARTIFACTS / "test_evaluation.json"
+        assert body.pop("test_evaluation") == (json.loads(test_eval.read_text(encoding="utf-8")) if test_eval.exists() else None)
+    assert body == json.loads((ARTIFACTS / artifact).read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize("path", ["/model", "/insights"])

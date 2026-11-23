@@ -10,13 +10,13 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 
 import httpx
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Path, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from app import drift, monitoring, planner, quality, rules, scenarios
+from app import drift, evaluation, monitoring, planner, quality, rules, scenarios
 from app.auth import User, current_user, require_role
 from app.explain import Explainer
 from app.model import ARTIFACTS, Model
@@ -24,6 +24,7 @@ from app.scoring import score_cohort, summarize
 from app.store import SupabaseStore
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+UUID_PATTERN = r"^[0-9a-fA-F-]{36}$"
 NOT_LOGGED = {"/health", "/docs", "/docs/oauth2-redirect", "/openapi.json"}  # probes and API docs
 log = logging.getLogger("lentera")
 
@@ -39,6 +40,9 @@ async def lifespan(app: FastAPI):
     app.state.contexts = {}  # cohort_id -> ranking context for what-if; the last few cohorts only
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
+    # Built from the DSCO test labels by scripts/build_test_evaluation.py; absent until the labels are available.
+    test_eval = ARTIFACTS / "test_evaluation.json"
+    app.state.test_evaluation = json.loads(test_eval.read_text(encoding="utf-8")) if test_eval.exists() else None
     app.state.drift_reference = drift.load_reference(ARTIFACTS / "drift_reference.json")
     # Request logging needs the Supabase secret key; without it (tests, CI smoke test) nothing is logged.
     keys = os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_SERVICE_ROLE_KEY")
@@ -98,7 +102,7 @@ def health(request: Request) -> dict:
 
 @app.get("/model")
 def model_card(request: Request, user: User = Depends(current_user)) -> dict:
-    return request.app.state.model_card
+    return {**request.app.state.model_card, "test_evaluation": request.app.state.test_evaluation}
 
 
 @app.get("/insights")
@@ -229,7 +233,7 @@ class PlaybookOverride(BaseModel):
 
 
 class PlanBody(BaseModel):
-    cohort_id: str = Field(..., pattern=r"^[0-9a-fA-F-]{36}$")
+    cohort_id: str = Field(..., pattern=UUID_PATTERN)
     advisors: int = Field(..., ge=0, le=200)
     hours_per_advisor: float = Field(..., ge=0, le=80)
     overrides: dict[str, PlaybookOverride] = {}
@@ -271,6 +275,40 @@ def plan_save(body: PlanBody, request: Request, user: User = Depends(require_rol
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Gagal menyimpan ke Supabase ({e.__class__.__name__}).") from None
     return {"id": plan_id, **result}
+
+
+@app.post("/cohorts/{cohort_id}/outcomes")
+def cohort_outcomes(request: Request, cohort_id: str = Path(..., pattern=UUID_PATTERN), file: UploadFile = File(...),
+                    user: User = Depends(require_role("coordinator", "admin")),
+                    store: SupabaseStore = Depends(get_store)) -> dict:
+    """Evaluate a scored cohort against its real outcomes (CSV with id and at_risk) and store the aggregate report.
+
+    Per-student labels are not stored. The report covers the whole cohort, so only users who see every module of
+    the cohort may upload outcomes for it.
+    """
+    try:
+        labels = evaluation.parse_labels(_read_upload(file))
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from None
+    request.state.cohort_id = cohort_id
+    try:
+        preds = pd.DataFrame(store.get_predictions(cohort_id))
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal membaca Supabase ({e.__class__.__name__}).") from None
+    if preds.empty:
+        raise HTTPException(404, "Kohort tidak ditemukan.")
+    if not preds.code_module.map(user.sees).all():
+        raise HTTPException(403, "Hasil akhir hanya bisa diunggah oleh pengguna yang melihat semua modul kohort ini.")
+    merged, coverage = evaluation.match(preds, labels)
+    if coverage["matched"] == 0:
+        raise HTTPException(422, "Tidak ada id yang cocok dengan mahasiswa di kohort ini.")
+    report = dict(coverage=coverage, uploaded_at=datetime.now(UTC).isoformat(),
+                  **evaluation.evaluate(merged, request.app.state.model.threshold, plan_capacity=planner.OPENING))
+    try:
+        store.set_outcome_report(cohort_id, report)
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal menyimpan ke Supabase ({e.__class__.__name__}).") from None
+    return report
 
 
 @app.get("/monitoring/requests")

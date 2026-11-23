@@ -11,6 +11,8 @@ import pandas as pd
 
 from app.rules import PLAYBOOK, THRESHOLD, TIERS, tier
 
+OPENING = (5, 10)  # advisors and hours per advisor: the capacity page's starting values
+
 
 def playbook_table(overrides: dict | None = None) -> pd.DataFrame:
     t = pd.DataFrame(PLAYBOOK).T[["action", "label", "minutes", "effectiveness"]]

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Section } from "@/components/domain/section";
+import { OutcomeUpload } from "@/components/domain/outcome-upload";
 import { UploadFlow } from "@/components/domain/upload-flow";
 import { PageHeader } from "@/components/layout/page-header";
 import { RoleGate } from "@/components/layout/role-gate";
 import { DataTable } from "@/components/ui/data-table";
+import { getLatestCohort } from "@/lib/data";
 import { fmtInt } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,6 +28,7 @@ export default function Page() {
             >
               <UploadFlow />
             </Section>
+            <LatestOutcomeUpload />
             <Section title="Kohort tersimpan" description="Kohort terbaru menjadi tampilan default di X-Ray dan daftar prioritas.">
               <CohortList />
             </Section>
@@ -33,6 +36,19 @@ export default function Page() {
         </RoleGate>
       </Suspense>
     </>
+  );
+}
+
+async function LatestOutcomeUpload() {
+  const cohort = await getLatestCohort();
+  if (!cohort) return null;
+  return (
+    <Section
+      title="Cek prediksi dengan hasil akhir"
+      description="Setelah semester selesai, unggah hasil akhir kohort terbaru. Lentera menghitung F1, kalibrasi, dan apakah rencana kontak menjangkau mahasiswa yang benar-benar berisiko."
+    >
+      <OutcomeUpload cohortId={cohort.id} cohortName={cohort.name} />
+    </Section>
   );
 }
 

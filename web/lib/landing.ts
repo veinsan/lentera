@@ -28,6 +28,17 @@ export type Landing = {
     advisor_visible: number;
     advisor_modules: string[];
   };
+  /** The served model against the test cohort's real outcomes (api/artifacts/test_evaluation.json); null without labels. */
+  test: {
+    n: number;
+    f1: number;
+    precision: number;
+    recall: number;
+    ece: number;
+    plan_contacted: number;
+    plan_expected: number;
+    plan_at_risk: number;
+  } | null;
   quality: { rows: number; status: string; repairs: { code: string; count: number }[] };
   plan: { advisors: number; hours: number; contacts: number; reached: number; marginal: number; automated: number; waiting: number };
   sky: Sky;

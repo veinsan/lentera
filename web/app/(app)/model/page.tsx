@@ -8,13 +8,16 @@ import { FairnessTable } from "@/components/domain/fairness-table";
 import { KaggleScores } from "@/components/domain/kaggle-scores";
 import { ModelTabs } from "@/components/domain/model-tabs";
 import { DriftPanel, RequestPanel } from "@/components/domain/monitoring";
+import { EmptyState } from "@/components/domain/empty-state";
+import { OutcomeEvaluation } from "@/components/domain/outcome-evaluation";
 import { Section } from "@/components/domain/section";
 import { Stat } from "@/components/domain/stat";
 import { TierBadge } from "@/components/domain/tier-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { getModelCard, type ModelCard, type Tier } from "@/lib/api";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, type Role } from "@/lib/auth";
+import { getLatestOutcome } from "@/lib/data";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -190,6 +193,33 @@ async function ModelContent() {
 
   const panels = [
     { id: "kartu", label: "Kartu model", content: overview },
+    ...(card.test_evaluation
+      ? [
+          {
+            id: "uji",
+            label: "Kohort uji",
+            content: (
+              <div className="flex flex-col gap-5">
+                <p className="max-w-[75ch] text-sm leading-relaxed text-ink-2">
+                  Model yang dilayani dinilai pada {fmtInt(card.test_evaluation.metrics.n)} mahasiswa kohort uji DSCO dengan label hasil akhir
+                  yang asli. Ambang dipilih tanpa label ini, jadi angkanya evaluasi independen. Model ini retrain CPU dari notebook final,
+                  sehingga F1-nya bisa sedikit berbeda dari skor Kaggle.
+                </p>
+                <OutcomeEvaluation report={card.test_evaluation} />
+              </div>
+            ),
+          },
+        ]
+      : []),
+    {
+      id: "hasil",
+      label: "Hasil akhir",
+      content: (
+        <Suspense fallback={<div className="plate h-40 animate-pulse" aria-label="Memuat hasil akhir" />}>
+          <LatestOutcome role={user.role} />
+        </Suspense>
+      ),
+    },
     {
       id: "fairness",
       label: "Fairness",
@@ -223,6 +253,35 @@ async function ModelContent() {
         ]),
   ];
   return <ModelTabs panels={panels} />;
+}
+
+async function LatestOutcome({ role }: { role: Role }) {
+  const latest = await getLatestOutcome();
+  if (!latest?.outcome) {
+    return (
+      <EmptyState
+        title="Hasil akhir kohort terbaru belum diunggah"
+        description={
+          role === "advisor"
+            ? "Setelah semester selesai, koordinator mengunggah hasil akhir mahasiswa, lalu prediksi minggu ke-4 dicek di sini."
+            : "Setelah semester selesai, unggah CSV berisi id dan at_risk di halaman Unggah kohort, lalu prediksi minggu ke-4 dicek di sini."
+        }
+        action={role === "advisor" ? undefined : { href: "/unggah", label: "Unggah hasil akhir" }}
+      />
+    );
+  }
+  const uploaded = latest.outcome.uploaded_at
+    ? new Date(latest.outcome.uploaded_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" })
+    : null;
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="max-w-[75ch] text-sm leading-relaxed text-ink-2">
+        Prediksi {latest.name} dibandingkan dengan hasil akhir yang diunggah{uploaded && <> pada {uploaded}</>}. Label per mahasiswa tidak disimpan,
+        hanya angka ringkasnya.
+      </p>
+      <OutcomeEvaluation report={latest.outcome} />
+    </div>
+  );
 }
 
 function DecisionBadge({ decision }: { decision: ModelCard["comparison"][number]["decision"] }) {
