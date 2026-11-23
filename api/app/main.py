@@ -24,7 +24,7 @@ from app.scoring import score_cohort, summarize
 from app.store import SupabaseStore
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
-NOT_LOGGED = {"/health", "/docs", "/docs/oauth2-redirect", "/redoc", "/openapi.json"}  # probes and API docs
+NOT_LOGGED = {"/health", "/docs", "/docs/oauth2-redirect", "/openapi.json"}  # probes and API docs
 log = logging.getLogger("lentera")
 
 
@@ -46,7 +46,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Lentera API", version="0.1.0", lifespan=lifespan)
+# The deployed image sets IMAGE_TAG; there the interactive docs and the schema stay off.
+DOCS = os.getenv("IMAGE_TAG") is None
+app = FastAPI(title="Lentera API", version="0.1.0", lifespan=lifespan, docs_url="/docs" if DOCS else None,
+              redoc_url=None, openapi_url="/openapi.json" if DOCS else None)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()],
@@ -166,7 +169,7 @@ def _student_frame(request: Request, student_id: int, user: User, store: Supabas
     try:
         student = store.get_student(student_id)
     except httpx.HTTPError as e:
-        raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+        raise HTTPException(502, f"Gagal membaca Supabase ({e.__class__.__name__}).") from None
     if student is None or not user.sees(student["code_module"]):
         raise HTTPException(404, "Mahasiswa tidak ditemukan.")
     raw = quality.frame_from_records([student["raw"]], request.app.state.schema)
@@ -201,7 +204,7 @@ def student_counterfactual(student_id: int, request: Request, user: User = Depen
 
 
 class SimulateBody(BaseModel):
-    levers: list[str]
+    levers: list[str] = Field(..., max_length=10)
 
 
 @app.post("/students/{student_id}/simulate")
@@ -226,7 +229,7 @@ class PlaybookOverride(BaseModel):
 
 
 class PlanBody(BaseModel):
-    cohort_id: str = Field(..., min_length=36, max_length=36)
+    cohort_id: str = Field(..., pattern=r"^[0-9a-fA-F-]{36}$")
     advisors: int = Field(..., ge=0, le=200)
     hours_per_advisor: float = Field(..., ge=0, le=80)
     overrides: dict[str, PlaybookOverride] = {}
@@ -242,7 +245,7 @@ def _plan(request: Request, body: PlanBody, user: User, store: SupabaseStore) ->
         try:
             cache[body.cohort_id] = pd.DataFrame(store.get_predictions(body.cohort_id))
         except httpx.HTTPError as e:
-            raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+            raise HTTPException(502, f"Gagal membaca Supabase ({e.__class__.__name__}).") from None
     students = cache[body.cohort_id]
     if students.empty:
         raise HTTPException(404, "Kohort tidak ditemukan.")
@@ -277,5 +280,5 @@ def request_stats(days: int = Query(7, ge=1, le=30), user: User = Depends(requir
     try:
         rows = store.get_request_log(since)
     except httpx.HTTPError as e:
-        raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+        raise HTTPException(502, f"Gagal membaca Supabase ({e.__class__.__name__}).") from None
     return monitoring.request_stats(rows, days)

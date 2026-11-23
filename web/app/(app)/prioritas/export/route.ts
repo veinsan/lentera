@@ -6,7 +6,8 @@ import { parseWorklistParams } from "@/lib/worklist-params";
 const PAGE = 1000;
 
 function csvCell(value: string | number): string {
-  const s = String(value);
+  // Uploaded text (module names, reasons) could start a spreadsheet formula; a leading quote keeps it plain text.
+  const s = typeof value === "string" && /^[=+\-@\t\r]/.test(value) ? `'${value}` : String(value);
   return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
