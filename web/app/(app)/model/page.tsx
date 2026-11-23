@@ -6,27 +6,28 @@ import { CapacityChart } from "@/components/charts/capacity-chart";
 import { ImportanceChart } from "@/components/charts/importance-chart";
 import { ApiError } from "@/components/domain/api-error";
 import { FairnessTable } from "@/components/domain/fairness-table";
-import { KpiCard } from "@/components/domain/kpi-card";
+import { ModelTabs } from "@/components/domain/model-tabs";
 import { DriftPanel, RequestPanel } from "@/components/domain/monitoring";
 import { Section } from "@/components/domain/section";
+import { Stat } from "@/components/domain/stat";
 import { TierBadge } from "@/components/domain/tier-badge";
 import { PageHeader } from "@/components/layout/page-header";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import { getModelCard, type ModelCard, type Tier } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Model & Monitoring" };
+export const metadata: Metadata = { title: "Model & monitoring" };
 
 export default function Page() {
   return (
     <>
       <PageHeader
-        title="Model yang di-deploy menghasilkan ulang submission Kaggle, baris demi baris."
-        description="Cara model dibangun, divalidasi, dan seberapa jauh prediksinya bisa dipercaya."
+        title="Model yang berjalan di Lentera menghasilkan ulang submission Kaggle-nya, baris demi baris."
+        description="Cara model dibangun dan divalidasi, seberapa jauh prediksinya bisa dipercaya, dan apakah kohort ini masih mirip data latihnya."
       />
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat model card...</p>}>
+      <Suspense fallback={<div className="plate h-48 animate-pulse" aria-label="Memuat model card" />}>
         <ModelContent />
       </Suspense>
     </>
@@ -40,71 +41,76 @@ const SEGMENTS: Partial<Record<keyof ModelCard["segments_seed42"], string>> = {
   hard: "Segmen sulit: aktif, tanpa missed submission",
   no_activity: "Tanpa catatan LMS (placeholder)",
 };
-
-const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
+const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+// Kaggle reports "2026-10-31 13:53:00.967000" in UTC; show it as a readable date.
+const utc = (s: string) =>
+  `${new Date(`${s.replace(" ", "T").slice(0, 19)}Z`).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC`;
 
 async function ModelContent() {
-  const res = await getModelCard((await getCurrentUser()).accessToken);
+  const user = await getCurrentUser();
+  const res = await getModelCard(user.accessToken);
   if (!res.ok) return <ApiError />;
   const card = res.data;
   const { nested, leaderboard, calibration, segments_seed42: seg } = card;
+  const selected = leaderboard.selected;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <KpiCard
-          highlight
-          label="F1 validasi bertingkat"
-          value={fmtNum(nested.mean_f1, 4)}
+  const overview = (
+    <div className="flex flex-col gap-5">
+      <section className="plate grid grid-cols-2 gap-x-6 gap-y-7 p-5 sm:p-6 lg:grid-cols-4" aria-label="Ringkasan model">
+        <Stat
+          label="F1 validasi silang bersarang"
+          value={nested.mean_f1}
+          format="dec4"
+          tone="blue"
+          size="lg"
           note={`SD antar-seed ${fmtNum(nested.sd_f1, 4)} (${nested.per_seed.length} seed)`}
         />
-        <KpiCard
-          label="F1 public leaderboard"
-          value={fmtNum(leaderboard.public_f1, 5)}
-          note={`Private: ${leaderboard.private_f1 == null ? "belum tercatat" : fmtNum(leaderboard.private_f1, 5)}`}
-        />
-        <KpiCard label="AUC (seed 42)" value={fmtNum(seg.all.auc, 4)} note={`${fmtInt(seg.all.n)} baris train`} />
-        <KpiCard label="Threshold" value={fmtNum(card.model.threshold, 3)} note="Dipilih di inner fold, bukan 0,5" />
-        <KpiCard label="Kalibrasi (ECE)" value={fmtNum(calibration.ece, 4)} note={`Brier ${fmtNum(calibration.brier, 3)}`} />
-      </div>
+        <Stat label="AUC (seed 42)" value={seg.all.auc} format="dec4" note={`${fmtInt(seg.all.n)} baris train`} />
+        <Stat label="Ambang ter-flag" value={card.model.threshold} format="dec4" note="dipilih di inner fold, bukan 0,5" />
+        <Stat label="Kalibrasi (ECE)" value={calibration.ece} format="dec4" note={`Brier ${fmtNum(calibration.brier, 3)}`} />
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Section title="Skor Kaggle" description="Dua submission berbeda, dilabeli terpisah supaya jelas mana yang berjalan di Lentera.">
+        <dl className="divide-y divide-separator">
+          <KaggleRow
+            label="Model yang berjalan di Lentera"
+            note={`Submission ref ${leaderboard.submission_ref}, ${utc(leaderboard.submitted_utc)}; prediksinya direproduksi persis oleh model ini.`}
+            pub={leaderboard.public_f1}
+            priv={leaderboard.private_f1}
+          />
+          {selected && (
+            <KaggleRow
+              label="Submission terpilih tim untuk leaderboard akhir"
+              note={`${selected.file}, ref ${selected.ref}, ${utc(selected.submitted_utc)}.`}
+              pub={selected.public_f1}
+              priv={selected.private_f1}
+            />
+          )}
+        </dl>
+      </Section>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section title="Validasi bertingkat" description={`${sentence(card.protocol.inference)}.`}>
-          <ul className="mb-4 list-disc space-y-1 pl-5 text-sm">
+          <ul className="mb-5 space-y-1.5 text-sm leading-relaxed text-ink-2">
             <li>Outer: {card.protocol.outer}.</li>
             <li>Inner: {card.protocol.inner}.</li>
             <li>Early stopping: {card.protocol.early_stopping}.</li>
           </ul>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Seed</TableHead>
-                <TableHead className="text-right">F1</TableHead>
-                <TableHead className="text-right">Presisi</TableHead>
-                <TableHead className="text-right">Recall</TableHead>
-                <TableHead className="text-right">AUC</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="font-mono tabular-nums">
-              {nested.per_seed.map((s) => (
-                <TableRow key={s.seed}>
-                  <TableCell>{s.seed}</TableCell>
-                  <TableCell className="text-right">{fmtNum(s.f1, 4)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(s.precision, 4)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(s.recall, 4)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(s.auc, 4)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            label="F1 per seed"
+            rows={nested.per_seed}
+            rowId={(s) => s.seed}
+            columns={[
+              { id: "seed", label: "Seed", rowHeader: true, cell: (s) => <span className="font-mono">{s.seed}</span> },
+              { id: "f1", label: "F1", align: "end", cell: (s) => <span className="font-semibold">{fmtNum(s.f1, 4)}</span> },
+              { id: "p", label: "Presisi", align: "end", cell: (s) => fmtNum(s.precision, 4) },
+              { id: "r", label: "Recall", align: "end", cell: (s) => fmtNum(s.recall, 4) },
+              { id: "auc", label: "AUC", align: "end", cell: (s) => fmtNum(s.auc, 4) },
+            ]}
+          />
         </Section>
-
-        <Section
-          title="Ablation preprocessing"
-          description="CatBoost 500 trees pada fold yang sama, sehingga perbedaan berasal dari representasi data, bukan jumlah trees."
-        >
+        <Section title="Ablation preprocessing" description="CatBoost 500 trees pada fold yang sama, sehingga perbedaan berasal dari representasi data, bukan jumlah trees.">
           <AblationChart rows={card.ablation} />
         </Section>
       </div>
@@ -113,186 +119,176 @@ async function ModelContent() {
         title="Perbandingan metode"
         description="Setiap kandidat memakai fold dan seed yang sama. Komponen tambahan hanya dipakai jika kontribusinya konsisten, termasuk pada segmen sulit dan M07."
       >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Metode</TableHead>
-              <TableHead className="text-right">F1</TableHead>
-              <TableHead className="text-right">SD</TableHead>
-              <TableHead className="text-right">AUC</TableHead>
-              <TableHead className="text-right">F1 sulit</TableHead>
-              <TableHead className="text-right">F1 M07</TableHead>
-              <TableHead>Keputusan</TableHead>
-              <TableHead>Alasan</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {card.comparison.map((m) => (
-              <TableRow key={m.method} className={cn(m.decision === "dipilih" && "bg-muted/60")}>
-                <TableCell className="font-mono text-xs">{m.method}</TableCell>
-                <TableCell className="text-right font-mono tabular-nums">{fmtNum(m.f1, 4)}</TableCell>
-                <TableCell className="text-right font-mono tabular-nums">{m.seeds > 1 ? fmtNum(m.f1_sd, 4) : "-"}</TableCell>
-                <TableCell className="text-right font-mono tabular-nums">{fmtNum(m.auc, 4)}</TableCell>
-                <TableCell className="text-right font-mono tabular-nums">{fmtNum(m.hard_f1, 4)}</TableCell>
-                <TableCell className="text-right font-mono tabular-nums">{fmtNum(m.m07_f1, 4)}</TableCell>
-                <TableCell>
-                  <DecisionBadge decision={m.decision} />
-                </TableCell>
-                <TableCell className="max-w-sm whitespace-normal text-xs text-muted-foreground">{m.reason ?? ""}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <DataTable
+          label="Perbandingan metode"
+          rows={card.comparison}
+          rowId={(m) => m.method}
+          columns={[
+            { id: "m", label: "Metode", rowHeader: true, cell: (m) => <span className="font-mono text-xs">{m.method}</span> },
+            { id: "f1", label: "F1", align: "end", cell: (m) => <span className="font-semibold">{fmtNum(m.f1, 4)}</span> },
+            { id: "sd", label: "SD", align: "end", cell: (m) => (m.seeds > 1 ? fmtNum(m.f1_sd, 4) : "-") },
+            { id: "auc", label: "AUC", align: "end", cell: (m) => fmtNum(m.auc, 4) },
+            { id: "hard", label: "F1 sulit", align: "end", cell: (m) => fmtNum(m.hard_f1, 4) },
+            { id: "m07", label: "F1 M07", align: "end", cell: (m) => fmtNum(m.m07_f1, 4) },
+            { id: "d", label: "Keputusan", cell: (m) => <DecisionBadge decision={m.decision} /> },
+            { id: "why", label: "Alasan", className: "min-w-[260px] max-w-sm whitespace-normal text-[13px] text-ink-3", cell: (m) => m.reason ?? "" },
+          ]}
+        />
       </Section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section
           title="Kalibrasi probabilitas"
-          description="Titik dekat garis diagonal berarti probabilitas bisa dibaca apa adanya: dari 100 mahasiswa dengan prediksi 0,8, sekitar 80 benar-benar berisiko."
+          description="Titik dekat garis diagonal berarti probabilitas bisa dibaca apa adanya, sehingga jumlahnya menjadi perkiraan jumlah mahasiswa yang benar-benar berisiko."
         >
           <CalibrationChart bins={calibration.bins} />
         </Section>
-        <Section
-          title="Presisi saat kapasitas terbatas"
-          description="Jika konselor hanya bisa menghubungi sebagian mahasiswa, urutan probabilitas menjaga presisi tetap tinggi."
-        >
+        <Section title="Presisi saat kapasitas terbatas" description="Jika konselor hanya bisa menghubungi sebagian mahasiswa, urutan probabilitas menjaga presisi tetap tinggi.">
           <CapacityChart points={card.capacity_curve} />
         </Section>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section title="Tier risiko" description={card.evaluation_notes.calibration_and_tiers}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tier</TableHead>
-                <TableHead className="text-right">Mahasiswa</TableHead>
-                <TableHead className="text-right">At-risk aktual</TableHead>
-                <TableHead className="text-right">Porsi dari semua at-risk</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="font-mono tabular-nums">
-              {TIER_ORDER.map((t) => (
-                <TableRow key={t}>
-                  <TableCell>
-                    <TierBadge tier={t} />
-                  </TableCell>
-                  <TableCell className="text-right">{fmtInt(card.tiers[t].n)}</TableCell>
-                  <TableCell className="text-right">{fmtPct(card.tiers[t].at_risk_rate, 1)}</TableCell>
-                  <TableCell className="text-right">{fmtPct(card.tiers[t].share_of_at_risk, 1)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            label="Tier risiko"
+            rows={TIER_ORDER.map((t) => ({ t, ...card.tiers[t] }))}
+            rowId={(r) => r.t}
+            columns={[
+              { id: "t", label: "Tier", rowHeader: true, cell: (r) => <TierBadge tier={r.t} /> },
+              { id: "n", label: "Mahasiswa", align: "end", cell: (r) => fmtInt(r.n) },
+              { id: "a", label: "At-risk aktual", align: "end", cell: (r) => fmtPct(r.at_risk_rate, 1) },
+              { id: "s", label: "Porsi dari semua at-risk", align: "end", cell: (r) => fmtPct(r.share_of_at_risk, 1) },
+            ]}
+          />
         </Section>
-
         <Section title="Keandalan per segmen dan modul" description={card.evaluation_notes.per_module_and_fairness}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Kelompok</TableHead>
-                <TableHead className="text-right">n</TableHead>
-                <TableHead className="text-right">F1</TableHead>
-                <TableHead className="text-right">AUC</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="font-mono tabular-nums">
-              {(Object.keys(SEGMENTS) as (keyof typeof SEGMENTS)[]).map((k) => (
-                <TableRow key={k}>
-                  <TableCell className="font-sans">{SEGMENTS[k]}</TableCell>
-                  <TableCell className="text-right">{fmtInt(seg[k].n)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(seg[k].f1, 3)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(seg[k].auc, 3)}</TableCell>
-                </TableRow>
-              ))}
-              {Object.entries(card.per_module).map(([mod, m]) => (
-                <TableRow key={mod}>
-                  <TableCell className="font-sans">Modul {fmtModule(mod)}</TableCell>
-                  <TableCell className="text-right">{fmtInt(m.n)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(m.f1, 3)}</TableCell>
-                  <TableCell className="text-right">{fmtNum(m.auc, 3)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            label="Keandalan per segmen dan modul"
+            dense
+            rows={[
+              ...(Object.keys(SEGMENTS) as (keyof typeof SEGMENTS)[]).map((k) => ({ id: k, label: SEGMENTS[k]!, n: seg[k].n, f1: seg[k].f1, auc: seg[k].auc })),
+              ...Object.entries(card.per_module).map(([mod, m]) => ({ id: mod, label: `Modul ${fmtModule(mod)}`, n: m.n, f1: m.f1, auc: m.auc })),
+            ]}
+            rowId={(r) => r.id}
+            columns={[
+              { id: "l", label: "Kelompok", rowHeader: true, cell: (r) => r.label },
+              { id: "n", label: "n", align: "end", cell: (r) => fmtInt(r.n) },
+              { id: "f1", label: "F1", align: "end", cell: (r) => fmtNum(r.f1, 3) },
+              { id: "auc", label: "AUC", align: "end", cell: (r) => fmtNum(r.auc, 3) },
+            ]}
+          />
         </Section>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section
           title="Sinyal yang paling memengaruhi model"
-          description="Importance CatBoost (PredictionValuesChange) dijumlahkan per sinyal; 77 fitur dikelompokkan menjadi 14 sinyal."
+          description={`Importance CatBoost (PredictionValuesChange) dijumlahkan per sinyal; ${card.model.n_features} fitur dikelompokkan menjadi ${Object.keys(card.importance.by_signal).length} sinyal.`}
         >
           <ImportanceChart items={Object.values(card.importance.by_signal)} />
         </Section>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <Section title="Uji transfer ke presentation baru" description={card.presentation_stress.note}>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Presentation di-hold-out</TableHead>
-                  <TableHead className="text-right">n</TableHead>
-                  <TableHead className="text-right">F1</TableHead>
-                  <TableHead className="text-right">AUC</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="font-mono tabular-nums">
-                {card.presentation_stress.per_presentation.map((p) => (
-                  <TableRow key={p.presentation}>
-                    <TableCell>{p.presentation}</TableCell>
-                    <TableCell className="text-right">{fmtInt(p.n)}</TableCell>
-                    <TableCell className="text-right">{fmtNum(p.f1, 3)}</TableCell>
-                    <TableCell className="text-right">{fmtNum(p.auc, 3)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              label="Uji transfer per presentation"
+              rows={card.presentation_stress.per_presentation}
+              rowId={(p) => p.presentation}
+              columns={[
+                { id: "p", label: "Presentation di-hold-out", rowHeader: true, cell: (p) => p.presentation },
+                { id: "n", label: "n", align: "end", cell: (p) => fmtInt(p.n) },
+                { id: "f1", label: "F1", align: "end", cell: (p) => fmtNum(p.f1, 3) },
+                { id: "auc", label: "AUC", align: "end", cell: (p) => fmtNum(p.auc, 3) },
+              ]}
+            />
           </Section>
-
-          <Section title="Artefak dan reproduksibilitas" description="Model yang di-deploy menghasilkan ulang submission yang dinilai di Kaggle.">
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-              <dt className="text-muted-foreground">Versi model</dt>
-              <dd className="font-mono text-xs">{card.model.model_version}</dd>
-              <dt className="text-muted-foreground">Fitur</dt>
-              <dd className="font-mono text-xs">{card.model.n_features} kolom, {fmtInt(card.model.n_train)} baris train</dd>
-              <dt className="text-muted-foreground">SHA256 model</dt>
-              <dd className="break-all font-mono text-xs">{card.model.model_sha256}</dd>
-              <dt className="text-muted-foreground">Submission Kaggle</dt>
-              <dd className="font-mono text-xs">ref {leaderboard.submission_ref}, {leaderboard.submitted_utc} UTC</dd>
-              <dt className="text-muted-foreground">SHA256 submission</dt>
-              <dd className="break-all font-mono text-xs">{leaderboard.submission_sha256}</dd>
-              <dt className="text-muted-foreground">Library</dt>
-              <dd className="font-mono text-xs">
-                {Object.entries(card.model.versions).map(([k, v]) => `${k} ${v}`).join(", ")}
+          <Section title="Artefak dan reproduksibilitas" description="Setiap angka di halaman ini berasal dari model card yang dibangun ulang dari pipeline DSCO.">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 text-sm">
+              <dt className="text-ink-3">Versi model</dt>
+              <dd className="font-mono text-xs text-ink">{card.model.model_version}</dd>
+              <dt className="text-ink-3">Fitur</dt>
+              <dd className="text-ink">
+                {card.model.n_features} kolom, {fmtInt(card.model.n_train)} baris train
+              </dd>
+              <dt className="text-ink-3">SHA256 model</dt>
+              <dd className="font-mono text-xs break-all text-ink">{card.model.model_sha256}</dd>
+              <dt className="text-ink-3">SHA256 submission</dt>
+              <dd className="font-mono text-xs break-all text-ink">{leaderboard.submission_sha256}</dd>
+              <dt className="text-ink-3">Library</dt>
+              <dd className="font-mono text-xs text-ink">
+                {Object.entries(card.model.versions)
+                  .map(([k, v]) => `${k} ${v}`)
+                  .join(", ")}
               </dd>
             </dl>
           </Section>
         </div>
       </div>
+    </div>
+  );
 
-      <Section
-      title="Fairness"
-        description="Tingkat flag dan kualitas prediksi per kelompok. Fitur demografi tidak pernah dipakai sebagai alasan intervensi."
-      >
-        <FairnessTable fairness={card.fairness} />
-      </Section>
+  const panels = [
+    { id: "kartu", label: "Kartu model", content: overview },
+    {
+      id: "fairness",
+      label: "Fairness",
+      content: (
+        <Section title="Fairness" description="Tingkat flag dan kualitas prediksi per kelompok. Fitur demografi tidak pernah dipakai sebagai alasan intervensi.">
+          <FairnessTable fairness={card.fairness} />
+        </Section>
+      ),
+    },
+    {
+      id: "drift",
+      label: "Drift data",
+      content: (
+        <Suspense fallback={<div className="plate h-40 animate-pulse" aria-label="Memuat drift" />}>
+          <DriftPanel />
+        </Suspense>
+      ),
+    },
+    ...(user.role === "advisor"
+      ? []
+      : [
+          {
+            id: "api",
+            label: "Kesehatan API",
+            content: (
+              <Suspense fallback={<div className="plate h-40 animate-pulse" aria-label="Memuat statistik API" />}>
+                <RequestPanel />
+              </Suspense>
+            ),
+          },
+        ]),
+  ];
+  return <ModelTabs panels={panels} />;
+}
 
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat laporan drift...</p>}>
-        <DriftPanel />
-      </Suspense>
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat statistik API...</p>}>
-        <RequestPanel />
-      </Suspense>
+function KaggleRow({ label, note, pub, priv }: { label: string; note: string; pub: number; priv: number | null }) {
+  return (
+    <div className="grid gap-2 py-4 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-8">
+      <dt>
+        <span className="block text-[15px] font-semibold text-ink">{label}</span>
+        <span className="mt-0.5 block text-sm text-ink-3">{note}</span>
+      </dt>
+      <dd>
+        <span className="block text-xs text-ink-3">Public</span>
+        <span className="numeral text-[1.6rem] text-ink">{fmtNum(pub, 5)}</span>
+      </dd>
+      <dd>
+        <span className="block text-xs text-ink-3">Private</span>
+        <span className="numeral text-[1.6rem] text-ink">{priv == null ? "-" : fmtNum(priv, 5)}</span>
+      </dd>
     </div>
   );
 }
 
 function DecisionBadge({ decision }: { decision: ModelCard["comparison"][number]["decision"] }) {
   const styles = {
-    dipilih: "bg-primary text-primary-foreground",
-    ditolak: "bg-muted text-muted-foreground",
-    pembanding: "border text-muted-foreground",
+    dipilih: "bg-blue text-white",
+    ditolak: "bg-surface-tertiary text-ink-2",
+    pembanding: "border border-line-strong text-ink-2",
   } as const;
   const labels = { dipilih: "Dipilih", ditolak: "Ditolak", pembanding: "Pembanding" } as const;
-  return <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", styles[decision])}>{labels[decision]}</span>;
+  return <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold", styles[decision])}>{labels[decision]}</span>;
 }

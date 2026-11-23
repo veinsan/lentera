@@ -5,8 +5,8 @@ import { AXIS, ChartTooltip, type TooltipContentProps } from "@/components/chart
 import { fmtInt } from "@/lib/format";
 
 const SERIES = [
-  { key: "at_risk", name: "At-risk", color: "var(--chart-1)" },
-  { key: "not_at_risk", name: "Tidak at-risk", color: "var(--chart-2)" },
+  { key: "at_risk", name: "At-risk", color: "var(--chart-risk)" },
+  { key: "not_at_risk", name: "Tidak at-risk", color: "var(--chart-safe)" },
 ] as const;
 
 type Weekly = { at_risk: number[]; not_at_risk: number[] };
@@ -21,9 +21,9 @@ export function WeeklyChart({ weekly, yMax }: { weekly: Weekly; yMax: number }) 
   return (
     <ResponsiveContainer width="100%" height={180}>
       <LineChart data={data} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke="var(--border)" vertical={false} />
-        <XAxis dataKey="week" tick={AXIS} stroke="var(--border)" />
-        <YAxis domain={[0, yMax]} tick={AXIS} stroke="var(--border)" width={36} />
+        <CartesianGrid stroke="var(--line)" vertical={false} />
+        <XAxis dataKey="week" tick={AXIS} stroke="var(--line)" />
+        <YAxis domain={[0, yMax]} tick={AXIS} stroke="var(--line)" width={36} />
         {SERIES.map((s) => (
           <Line
             key={s.key}
@@ -31,13 +31,13 @@ export function WeeklyChart({ weekly, yMax }: { weekly: Weekly; yMax: number }) 
             name={s.name}
             stroke={s.color}
             strokeWidth={2}
-            dot={{ r: 4, fill: s.color, stroke: "var(--card)", strokeWidth: 2 }}
+            dot={{ r: 4, fill: s.color, stroke: "var(--surface)", strokeWidth: 2 }}
             isAnimationActive={false}
           />
         ))}
-        <Legend verticalAlign="top" align="right" iconType="plainline" wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }} />
+        <Legend verticalAlign="top" align="right" iconType="plainline" wrapperStyle={{ fontSize: 12, color: "var(--ink)" }} />
         <Tooltip
-          cursor={{ stroke: "var(--border)" }}
+          cursor={{ stroke: "var(--line)" }}
           content={(p: TooltipContentProps) => {
             const d = p.payload?.[0]?.payload as (typeof data)[number] | undefined;
             if (!p.active || !d) return null;

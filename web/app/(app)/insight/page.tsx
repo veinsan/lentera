@@ -4,24 +4,24 @@ import { CircleAlert } from "lucide-react";
 import { HeatmapTable } from "@/components/charts/heatmap-table";
 import { WeeklyChart } from "@/components/charts/weekly-chart";
 import { ApiError } from "@/components/domain/api-error";
-import { KpiCard } from "@/components/domain/kpi-card";
 import { Section } from "@/components/domain/section";
+import { Stat } from "@/components/domain/stat";
 import { PageHeader } from "@/components/layout/page-header";
 import { getInsights, type Insights, type ModuleInsight } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Insight Course" };
+export const metadata: Metadata = { title: "Insight course" };
 
 export default function Page() {
   return (
     <>
       <PageHeader
         title="Modul tanpa asesmen yang dinilai di minggu ke-4 paling sulit diprediksi."
-        description="Apa yang bisa diubah di desain course agar risiko terdeteksi lebih awal, per modul."
+        description="Apa yang bisa diubah di desain course agar risiko terdeteksi lebih awal, per modul, dari data train DSCO."
       />
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat insight...</p>}>
+      <Suspense fallback={<div className="plate h-40 animate-pulse" aria-label="Memuat insight" />}>
         <InsightContent />
       </Suspense>
     </>
@@ -34,27 +34,30 @@ async function InsightContent() {
   const insights = res.data;
   const modules = Object.entries(insights.modules);
   const flagged = modules.filter(([, m]) => m.recommendations.length > 0).length;
-  const yMax = Math.ceil(
-    Math.max(...modules.flatMap(([, m]) => [...m.weekly_median_interactions.at_risk, ...m.weekly_median_interactions.not_at_risk])) / 10,
-  ) * 10;
+  const yMax =
+    Math.ceil(
+      Math.max(...modules.flatMap(([, m]) => [...m.weekly_median_interactions.at_risk, ...m.weekly_median_interactions.not_at_risk])) / 10,
+    ) * 10;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <KpiCard highlight label="Modul dengan rekomendasi" value={`${flagged} dari ${modules.length}`} note={insights.source} />
-        <KpiCard label="Tingkat at-risk seluruh modul" value={fmtPct(insights.overall.at_risk_rate, 1)} />
-        <KpiCard
-          label="Mahasiswa di zona tidak pasti"
-          value={fmtPct(insights.overall.uncertain_share, 1)}
-          note="Probabilitas 0,25 sampai 0,55"
-        />
-      </div>
+    <div className="flex flex-col gap-5">
+      <section className="plate rise grid grid-cols-1 gap-6 p-5 sm:grid-cols-3 sm:p-6" style={{ "--i": 1 } as React.CSSProperties}>
+        <div>
+          <p className="text-[13px] font-medium text-ink-3">Modul dengan rekomendasi desain</p>
+          <p className="numeral mt-1.5 text-[1.9rem] text-blue">
+            {flagged} <span className="text-ink-3">dari {modules.length}</span>
+          </p>
+          <p className="mt-1 text-xs text-ink-3">{insights.source}</p>
+        </div>
+        <Stat label="Tingkat at-risk seluruh modul" value={insights.overall.at_risk_rate} format="pct1" />
+        <Stat label="Mahasiswa di zona tidak pasti" value={insights.overall.uncertain_share} format="pct1" note="butuh tinjauan manusia sebelum bertindak" />
+      </section>
 
-      <Section title="Tingkat at-risk per course" description="Modul x presentation pada data train. Sel kosong berarti course tersebut tidak ada.">
+      <Section title="Tingkat at-risk per course" description="Modul dan presentation pada data train. Sel kosong berarti course tersebut tidak ada.">
         <RiskHeatmap insights={insights} />
       </Section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         {modules.map(([code, m]) => (
           <ModuleCard key={code} code={code} module={m} yMax={yMax} cutoffs={insights.cutoffs} />
         ))}
@@ -63,17 +66,7 @@ async function InsightContent() {
   );
 }
 
-function ModuleCard({
-  code,
-  module: m,
-  yMax,
-  cutoffs,
-}: {
-  code: string;
-  module: ModuleInsight;
-  yMax: number;
-  cutoffs: Insights["cutoffs"];
-}) {
+function ModuleCard({ code, module: m, yMax, cutoffs }: { code: string; module: ModuleInsight; yMax: number; cutoffs: Insights["cutoffs"] }) {
   const stats = [
     { label: "Mahasiswa", value: fmtInt(m.n) },
     { label: "Risiko dasar", value: fmtPct(m.at_risk_rate), warn: m.at_risk_rate >= cutoffs.high_base_risk },
@@ -83,11 +76,11 @@ function ModuleCard({
   ];
   return (
     <Section title={`Modul ${fmtModule(code)}`}>
-      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <dl className="grid grid-cols-3 gap-x-4 gap-y-3 sm:grid-cols-5">
         {stats.map((s) => (
           <div key={s.label}>
-            <dt className="text-xs text-muted-foreground">{s.label}</dt>
-            <dd className={cn("font-mono text-base font-semibold", s.warn && "text-risk-high")}>
+            <dt className="text-xs text-ink-3">{s.label}</dt>
+            <dd className={cn("mt-0.5 text-lg font-semibold tabular-nums", s.warn ? "text-tier-critical" : "text-ink")}>
               {s.value}
               {s.warn && <span className="sr-only"> (perlu perhatian)</span>}
             </dd>
@@ -96,20 +89,20 @@ function ModuleCard({
       </dl>
 
       {m.recommendations.length > 0 ? (
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-5 space-y-2">
           {m.recommendations.map((r) => (
-            <li key={r.code} className="flex gap-2 rounded-md bg-muted p-3 text-sm">
-              <CircleAlert className="mt-0.5 size-4 shrink-0 text-risk-high" aria-hidden />
+            <li key={r.code} className="flex gap-3 rounded-2xl bg-surface-secondary p-3.5 text-sm leading-relaxed text-ink">
+              <CircleAlert className="mt-0.5 size-4 shrink-0 text-tier-critical" aria-hidden />
               <span>{r.text}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="mt-4 text-sm text-muted-foreground">Tidak ada rekomendasi desain untuk modul ini.</p>
+        <p className="mt-5 text-sm text-ink-3">Tidak ada rekomendasi desain untuk modul ini.</p>
       )}
 
-      <div className="mt-4">
-        <p className="mb-1 text-xs font-semibold text-muted-foreground">Median interaksi mingguan (mahasiswa dengan catatan LMS)</p>
+      <div className="mt-5">
+        <p className="mb-2 text-xs font-medium text-ink-3">Median interaksi mingguan (mahasiswa dengan catatan LMS)</p>
         <WeeklyChart weekly={m.weekly_median_interactions} yMax={yMax} />
       </div>
     </Section>

@@ -10,7 +10,12 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 | React | 19.3.0 |
 | TypeScript | 5.9, strict mode |
 | Tailwind CSS | 4.3.3, configured in CSS (`web/app/globals.css`), no `tailwind.config` file |
-| shadcn/ui | 4.23, style `base-nova` on Base UI (`@base-ui/react`), copied into `web/components/ui/`; class merging through the `cn` package (`web/lib/utils.ts`) |
+| HeroUI | 3.2.7 (`@heroui/react`, `@heroui/styles`) on React Aria Components 1.22; themed through its CSS variables in `web/app/globals.css`; class merging through the `cn` package (`web/lib/utils.ts`) |
+| Motion | 14.14 (`motion/react`): route enter animation, nav indicator, backdrop parallax |
+| three.js / React Three Fiber | three 0.187, `@react-three/fiber` 9.8, `@react-three/drei` 10.7: the cohort sky in `web/components/sky/` |
+| NumberFlow | `@number-flow/react` 0.6: numbers that roll when they change (`Num` in `web/components/domain/stat.tsx`) |
+| cmdk | 1.1: the command palette (Ctrl/Cmd+K) |
+| Fonts | Google Sans Flex (display and UI, axes opsz, wdth, ROND) and Google Sans Code (IDs) through `next/font/google` |
 | lucide-react | Icons |
 | Recharts | 3.11, charts in `web/components/charts/` |
 | `@supabase/ssr`, `@supabase/supabase-js` | Auth and database access from the frontend |
@@ -32,30 +37,36 @@ The ML library versions match `dsco/outputs/audit/requirements-lock.txt`, except
 
 ## Design System
 
-`DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables in `:root` and maps them to Tailwind utility names in the `@theme inline` block. Change a token in `DESIGN.md` and `globals.css` together. The shadcn/ui variable names map onto `DESIGN.md` roles; shadcn's `accent` is the hover surface, so the `DESIGN.md` amber accent is `brand-accent` in code. Fonts load through `next/font/google` in `web/app/layout.tsx`.
+`DESIGN.md` holds the tokens. `web/app/globals.css` defines them as CSS variables in `:root`, sets HeroUI's own variables from them (`--background`, `--surface`, `--accent`, `--muted` is a text colour in HeroUI), and maps them to Tailwind utility names in the `@theme inline` block. Change a token in `DESIGN.md` and `globals.css` together. Liquid glass (`glass`, `glass-night`, `glass-lens` utilities) is for the navigation layer only; content sits on solid `plate` surfaces. Tier and chart colours were checked with the dataviz palette validator; re-run it before changing them. Fonts load through `next/font/google` in `web/app/layout.tsx`.
 
 ## Project Structure
 
 ```text
 web/
   app/
-    (auth)/login/          One-click demo sign-in (role sheets, Alt+1/2/3)
+    page.tsx               Public landing page (static; numbers from lib/generated/landing.json)
+    (auth)/login/          One-click demo sign-in (role cards, Alt+1/2/3)
     demo/[role]/           Presenter deep link that signs in as a demo role
-    (app)/                 Pages behind sign-in, sharing the sidebar layout
-      dashboard/
-      rencana/             Capacity planner
-      prioritas/           Advisor worklist
-      mahasiswa/[id]/      Student profile
+    (app)/                 Pages behind sign-in, sharing the glass sidebar layout
+      @panel/(.)mahasiswa/[id]/  Intercepted student profile, shown as a side sheet over the current page
+      dashboard/           X-Ray kohort: the 3D cohort sky, KPIs, capacity glance, archetype and module tables
+      rencana/             Capacity planner and the advisor board
+      prioritas/           Advisor worklist (rows open the student side sheet)
+      mahasiswa/[id]/      Student profile as a full page (direct link or refresh)
       insight/             Course insights
       unggah/              Cohort upload
-      model/               Model and monitoring
+      model/               Model and monitoring (tabs: model card, fairness, drift, API health)
   components/
-    ui/                    shadcn/ui components
-    layout/                Sidebar, nav links, page header
+    ui/                    DataTable (HeroUI table from column definitions) and LinkButton
+    brand/                 Lantern mark and wordmark, liquid lens SVG filter
+    sky/                   The React Three Fiber constellation and its client-only loader
+    layout/                Sidebar, phone nav, command palette, page header, atlas backdrop
     charts/                Recharts wrappers that apply chart tokens, plus the HTML heatmap and segmented bar
-    domain/                Empty state, KPI card, section, tier badge, fairness table, API error; planned: archetype chip, scenario panel, reason list
+    domain/                Section, stat, tier badge, archetype chip, student profile and panel, planner, upload, monitoring
   lib/
-    nav.ts                 Sidebar items
+    nav.ts                 Sidebar items and presenter shortcuts (1 to 6)
+    landing.ts             Typed view of generated/landing.json (api/scripts/build_landing.py)
+    sky.ts                 Cohort sky shape and the night tier colours
     utils.ts               cn() class merging
     auth.ts                getCurrentUser() and requireRole(): the data access layer for the session
     supabase/              Browser and server Supabase clients
@@ -94,6 +105,9 @@ data/                      Local only, gitignored
 - Use the `@/` import alias for `web/`.
 - Supabase returns at most 1,000 rows per request. Page with `.range()`; `getCohortPredictions` in `web/lib/data.ts` fetches the pages in parallel.
 - Modules imported by client components must not import `web/lib/data.ts` or `web/lib/supabase/server.ts`, which depend on `next/headers`.
+- HeroUI compound components (`Table.Row`, `Select.Trigger`) work in client components only. A server component cannot dot into a client module: use the named parts (`TableRoot`, `TableRow`) as `web/components/ui/data-table.tsx` does, or wrap the kit in a small client component.
+- Do not use `next/dynamic` with `ssr: false` inside a streamed Suspense boundary (it broke React's streaming in dev). Load client-only code with `React.lazy` after mount, as `web/components/sky/sky-stage.tsx` does.
+- Entrance motion never hides content on first paint: CSS `rise`/`reveal` animations from a visible default, and the route template animates only in-app navigations. Every animation has a `prefers-reduced-motion` path.
 - Fetch Supabase data in server components where possible. Call the API through `web/lib/api.ts` only. It returns `{ ok, data }` or `{ ok: false, error }` instead of throwing, and calls `unstable_rethrow` so Next.js prerender signals pass through; pages render `ApiError` on failure.
 - Charts follow the dataviz rules: categorical and ordinal colors come only from validated tokens, 2px lines, bars at most 24px with 4px rounded ends, solid hairline grids, a legend for two or more series, a hover tooltip with the value first, and no dual axes.
 - Format probabilities and counts through `web/lib/format.ts` so every page shows them the same way.
@@ -122,6 +136,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [x] Drift report stored per scored cohort (`api/app/drift.py`) and request logging middleware with `GET /monitoring/requests`
 - [x] Deployment: API on Azure Container Apps through GitHub Actions, web on Vercel (see Production)
+- [x] Star atlas redesign: public landing page (cohort sky, four stages, safety, proof, role entry), liquid glass shell, X-Ray dashboard with the 3D cohort sky, student side sheet over the worklist, command palette, HeroUI kit; landing numbers from `api/scripts/build_landing.py`
 
 ## Do Not
 
@@ -139,7 +154,8 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - API: `uv run python -m pytest` from `api/`.
 - Local API server: `uv run --env-file .env python -m uvicorn app.main:app --reload` from `api/`, then open `http://localhost:8000/docs`. `CORS_ORIGINS` (comma-separated) sets the allowed frontend origins; the default is `http://localhost:3000`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
-- Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
+- Frontend: no automated tests yet. Verify pages manually in a browser with each demo role. The owner works in Orca: use its embedded browser through the `orca` CLI (`orca tab create`, `orca screenshot --page <id>`), not Chrome. Start dev servers outside the Claude Code sandbox, or the browser cannot reach them.
+- Landing data: `uv run python scripts/build_landing.py` from `api/` rewrites `web/lib/generated/landing.json` from `data/test.csv`, the model, the planner, and `artifacts/model_card.json`. Rerun it after any artifact change. Kaggle scores live in `api/artifacts/kaggle_submissions.csv` (Kaggle CLI export) and reach the model card through `scripts/build_model_card.py`.
 
 Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Port 3000 is often taken by another project on the owner's machine; then run `pnpm dev --port 3001` and start the API with `CORS_ORIGINS=http://localhost:3000,http://localhost:3001`. The web defaults to `http://127.0.0.1:8000` for the API, because `localhost` on Windows tries IPv6 first and adds about 2 s per call. Pages that read the API need the local API on port 8000, or `API_URL` (server) and `NEXT_PUBLIC_API_URL` (browser uploads) in `web/.env.local`.
 
@@ -156,7 +172,7 @@ Windows Smart App Control on the owner's machine blocks unsigned executables and
 
 ## Visual World
 
-The redesign follows the direction contract in `.impeccable/surfaces/web-app.md` (campus noticeboard: putty board, paper sheets, slate rail and contrast panels, one lime highlighter, tier pins with labels; Archivo for headlines and numerals, Geist for UI, Geist Mono for data). Product truth for design work is `PRODUCT.md`. Each page title is the screen's finding as one sentence; no eyebrow or kicker above a heading. `DESIGN.md` is rewritten from the built world at the end of the redesign.
+The design follows the direction contracts in `.impeccable/surfaces/web-app.md` (app) and `.impeccable/surfaces/web-app-page-tsx.md` (landing): a star atlas. Every student is a star whose size and warmth is their risk, archetypes are constellations; liquid glass is the navigation layer over a generated blue atlas plate (`web/public/atlas/`, Figma AI, provenance in the `.json` sidecars); one committed blue for actions; warm hues for risk tiers only, always labelled; Google Sans Flex and Google Sans Code. Product truth for design work is `PRODUCT.md`. Each page title is the screen's finding as one sentence; no eyebrow or kicker above a heading. `DESIGN.md` is written from the built world.
 
 ## Build
 

@@ -17,7 +17,7 @@ Lentera turns the DSCO 2026 week 4 at-risk predictions into decisions: which stu
 
 ## Positioning
 
-A probability per student is what every entry produces. Lentera's mechanism is prescriptive and capacity-aware: calibrated probabilities (ECE 0.0075) let it count expected at-risk students reached per advisor hour, archetypes route each flagged student to a different action, SHAP reasons separate actionable signals from context, and a counterfactual shows the behavior change that would move a student below the threshold. The deployed model reproduces the submitted Kaggle predictions exactly (6,502 of 6,502 rows).
+A probability per student is what every entry produces. Lentera's mechanism is prescriptive and capacity-aware: calibrated probabilities (ECE 0.0075) let it count expected at-risk students reached per advisor hour, archetypes route each flagged student to a different action, SHAP reasons separate actionable signals from context, and a counterfactual shows the behavior change that would move a student below the threshold. The deployed model reproduces its own Kaggle submission of 31 October exactly (6,502 of 6,502 rows; public 0.78443, private 0.77775). The team's selected leaderboard submission is a different file (public 0.80150, private 0.79363); the interface labels the two separately.
 
 ## Operating Context
 
@@ -27,7 +27,8 @@ A probability per student is what every entry produces. Lentera's mechanism is p
 
 ## Capabilities and Constraints
 
-- Pages: dashboard, capacity planner (Rencana Intervensi), advisor worklist (Daftar Prioritas), student profile with reason codes, what-if and counterfactual, message template and intervention log, course insights (Insight Course), cohort upload with data quality report, model and monitoring (model card, fairness, drift, API health).
+- Public landing page at `/`: what Lentera does, how it works in four stages, safety facts, model proof, and one-click entry to the demo roles.
+- Pages: dashboard (X-Ray kohort), capacity planner (Rencana Intervensi), advisor worklist (Daftar Prioritas), student profile with reason codes, what-if and counterfactual, message template and intervention log, course insights (Insight Course), cohort upload with data quality report, model and monitoring (model card, fairness, drift, API health).
 - Roles change what is visible: the advisor sees modules M03 and M06 only (row level security), coordinator and admin see all modules and the planner and upload pages.
 - Stack in place: Next.js 16 on Vercel (web), FastAPI with CatBoost on Azure Container Apps (API), Supabase Postgres with RLS and Auth.
 - UI copy is Indonesian; documents are English.
@@ -39,7 +40,8 @@ A probability per student is what every entry produces. Lentera's mechanism is p
 
 ## Evidence on Hand
 
-- `api/artifacts/model_card.json`: nested CV F1 0.7738 (SD 0.0005), public leaderboard F1 0.78443, calibration, ablation, fairness, per-module metrics.
+- `api/artifacts/model_card.json`: nested CV F1 0.7738 (SD 0.0005), Kaggle public 0.78443 and private 0.77775 for the deployed model, the selected submission's public 0.80150 and private 0.79363 (from `api/artifacts/kaggle_submissions.csv`), calibration, ablation, fairness, per-module metrics.
+- `web/lib/generated/landing.json`: the public landing page's numbers and the demo cohort sky (no IDs), built by `api/scripts/build_landing.py`.
 - `api/artifacts/insights.json`: course insights per module.
 - Demo cohort "Kohort uji DSCO (test.csv)": 6,502 scored students in Supabase; DSCO competition data, anonymized numeric IDs, approved by the owner for public display (2026-11-23).
 - Absent: real institution users, testimonials, measured intervention effects. Effectiveness values in the planner are assumptions and are labeled as scenarios, never as causal effects.

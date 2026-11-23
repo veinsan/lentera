@@ -22,6 +22,7 @@ DATA = ROOT.parent / "data"
 DSCO = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parents[1] / "dsco"
 EXP = DSCO / "outputs/experiments"
 SEEDS = [42, 137, 20261031]
+SELECTED_REF = 57470830  # the submission the team selected for the final Kaggle leaderboard (owner, 2026-11-23)
 
 # Decisions recorded in dsco/docs/findings.md and dsco/docs/experiment_log.md.
 DECISIONS = {
@@ -70,7 +71,10 @@ def main() -> None:
         ablation.append(dict(name=name, label=label_id, f1_seed42=float(row[42]), f1_seed137=float(row[137])))
 
     ledger = json.loads((DSCO / "outputs/submissions/ledger.json").read_text())[0]
-    stress = json.loads((DSCO / "outputs/eda/18_presentation_stress/cat_clean_rank/summary.json").read_text())
+    # Scores as Kaggle reports them after the deadline (kaggle competitions submissions -v > artifacts/kaggle_submissions.csv).
+    kaggle = pd.read_csv(ROOT / "artifacts/kaggle_submissions.csv").set_index("ref")
+    deployed, selected = kaggle.loc[ledger["ref"]], kaggle.loc[SELECTED_REF]
+    stress =json.loads((DSCO / "outputs/eda/18_presentation_stress/cat_clean_rank/summary.json").read_text())
 
     bins = pd.cut(p, np.linspace(0, 1, 11), include_lowest=True)
     cal = pd.DataFrame(dict(y=y, p=p, b=bins)).groupby("b", observed=True).agg(n=("y", "size"), predicted=("p", "mean"),
@@ -116,9 +120,11 @@ def main() -> None:
         segments_seed42={k: segments_42[k] for k in ["all", "active", "hard", "m07", "no_activity"]},
         comparison=comparison,
         ablation=ablation,
-        leaderboard=dict(public_f1=ledger["public_score"], private_f1=ledger["private_score"],
+        leaderboard=dict(public_f1=float(deployed.publicScore), private_f1=float(deployed.privateScore),
                          submission_ref=ledger["ref"], submission_sha256=ledger["submission_sha256"],
-                         submitted_utc=ledger["date_utc"]),
+                         submitted_utc=ledger["date_utc"],
+                         selected=dict(ref=SELECTED_REF, file=selected.fileName, submitted_utc=selected.date,
+                                       public_f1=float(selected.publicScore), private_f1=float(selected.privateScore))),
         presentation_stress=dict(note="Satu presentation di-hold-out per run; menguji transfer ke cohort baru.",
                                  per_presentation=stress["per_presentation"]),
         calibration=calibration,
@@ -135,7 +141,7 @@ def main() -> None:
     )
     (ROOT / "artifacts/model_card.json").write_text(json.dumps(card, indent=2, ensure_ascii=False))
     print(json.dumps(dict(mean_f1=card["nested"]["mean_f1"], sd=card["nested"]["sd_f1"], ece=calibration["ece"],
-                          public=ledger["public_score"], private=ledger["private_score"],
+                          leaderboard=card["leaderboard"],
                           top10=capacity[1], tiers=tier_stats), indent=2))
 
 

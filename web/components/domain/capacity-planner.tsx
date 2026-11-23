@@ -1,33 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { FlaskConical, Info } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button, Input, Label, NumberField, toast } from "@heroui/react";
+import { FlaskConical, RotateCcw } from "lucide-react";
 import { ReachCurveChart } from "@/components/charts/reach-curve-chart";
-import { KpiCard } from "@/components/domain/kpi-card";
 import { Section } from "@/components/domain/section";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { PlanResult, PlaybookRow } from "@/lib/api";
+import { Num, Stat } from "@/components/domain/stat";
+import { TIER_LABELS, TierDot } from "@/components/domain/tier-badge";
+import type { PlanResult, PlaybookRow, Tier } from "@/lib/api";
 import { postJson } from "@/lib/api-browser";
-import { fmtInt, fmtNum, fmtPct, fmtProb } from "@/lib/format";
+import { fmtInt, fmtModule, fmtNum, fmtProb } from "@/lib/format";
 import { ACTION_LABELS, ARCHETYPE_LABELS } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 type Overrides = Record<string, { minutes: number; effectiveness: number }>;
 const CHANNEL_LABELS = { advisor: "Konselor", automated: "Otomatis", unassigned: "Belum terjangkau" } as const;
+const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
 const DEBOUNCE_MS = 300;
 
-export function CapacityPlanner({ cohortId }: { cohortId: string }) {
+export function CapacityPlanner({ cohortId, ece }: { cohortId: string; ece: number | null }) {
   const router = useRouter();
   const [advisors, setAdvisors] = useState(5);
   const [hours, setHours] = useState(10);
   const [defaults, setDefaults] = useState<PlaybookRow[] | null>(null);
   const [overrides, setOverrides] = useState<Overrides>({});
   const [result, setResult] = useState<PlanResult | null>(null);
+  const [revision, setRevision] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
   const request = useRef(0);
 
@@ -41,9 +42,10 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
       if (res.status === 200) {
         const plan = res.body as PlanResult;
         setResult(plan);
+        setRevision((r) => r + 1); // re-keys the board cards so the refill animates
         setError(null);
         setDefaults((d) => d ?? plan.playbook);
-      } else setError("Rencana gagal dihitung. Periksa angka yang dimasukkan.");
+      } else setError("Rencana gagal dihitung. Periksa angka yang dimasukkan, atau tunggu API model bangun.");
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
     // body is rebuilt from these values on every render
@@ -53,16 +55,15 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
   function setOverride(row: PlaybookRow, key: "minutes" | "effectiveness", value: number) {
     const current = overrides[row.archetype] ?? { minutes: row.minutes, effectiveness: row.effectiveness };
     setOverrides({ ...overrides, [row.archetype]: { ...current, [key]: value } });
-    setSaved(null);
   }
 
   function save() {
     startSave(async () => {
       const res = await postJson<{ id: number }>("/plans", body);
       if (res.status === 200) {
-        setSaved(`Rencana #${(res.body as { id: number }).id} tersimpan.`);
+        toast.success(`Rencana #${(res.body as { id: number }).id} tersimpan`);
         router.refresh();
-      } else setError("Rencana gagal disimpan.");
+      } else setError("Rencana gagal disimpan. Coba lagi sebentar lagi.");
     });
   }
 
@@ -70,89 +71,94 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
   const capacityHours = advisors * hours;
 
   return (
-    <div className="flex flex-col gap-6">
-      <Section title="Kapasitas konselor" description="Berapa banyak waktu konselor yang tersedia untuk kohort ini per minggu.">
-        <div className="flex flex-wrap items-end gap-4">
-          <NumberField id="advisors" label="Jumlah konselor" value={advisors} min={0} max={200} step={1} onChange={(v) => { setAdvisors(v); setSaved(null); }} />
-          <NumberField id="hours" label="Jam per konselor per minggu" value={hours} min={0} max={80} step={1} onChange={(v) => { setHours(v); setSaved(null); }} />
-          <p className="pb-2 text-sm text-muted-foreground">
-            = <span className="font-mono font-semibold text-foreground">{fmtInt(capacityHours)}</span> jam konselor per minggu
+    <div className="flex flex-col gap-5">
+      <section className="plate rise flex flex-wrap items-end gap-x-6 gap-y-4 p-5 sm:p-6" style={{ "--i": 1 } as React.CSSProperties}>
+        <Stepper label="Jumlah konselor" value={advisors} max={200} onChange={setAdvisors} />
+        <Stepper label="Jam per konselor per minggu" value={hours} max={80} onChange={setHours} />
+        <p className="pb-3 text-sm text-ink-3">
+          = <b className="font-semibold text-ink tabular-nums">{fmtInt(capacityHours)}</b> jam konselor per minggu
+        </p>
+        <Button onPress={save} isDisabled={!result} isPending={saving} className="ml-auto">
+          {saving ? "Menyimpan..." : "Simpan rencana"}
+        </Button>
+        {error && (
+          <p role="alert" className="w-full text-sm text-danger">
+            {error}
           </p>
-          <Button onClick={save} disabled={!result || saving} className="ml-auto hover:bg-primary-hover">
-            {saving ? "Menyimpan..." : "Simpan rencana"}
-          </Button>
-        </div>
-        {saved && <p role="status" className="mt-3 text-sm text-success">{saved}</p>}
-        {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
-      </Section>
+        )}
+      </section>
 
       {!s ? (
-        <p className="text-sm text-muted-foreground">Menghitung rencana...</p>
+        <div className="plate grid h-40 place-items-center text-sm text-ink-3" aria-busy>
+          Menghitung rencana...
+        </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-            <KpiCard label="Dihubungi konselor" value={fmtInt(s.advisor_contacts)} note={`${fmtInt(s.minutes_used / 60)} dari ${fmtInt(capacityHours)} jam terpakai`} />
-            <KpiCard
-              highlight
-              label="Perkiraan berisiko terjangkau konselor"
-              value={fmtInt(s.expected_at_risk_reached_advisor)}
-              note={s.advisor_mean_probability != null ? `Rata-rata probabilitas ${fmtProb(s.advisor_mean_probability)}` : undefined}
+          <section className="plate grid grid-cols-2 gap-x-6 gap-y-6 p-5 sm:p-6 lg:grid-cols-5" aria-label="Hasil rencana">
+            <Stat label="Dihubungi konselor" value={s.advisor_contacts} note={`${fmtInt(s.minutes_used / 60)} dari ${fmtInt(capacityHours)} jam terpakai`} />
+            <Stat
+              label="Berisiko terjangkau konselor"
+              value={s.expected_at_risk_reached_advisor}
+              tone="blue"
+              note={s.advisor_mean_probability != null ? `rata-rata probabilitas ${fmtProb(s.advisor_mean_probability)}` : undefined}
             />
-            <KpiCard label="Cakupan" value={fmtPct(s.advisor_coverage, 1)} note={`dari ${fmtInt(s.expected_at_risk_cohort)} perkiraan berisiko di kohort`} />
-            <KpiCard label="Pesan otomatis" value={fmtInt(s.automated_contacts)} note={`${fmtInt(s.expected_at_risk_reached_automated)} perkiraan berisiko`} />
-            <KpiCard label="Belum terjangkau" value={fmtInt(s.unassigned)} note="Ter-flag, butuh konselor, belum masuk kapasitas" />
-          </div>
+            <Stat label="Cakupan" value={s.advisor_coverage} format="pct1" note={`dari ${fmtInt(s.expected_at_risk_cohort)} perkiraan berisiko`} />
+            <Stat label="Pesan otomatis" value={s.automated_contacts} note={`${fmtInt(s.expected_at_risk_reached_automated)} perkiraan berisiko`} />
+            <Stat label="Menunggu kapasitas" value={s.unassigned} note="ter-flag, butuh konselor, belum muat" />
+          </section>
 
-          <div className="sheet flex items-start gap-3 px-5 py-4 text-sm">
-            <Info className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-            <p>
-              Menambah 1 konselor ({fmtInt(hours)} jam) menjangkau sekitar{" "}
-              <span className="font-mono font-semibold">+{fmtInt(s.marginal_per_advisor)}</span> mahasiswa berisiko lagi.
-              Perkiraan memakai probabilitas terkalibrasi (ECE 0,0075), bukan jumlah mahasiswa yang pasti tertolong.
-            </p>
-          </div>
+          <p className="px-1 text-sm leading-relaxed text-ink-2">
+            Menambah satu konselor ({fmtInt(hours)} jam) menjangkau sekitar{" "}
+            <b className="font-semibold text-blue">
+              <Num value={s.marginal_per_advisor} prefix="+" />
+            </b>{" "}
+            mahasiswa berisiko lagi. Perkiraan memakai probabilitas terkalibrasi{ece != null && ` (ECE ${fmtNum(ece, 4)})`}, bukan jumlah
+            mahasiswa yang pasti tertolong.
+          </p>
 
           {s.is_scenario && (
-            <div className="rounded-2xl border border-dashed border-uncertain bg-muted p-5 text-sm">
-              <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-uncertain bg-surface-secondary p-5 text-sm">
+              <p className="flex items-center gap-2 text-xs font-semibold text-ink-2">
                 <FlaskConical className="size-4" aria-hidden />
                 Skenario model, bukan efek kausal
               </p>
-              <p className="mt-2">
+              <p className="mt-2 leading-relaxed text-ink">
                 Dengan asumsi efektivitas di bawah, perkiraan mahasiswa berisiko yang tertolong:{" "}
-                <span className="font-mono text-lg font-semibold">{fmtInt(s.estimated_retained_scenario)}</span>. Angka ini
-                bergantung sepenuhnya pada asumsi efektivitas.
+                <b className="numeral text-xl">{fmtInt(s.estimated_retained_scenario)}</b>. Angka ini bergantung sepenuhnya pada asumsi
+                efektivitas.
               </p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr]">
+          <AdvisorBoard plan={result} revision={revision} />
+
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[3fr_2fr]">
             <Section title="Kurva jangkauan" description="Perkiraan mahasiswa berisiko yang terjangkau konselor untuk setiap tambahan jam.">
               <ReachCurveChart curve={result.curve} currentHours={capacityHours} />
             </Section>
             <Section title="Alokasi intervensi" description="Satu intervensi playbook per mahasiswa ter-flag.">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Intervensi</TableHead>
-                    <TableHead>Kanal</TableHead>
-                    <TableHead className="text-right">Mhs</TableHead>
-                    <TableHead className="text-right">Berisiko</TableHead>
-                    <TableHead className="text-right">Jam</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-separator text-left text-xs text-ink-3">
+                    <th className="py-2 pr-3 font-medium">Intervensi</th>
+                    <th className="py-2 pr-3 font-medium">Kanal</th>
+                    <th className="py-2 pr-3 text-right font-medium">Mhs</th>
+                    <th className="py-2 pr-3 text-right font-medium">Berisiko</th>
+                    <th className="py-2 text-right font-medium">Jam</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {s.per_action.map((a) => (
-                    <TableRow key={`${a.action}-${a.channel}`} className={a.channel === "unassigned" ? "text-muted-foreground" : undefined}>
-                      <TableCell className="whitespace-normal">{ACTION_LABELS[a.action] ?? a.action}</TableCell>
-                      <TableCell className="text-xs">{CHANNEL_LABELS[a.channel]}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">{fmtInt(a.students)}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">{fmtInt(a.expected_at_risk)}</TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">{a.channel === "advisor" ? fmtNum(a.minutes / 60, 1) : "-"}</TableCell>
-                    </TableRow>
+                    <tr key={`${a.action}-${a.channel}`} className={cn("border-b border-separator/70", a.channel === "unassigned" && "text-ink-3")}>
+                      <td className="py-2.5 pr-3">{ACTION_LABELS[a.action] ?? a.action}</td>
+                      <td className="py-2.5 pr-3 text-xs">{CHANNEL_LABELS[a.channel]}</td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">{fmtInt(a.students)}</td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">{fmtInt(a.expected_at_risk)}</td>
+                      <td className="py-2.5 text-right tabular-nums">{a.channel === "advisor" ? fmtNum(a.minutes / 60, 1) : "-"}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </Section>
           </div>
 
@@ -160,44 +166,165 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
             <Section
               title="Asumsi playbook"
               description="Menit konselor dan efektivitas per archetype. Efektivitas 1,0 berarti semua intervensi dianggap sama efektif, sehingga planner memprioritaskan cek singkat untuk mahasiswa Senyap. Turunkan efektivitas bila mahasiswa Senyap kemungkinan sudah mundur."
+              actions={
+                Object.keys(overrides).length > 0 && (
+                  <Button variant="ghost" size="sm" onPress={() => setOverrides({})}>
+                    <RotateCcw aria-hidden /> Kembalikan ke default
+                  </Button>
+                )
+              }
             >
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Archetype</TableHead>
-                    <TableHead>Intervensi</TableHead>
-                    <TableHead className="w-32">Menit konselor</TableHead>
-                    <TableHead className="w-32">Efektivitas (0 sampai 1)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {defaults.map((row) => {
-                    const o = overrides[row.archetype] ?? row;
-                    return (
-                      <TableRow key={row.archetype}>
-                        <TableCell>{ARCHETYPE_LABELS[row.archetype]}</TableCell>
-                        <TableCell className="text-xs">{ACTION_LABELS[row.action]}</TableCell>
-                        <TableCell>
-                          <Input type="number" min={0} max={240} step={5} value={o.minutes} aria-label={`Menit ${ARCHETYPE_LABELS[row.archetype]}`}
-                            onChange={(e) => setOverride(row, "minutes", clamp(e.target.valueAsNumber, 0, 240))} />
-                        </TableCell>
-                        <TableCell>
-                          <Input type="number" min={0} max={1} step={0.1} value={o.effectiveness} aria-label={`Efektivitas ${ARCHETYPE_LABELS[row.archetype]}`}
-                            onChange={(e) => setOverride(row, "effectiveness", clamp(e.target.valueAsNumber, 0, 1))} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              {Object.keys(overrides).length > 0 && (
-                <Button variant="ghost" size="sm" className="mt-2" onClick={() => setOverrides({})}>
-                  Kembalikan ke default
-                </Button>
-              )}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead>
+                    <tr className="border-b border-separator text-left text-xs text-ink-3">
+                      <th className="py-2 pr-3 font-medium">Archetype</th>
+                      <th className="py-2 pr-3 font-medium">Intervensi</th>
+                      <th className="w-36 py-2 pr-3 font-medium">Menit konselor</th>
+                      <th className="w-36 py-2 font-medium">Efektivitas (0 sampai 1)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {defaults.map((row) => {
+                      const o = overrides[row.archetype] ?? row;
+                      return (
+                        <tr key={row.archetype} className="border-b border-separator/70">
+                          <td className="py-2 pr-3 font-medium text-ink">{ARCHETYPE_LABELS[row.archetype]}</td>
+                          <td className="py-2 pr-3 text-ink-2">{ACTION_LABELS[row.action]}</td>
+                          <td className="py-2 pr-3">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={240}
+                              step={5}
+                              value={String(o.minutes)}
+                              aria-label={`Menit ${ARCHETYPE_LABELS[row.archetype]}`}
+                              onChange={(e) => setOverride(row, "minutes", clamp(e.target.valueAsNumber, 0, 240))}
+                            />
+                          </td>
+                          <td className="py-2">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={1}
+                              step={0.1}
+                              value={String(o.effectiveness)}
+                              aria-label={`Efektivitas ${ARCHETYPE_LABELS[row.archetype]}`}
+                              onChange={(e) => setOverride(row, "effectiveness", clamp(e.target.valueAsNumber, 0, 1))}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </Section>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * One column per advisor, filled from the plan's board: capacity never overflows a column, and whoever does not fit
+ * waits below the line. Cards settle in again whenever capacity changes.
+ */
+function AdvisorBoard({ plan, revision }: { plan: PlanResult; revision: number }) {
+  const s = plan.summary;
+  return (
+    <Section
+      title="Papan konselor minggu ini"
+      description="Setiap kolom satu konselor; contoh mahasiswa per tindakan, diurutkan dari nilai harapan tertinggi per menit."
+      actions={
+        <ul aria-label="Arti warna titik" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
+          {TIER_ORDER.slice(0, 3).map((t) => (
+            <li key={t} className="flex items-center gap-1.5">
+              <TierDot tier={t} />
+              {TIER_LABELS[t]}
+            </li>
+          ))}
+        </ul>
+      }
+    >
+      {plan.board.columns.length === 0 ? (
+        <p className="py-10 text-center text-sm text-ink-3">
+          Tanpa jam konselor, hanya {fmtInt(s.automated_contacts)} pesan otomatis yang terkirim. Tambah konselor untuk mengisi papan.
+        </p>
+      ) : (
+        <div className="grid auto-cols-[minmax(212px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2">
+          {plan.board.columns.map((c) => (
+            <AdvisorColumn key={`${revision}-${c.advisor}`} column={c} />
+          ))}
+        </div>
+      )}
+      <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-dashed border-line-strong pt-4 text-sm">
+        <p className="text-ink-2">
+          <b className="font-semibold text-ink tabular-nums">{fmtInt(s.advisor_contacts)}</b> dihubungi konselor ·{" "}
+          <b className="font-semibold text-ink tabular-nums">{fmtInt(s.automated_contacts)}</b> dapat pesan otomatis
+        </p>
+        <p className="text-ink-3">
+          Di bawah garis: <b className="font-semibold text-ink tabular-nums">{fmtInt(s.unassigned)}</b> mahasiswa ter-flag menunggu kapasitas
+          {plan.board.unplaced > 0 && <>, {fmtInt(plan.board.unplaced)} di antaranya muat di total jam tapi tidak utuh di satu konselor</>}.
+        </p>
+      </div>
+    </Section>
+  );
+}
+
+function AdvisorColumn({ column: c }: { column: PlanResult["board"]["columns"][number] }) {
+  const leftMinutes = c.capacity_minutes - c.minutes_used;
+  const more = c.students - c.top.length;
+  return (
+    <div className="flex min-w-0 flex-col gap-2 rounded-2xl bg-surface-secondary p-3">
+      <div className="px-1">
+        <h3 className="text-sm font-semibold text-ink">Konselor {c.advisor}</h3>
+        <p className="text-xs text-ink-3 tabular-nums">
+          {fmtInt(c.students)} kontak · {fmtNum(c.minutes_used / 60, 1)}/{fmtNum(c.capacity_minutes / 60, 0)} jam
+        </p>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white" aria-hidden>
+          <span className="block h-full rounded-full bg-blue" style={{ width: `${Math.min(100, (c.minutes_used / (c.capacity_minutes || 1)) * 100)}%` }} />
+        </div>
+        <p className="mt-2 flex flex-wrap gap-x-3 text-xs text-ink-3" aria-label="Tier di kolom ini">
+          {TIER_ORDER.filter((t) => c.tiers[t] > 0).map((t) => (
+            <span key={t} className="flex items-center gap-1">
+              <TierDot tier={t} />
+              <span className="sr-only">{TIER_LABELS[t]}</span>
+              <span className="tabular-nums">{fmtInt(c.tiers[t])}</span>
+            </span>
+          ))}
+        </p>
+      </div>
+      <ul className="flex flex-col gap-1.5">
+        {c.top.map((st, i) => (
+          <li key={st.id} className="rise" style={{ "--i": c.advisor + i } as React.CSSProperties}>
+            <Link
+              href={`/mahasiswa/${st.id}`}
+              className="group flex items-center gap-2.5 rounded-xl bg-white px-3 py-2 shadow-[0_1px_2px_rgb(11_27_58/0.06)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <TierDot tier={st.tier} />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-baseline justify-between gap-2">
+                  <b className="font-mono text-[13px] font-semibold text-ink">{st.source_id ?? st.id}</b>
+                  <span className="text-[13px] font-semibold text-ink tabular-nums">
+                    <span className="sr-only">{TIER_LABELS[st.tier]}, probabilitas </span>
+                    {fmtProb(st.probability)}
+                  </span>
+                </span>
+                <span className="block truncate text-xs text-ink-3">
+                  {st.code_module ? fmtModule(st.code_module) : ""} · {ACTION_LABELS[st.action] ?? st.action}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {more > 0 && <p className="px-1 text-xs text-ink-3">+{fmtInt(more)} mahasiswa lagi di kolom ini</p>}
+      {leftMinutes >= 15 && (
+        <div className="grid h-10 place-items-center rounded-xl border border-dashed border-line-strong text-xs text-ink-3">
+          Sisa {fmtInt(leftMinutes)} menit
+        </div>
       )}
     </div>
   );
@@ -207,14 +334,15 @@ function clamp(v: number, lo: number, hi: number) {
   return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo;
 }
 
-function NumberField({ id, label, value, min, max, step, onChange }: {
-  id: string; label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void;
-}) {
+function Stepper({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex w-48 flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} type="number" min={min} max={max} step={step} value={value}
-        onChange={(e) => onChange(clamp(e.target.valueAsNumber, min, max))} />
-    </div>
+    <NumberField value={value} minValue={0} maxValue={max} onChange={(v) => onChange(Number.isFinite(v) ? v : 0)} className="flex w-52 flex-col gap-1.5">
+      <Label className="text-[13px] font-medium text-ink-2">{label}</Label>
+      <NumberField.Group className="h-11">
+        <NumberField.DecrementButton aria-label={`Kurangi ${label.toLowerCase()}`} />
+        <NumberField.Input className="text-center text-base font-semibold tabular-nums" />
+        <NumberField.IncrementButton aria-label={`Tambah ${label.toLowerCase()}`} />
+      </NumberField.Group>
+    </NumberField>
   );
 }

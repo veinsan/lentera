@@ -8,15 +8,15 @@ type Point = { share: number; n: number; precision: number; recall: number };
 
 // Precision carries the story (emphasis color); recall is the neutral companion series.
 const SERIES = [
-  { key: "precision", name: "Presisi", color: "var(--chart-2)" },
-  { key: "recall", name: "Recall", color: "var(--chart-3)" },
+  { key: "precision", name: "Presisi", color: "var(--chart-safe)" },
+  { key: "recall", name: "Recall", color: "var(--chart-neutral)" },
 ] as const;
 
 export function CapacityChart({ points }: { points: Point[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={points} margin={{ top: 8, right: 16, bottom: 16, left: 0 }}>
-        <CartesianGrid stroke="var(--border)" vertical={false} />
+        <CartesianGrid stroke="var(--line)" vertical={false} />
         <XAxis
           type="number"
           dataKey="share"
@@ -24,7 +24,7 @@ export function CapacityChart({ points }: { points: Point[] }) {
           ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
           tickFormatter={(v: number) => fmtPct(v)}
           tick={AXIS}
-          stroke="var(--border)"
+          stroke="var(--line)"
           label={{ value: "Mahasiswa yang dihubungi, urut probabilitas", position: "insideBottom", offset: -12, ...AXIS }}
         />
         <YAxis
@@ -32,7 +32,7 @@ export function CapacityChart({ points }: { points: Point[] }) {
           ticks={[0, 0.25, 0.5, 0.75, 1]}
           tickFormatter={(v: number) => fmtPct(v)}
           tick={AXIS}
-          stroke="var(--border)"
+          stroke="var(--line)"
           width={44}
         />
         {SERIES.map((s) => (
@@ -43,7 +43,7 @@ export function CapacityChart({ points }: { points: Point[] }) {
             stroke={s.color}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }}
+            activeDot={{ r: 5, stroke: "var(--surface)", strokeWidth: 2 }}
             isAnimationActive={false}
           />
         ))}
@@ -51,10 +51,10 @@ export function CapacityChart({ points }: { points: Point[] }) {
           verticalAlign="top"
           align="right"
           iconType="plainline"
-          wrapperStyle={{ fontSize: 12, color: "var(--foreground)", paddingBottom: 8 }}
+          wrapperStyle={{ fontSize: 12, color: "var(--ink)", paddingBottom: 8 }}
         />
         <Tooltip
-          cursor={{ stroke: "var(--border)" }}
+          cursor={{ stroke: "var(--line)" }}
           content={(p: TooltipContentProps) => {
             const d = p.payload?.[0]?.payload as Point | undefined;
             if (!p.active || !d) return null;

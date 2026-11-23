@@ -129,6 +129,8 @@ export type ModelCard = {
     submission_ref: number;
     submission_sha256: string;
     submitted_utc: string;
+    /** The submission the team selected for the final leaderboard; not the model deployed in Lentera. */
+    selected?: { ref: number; file: string; submitted_utc: string; public_f1: number; private_f1: number };
   };
   presentation_stress: {
     note: string;

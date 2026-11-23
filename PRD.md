@@ -10,7 +10,7 @@ Pending: the owner confirms the product name "Lentera".
 
 ## 1. Problem Statement
 
-The DSCO 2026 model predicts `at_risk` for each student from data available in the first four weeks of a course presentation: demographics, assessment submissions and scores, and online learning activity (week 1 to week 4 interactions). The model is a CatBoost classifier with a nested cross-validation F1 of 0.7738 and a public leaderboard F1 of 0.78443. A probability alone does not tell an institution what to do. Lentera turns each prediction into a decision.
+The DSCO 2026 model predicts `at_risk` for each student from data available in the first four weeks of a course presentation: demographics, assessment submissions and scores, and online learning activity (week 1 to week 4 interactions). The model is a CatBoost classifier with a nested cross-validation F1 of 0.7738; its Kaggle submission scored 0.78443 public and 0.77775 private. A probability alone does not tell an institution what to do. Lentera turns each prediction into a decision.
 
 The problem has four parts, each grounded in the model's out-of-fold (OOF) predictions on the 26,086 training rows.
 

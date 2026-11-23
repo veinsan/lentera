@@ -6,7 +6,7 @@ Steps marked Done in `TODO.md` are implemented; everything else below is planned
 
 | Area | Choice | Status |
 | --- | --- | --- |
-| Frontend | Next.js 16.4.6 (App Router, TypeScript, Cache Components), Tailwind CSS 4, shadcn/ui on Base UI, Recharts | Agreed; versions in `CLAUDE.md` |
+| Frontend | Next.js 16.4.6 (App Router, TypeScript, Cache Components), Tailwind CSS 4, HeroUI 3 on React Aria, Motion, React Three Fiber, Recharts | Agreed; versions in `CLAUDE.md` |
 | Frontend package manager | pnpm | Agreed |
 | Backend | FastAPI on Python 3.13 | Agreed. 3.13 because Smart App Control blocks the uv-managed 3.12 on the owner's machine. |
 | ML libraries | catboost 1.2.10, pandas 3.1.1, numpy 2.5.4, scikit-learn 1.9.1. SHAP values come from CatBoost itself. | Done. Matches `dsco/outputs/audit/requirements-lock.txt` except pandas 3.1.1; parity check passed. |

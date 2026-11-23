@@ -1,27 +1,33 @@
-import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import Image from "next/image";
+import { LinkButton } from "@/components/ui/link-button";
 
+/** Empty or unreachable content: the generated atlas illustration, what is missing, and the way forward. */
 export function EmptyState({
-  icon: Icon,
   title,
   description,
   action,
+  art = "empty",
 }: {
-  icon: LucideIcon;
   title: string;
   description: string;
   action?: { href: string; label: string };
+  art?: "empty" | "missing";
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border-[1.5px] border-dashed border-input bg-card/60 px-6 py-16 text-center">
-      <Icon className="size-8 text-muted-foreground" aria-hidden />
-      <h2 className="mt-4 text-lg font-semibold">{title}</h2>
-      <p className="mt-1 max-w-md text-sm text-muted-foreground">{description}</p>
+    <div className="plate flex flex-col items-center px-6 py-14 text-center">
+      <Image
+        src={art === "empty" ? "/illustrations/empty-atlas.svg" : "/illustrations/missing-star.svg"}
+        alt=""
+        width={280}
+        height={175}
+        className="h-auto w-[240px] sm:w-[280px]"
+      />
+      <h2 className="mt-6 text-lg font-semibold text-ink">{title}</h2>
+      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-ink-3">{description}</p>
       {action && (
-        <Link href={action.href} className={buttonVariants({ className: "mt-6 hover:bg-primary-hover" })}>
+        <LinkButton href={action.href} className="mt-6">
           {action.label}
-        </Link>
+        </LinkButton>
       )}
     </div>
   );

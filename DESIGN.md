@@ -1,294 +1,346 @@
 ---
 name: Lentera
-description: Week 4 intervention board for at-risk students, drawn as a pinned campus noticeboard.
+description: Week 4 at-risk student sky, read through a glass lens over a blue star atlas.
 colors:
-  ink: "#16140f"
-  ink-hover: "#34302a"
-  ink-muted: "#625d52"
-  putty: "#ece7dd"
-  paper: "#fbfaf6"
-  putty-deep: "#e3dcce"
-  putty-hover: "#e8e1d3"
-  rule: "#d9d1c1"
-  rule-strong: "#cfc6b4"
-  slate: "#1f2b2e"
-  slate-raised: "#2c3a3e"
-  slate-line: "#3a4a4f"
-  slate-ink: "#e9e6dd"
-  slate-muted: "#a4aba3"
-  lime: "#d9f24a"
-  destructive: "#b42318"
-  success: "#2f7d5b"
-  risk-low: "#e2a27a"
-  risk-watch: "#cf7448"
-  risk-high: "#b04a26"
-  risk-critical: "#7a2610"
-  on-risk-light: "#16140f"
-  on-risk-dark: "#ffffff"
-  uncertain: "#7a7f8c"
-  chart-at-risk: "#a93a1c"
-  chart-not-at-risk: "#2f6db5"
-  chart-neutral: "#9aa1ae"
+  blue: "#2457f5"
+  blue-hover: "#1c48d8"
+  blue-press: "#173cb8"
+  blue-soft: "#e7eeff"
+  blue-ink: "#1a3fb8"
+  starlight: "#8fb0ff"
+  queue-track: "#dbe4f3"
+  ink: "#0b1b3a"
+  ink-2: "#3e4d72"
+  ink-3: "#5b6a8e"
+  paper: "#f3f7fd"
+  surface: "#ffffff"
+  surface-secondary: "#f5f8fd"
+  surface-tertiary: "#edf2fa"
+  line: "#dce5f3"
+  line-strong: "#c5d2e8"
+  separator: "#e6ecf6"
+  night: "#081634"
+  night-2: "#0d1f4a"
+  night-3: "#15295c"
+  night-ink: "#eaf1ff"
+  night-muted: "#a9b8d9"
+  tier-low: "#6b8fd8"
+  tier-watch: "#f0a35a"
+  tier-high: "#de6a2e"
+  tier-critical: "#b0381f"
+  star-low: "#86a4ea"
+  star-watch: "#fac96c"
+  star-high: "#ef7834"
+  star-critical: "#c62e29"
+  uncertain: "#8a96b3"
+  chart-risk: "#c4402a"
+  chart-safe: "#2457f5"
+  chart-neutral: "#9aa6c0"
+  success: "#13795b"
+  warning: "#b7790a"
 typography:
   display:
-    fontFamily: "Archivo, sans-serif"
-    fontSize: "64px"
-    fontWeight: 800
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "3.9rem"
+    fontWeight: 600
+    lineHeight: 1.02
+    letterSpacing: "-0.032em"
+    fontVariation: "\"wdth\" 108, \"ROND\" 40"
+  headline:
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2.6rem"
+    fontWeight: 600
+    lineHeight: 1.02
+    letterSpacing: "-0.032em"
+    fontVariation: "\"wdth\" 108, \"ROND\" 40"
+  numeral:
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.9rem"
+    fontWeight: 650
     lineHeight: 1
     letterSpacing: "-0.03em"
-    fontVariation: "'wdth' 80"
-  headline:
-    fontFamily: "Archivo, sans-serif"
-    fontSize: "44px"
-    fontWeight: 700
-    lineHeight: 1.06
-    letterSpacing: "-0.025em"
-    fontVariation: "'wdth' 88"
+    fontFeature: "\"tnum\""
+    fontVariation: "\"wdth\" 100, \"ROND\" 20"
   title:
-    fontFamily: "Archivo, sans-serif"
-    fontSize: "20px"
-    fontWeight: 700
-    lineHeight: 1.25
-    fontVariation: "'wdth' 92"
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 600
+    letterSpacing: "-0.01em"
   body:
-    fontFamily: "Geist, sans-serif"
-    fontSize: "13px"
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "15px"
     fontWeight: 400
-    lineHeight: 1.375
-  body-app:
-    fontFamily: "Geist, sans-serif"
-    fontSize: "14px"
-    fontWeight: 400
-    lineHeight: 1.43
+    lineHeight: 1.625
   label:
-    fontFamily: "Geist, sans-serif"
-    fontSize: "12px"
-    fontWeight: 600
-    lineHeight: 1.33
-  data:
-    fontFamily: "Geist Mono, monospace"
+    fontFamily: "Google Sans Flex, ui-sans-serif, system-ui, sans-serif"
     fontSize: "13px"
-    fontWeight: 600
-    lineHeight: 1.375
-    fontFeature: "'tnum'"
+    fontWeight: 500
+  mono:
+    fontFamily: "Google Sans Code, ui-monospace, monospace"
+    fontSize: "11px"
+    fontWeight: 500
+    fontFeature: "\"tnum\""
 rounded:
-  sm: "8px"
-  md: "12px"
-  lg: "16px"
-  xl: "20px"
-  2xl: "24px"
-  full: "9999px"
+  control: "10px"
+  field: "12px"
+  tooltip: "12px"
+  nav-item: "16px"
+  plate: "20px"
+  role-card: "22px"
+  bar: "22px"
+  night-plate: "24px"
+  rail: "28px"
+  sheet-edge: "36px"
+  pill: "9999px"
 spacing:
-  xs: "8px"
-  sm: "12px"
-  md: "20px"
-  lg: "24px"
-  xl: "32px"
+  plate-pad: "24px"
+  plate-pad-sm: "20px"
+  grid-gap: "20px"
+  cell-x: "16px"
+  shell-max: "1360px"
+  rail-width: "264px"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-    rounded: "{rounded.full}"
-    padding: "0 16px"
-    height: "40px"
+    backgroundColor: "{colors.blue}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.pill}"
   button-primary-hover:
-    backgroundColor: "{colors.ink-hover}"
-  button-outline:
-    backgroundColor: "{colors.paper}"
+    backgroundColor: "{colors.blue-hover}"
+  button-primary-active:
+    backgroundColor: "{colors.blue-press}"
+  button-on-night:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.night}"
+    rounded: "{rounded.pill}"
+    height: "48px"
+    padding: "0 24px"
+  plate:
+    backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.full}"
-    padding: "0 16px"
-    height: "40px"
-  button-outline-hover:
-    backgroundColor: "{colors.putty-deep}"
+    rounded: "{rounded.plate}"
+    padding: "{spacing.plate-pad}"
+  night-plate:
+    backgroundColor: "{colors.night}"
+    textColor: "{colors.night-ink}"
+    rounded: "{rounded.night-plate}"
+  role-card-night:
+    backgroundColor: "{colors.night-2}"
+    textColor: "{colors.night-ink}"
+    rounded: "{rounded.role-card}"
+    padding: "20px"
+  role-card-night-hover:
+    backgroundColor: "{colors.night-3}"
+  chip-archetype:
+    backgroundColor: "{colors.blue-soft}"
+    textColor: "{colors.blue-ink}"
+    rounded: "{rounded.pill}"
+    height: "28px"
+    padding: "0 10px"
+  flag-stopped:
+    backgroundColor: "{colors.blue-soft}"
+    textColor: "{colors.blue-ink}"
+    rounded: "{rounded.pill}"
+    padding: "2px 8px"
   input:
-    backgroundColor: "{colors.paper}"
+    backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.xl}"
-    padding: "4px 12px"
-    height: "40px"
-  sheet:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.2xl}"
-    padding: "24px"
-  slate-panel:
-    backgroundColor: "{colors.slate}"
-    textColor: "{colors.slate-ink}"
-    rounded: "{rounded.2xl}"
-    padding: "24px"
-  student-card:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    typography: "{typography.data}"
-    rounded: "{rounded.xl}"
-    padding: "10px 12px 10px 32px"
+    rounded: "{rounded.field}"
   nav-item:
-    textColor: "{colors.slate-muted}"
-    rounded: "{rounded.xl}"
-    padding: "10px 12px"
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.nav-item}"
+    height: "40px"
+    padding: "0 12px"
   nav-item-active:
-    backgroundColor: "{colors.slate-raised}"
-    textColor: "{colors.on-risk-dark}"
-  role-switch-active:
-    backgroundColor: "{colors.lime}"
     textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.lg}"
-    padding: "6px 10px"
-  tier-pin:
-    rounded: "{rounded.full}"
-    size: "10px"
+    rounded: "{rounded.nav-item}"
+  tooltip:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.tooltip}"
+    padding: "8px 12px"
 ---
 
 # Design System: Lentera
 
 ## Overview
 
-**Creative North Star: "The Week 4 Noticeboard"**
+**Creative North Star: "The Star Atlas Lens"**
 
-Lentera is a campus noticeboard for one week. The ground is warm putty, every piece of content is a paper sheet pinned to it, and the controls live on a dark slate rail and slate panels beside the board. Flagged students are small paper cards with a round tier pin; each advisor is a column whose open capacity shows as a dashed pin hole. One lime highlighter marks the numbers that matter, the way a coordinator would mark a printed list.
+The week 4 cohort is a sky. Every student is a star whose size and warmth is their risk, archetypes are constellations, and Lentera is the lens the cohort is read through. Working screens are the day edition: pale atlas paper under a generated blue chart plate, solid white content plates, navy ink. The night edition (the landing hero, the X-Ray panel, the sign-in role cards) is a deep navy plate where the cohort appears as stars. Glass instruments float over both, and they are only ever navigation.
 
-The interface is dense but calm. It ranks by weight, case, and family rather than by many sizes: condensed Archivo carries findings and the one big numeral, Geist carries the interface, Geist Mono carries every ID, count, and probability. Colour is spent sparingly: ink on paper does the work, the tier ramp carries risk, and lime appears only where the eye should land first. The screen is read from a projector, so contrast and size hold up at distance.
+The system is calm, cool, and dense enough for an advisor's working session, legible enough for a projector. One committed blue carries every action, selection, and focus. Warm hues exist to say "risk" and nothing else, so a glance at any screen finds the students who need a call first. Interface copy is Indonesian; numbers are formatted id-ID with a decimal comma, and a calibrated probability never prints as certainty (0.995 and above prints as 0,99+).
 
-The previous navy, amber, and Plus Jakarta Sans system is retired. None of it remains in code and none of it should return.
+The world replaced a retired noticeboard system (putty board, slate, lime highlighter, Archivo and Geist). None of those materials, colours, or faces belong here.
 
 **Key Characteristics:**
-- Putty board, paper sheets with a soft pinned shadow, slate for controls and navigation.
-- One lime highlighter: a half-height marker stroke behind key numbers on paper, a solid fill on slate.
-- Tier shown as a round pin plus a label, never colour alone.
-- Condensed Archivo for findings and numerals; Geist Mono with tabular figures for all data.
-- Indonesian interface copy with id-ID number formatting (comma decimals, dot thousands).
+- Two editions of one atlas: day paper for work, night plate for the sky.
+- Liquid glass on the navigation layer only; content on solid plates.
+- One blue for action; warm hues reserved for risk tiers, always labelled.
+- Risk reads as star size and warmth, never colour alone.
+- One variable family (Google Sans Flex) for display, UI, and numerals; Google Sans Code for IDs and keys.
+- Motion arrives once and never hides content on first paint.
 
 ## Colors
 
-A warm paper and ink palette with one slate counterweight and one acid lime accent; risk owns its own validated ramp.
+A cool navy-and-blue atlas with a single warm arm reserved for risk.
 
 ### Primary
-- **Noticeboard Ink** (ink): body text, headings, primary buttons, and the pin dot on sheets. Hover deepens to Ink Hover (ink-hover).
-- **Highlighter Lime** (lime): the marker stroke behind key numbers, the selected role in the role switch, the active nav icon, the hover ring on a student card's pin, text selection, and focus outlines on slate. On slate it may also set a numeral directly (the marginal reach figure).
+- **Atlas Blue** (blue): the only action and selection colour: primary buttons, the active nav icon, focus outlines, caret, links (as Deep Atlas Blue, blue-ink), the "not at risk" chart series, the lit share of the capacity band. Hover deepens (blue-hover), press deepens further (blue-press).
+- **Blue Wash** (blue-soft) with **Deep Atlas Blue** (blue-ink): tinted neutral chips (archetype chip, the "Terakhir dibuka" flag, the active mobile menu item). The blue family is how the system says "category" without saying "risk".
+- **Starlight** (starlight): the light blue of the night edition: the lantern star on night plates, the focus outline inside `.night`, and the automated-message share of the capacity band. **Queue Track** (queue-track) is the unlit remainder of that band: students still waiting for capacity. Both are CSS variables (`--starlight`, `--queue-track`) in `web/app/globals.css`. Starlight also marks the night sky's catalogue tags (K01 to K06).
 
-### Secondary
-- **Rail Slate** (slate): sidebar, the capacity panel, the sign-in hero, and the focus ring colour on light surfaces. Slate Raised (slate-raised) holds steppers, the user panel, and the active nav item; Slate Line (slate-line) is hover and dividers on slate. Text on slate is Slate Ink (slate-ink) with Slate Muted (slate-muted) for secondary lines.
+### Secondary: Risk tiers
+A diverging scale. Rendah is the cool pole (not flagged); Pantau, Tinggi, Kritis are one warm ordinal arm (monotone lightness, one hue, light end 2.08:1 on white).
+- **Day tiers** (tier-low, tier-watch, tier-high, tier-critical): dots, bars, and the risk tone of a figure on white and paper.
+- **Night stars** (star-low, star-watch, star-high, star-critical): the same four tiers tuned for the night plate (validated on night: CVD 15.6, normal 16.9, contrast at least 3:1). Use only on night; never mix the two sets on one ground.
+- **Uncertain** (uncertain): the grey-blue of the uncertain band around the threshold.
 
-### Tertiary
-- **Tier ramp** (risk-low, risk-watch, risk-high, risk-critical): pin colours for Rendah, Pantau, Tinggi, Kritis, light to dark. Text placed on the two light tiers uses on-risk-light; on the two dark tiers, on-risk-dark. Validated with the dataviz checker; do not adjust.
-- **Uncertain Grey** (uncertain): the uncertainty zone that needs human review.
-- **Chart pair** (chart-at-risk, chart-not-at-risk, chart-neutral): at risk, not at risk, and neutral series in every chart. Validated; do not swap or recolour.
+### Tertiary: Chart pair
+- **At Risk** (chart-risk), **Not At Risk** (chart-safe, equal to Atlas Blue), **Neutral** (chart-neutral): the two-series pair and its reference colour; all six validator checks pass on white. Categorical and ordinal chart colours come only from these and the tier tokens.
 
 ### Neutral
-- **Putty Board** (putty): the page ground.
-- **Pinned Paper** (paper): sheets, student cards, inputs, outline buttons, popovers.
-- **Putty Deep** (putty-deep): the board tray behind advisor columns, muted fills, secondary buttons. Putty Hover (putty-hover) is the hover surface and loading skeleton.
-- **Muted Ink** (ink-muted): labels, notes, context lines.
-- **Rule** (rule) for hairlines and table rows; **Rule Strong** (rule-strong) for input strokes and dashed pin holes.
-- **Destructive** (destructive) and **Success** (success) for errors and confirmations only.
+- **Navy Ink** (ink): headings, values, primary text. **Slate Ink** (ink-2): body and secondary copy. **Quiet Ink** (ink-3): labels, captions, axis text, placeholders, HeroUI's `muted`.
+- **Atlas Paper** (paper): page ground behind the atlas plate. **Plate White** (surface): content plates, fields, overlays. surface-secondary and surface-tertiary are the quieter fills inside plates.
+- **Hairline** (line), **Strong Hairline** (line-strong, field borders), **Separator** (separator, table header rule).
+- **Night** (night), **Night Raised** (night-2), **Night Hover** (night-3), **Night Ink** (night-ink), **Night Muted** (night-muted): the night edition. The night hairline is night-muted at 18% alpha.
+- **Success** (success) and **Warning** (warning) are HeroUI semantics for status text; danger maps to tier-critical.
 
 ### Named Rules
-**The One Highlighter Rule.** Lime is the only accent. On paper it is never a fill or a text colour, only the stroke behind ink; on slate it may fill a selected control or set one numeral. If two lime marks compete for the first look, remove one.
+**The Warm Means Risk Rule.** On day surfaces, amber, orange, and red appear only as risk tiers or the at-risk chart series. Archetypes, contact status, and categories use the blue family or a neutral, never a warm hue. On night plates warm is a star's tier, plus the amber constellation line that joins each cluster's six riskiest stars, which the sky caption names; catalogue tags stay Starlight.
 
-**The Pin Plus Label Rule.** A tier is always a round pin with its Indonesian label nearby (legend, screen reader text, or badge). Colour alone never carries tier identity.
+**The Label Always Rule.** A tier colour never stands alone: every tier dot sits next to its Indonesian label (Rendah, Pantau, Tinggi, Kritis), and dot size grows with risk (8, 10, 10, 12px on day; magnitude steps on night) so identity survives colour blindness and greyscale projectors.
 
-**The Validated Pair Rule.** Chart colours mean the same thing on every screen: chart-at-risk is at risk, chart-not-at-risk is not at risk, chart-neutral is everything else.
+**The One Blue Rule.** There is one action colour. A second accent hue for buttons, links, or selection does not exist in this system.
 
 ## Typography
 
-**Display Font:** Archivo, variable width axis (with sans-serif)
-**Body Font:** Geist (with sans-serif)
-**Label/Mono Font:** Geist Mono (with monospace), tabular figures
+**Display Font:** Google Sans Flex (with ui-sans-serif, system-ui), loaded with its opsz, wdth, and ROND axes
+**Body Font:** Google Sans Flex, optical sizing auto
+**Label/Mono Font:** Google Sans Code (with ui-monospace)
 
-**Character:** A condensed grotesque headline voice that reads like a printed notice, over a neutral modern UI face and a monospace that keeps numbers aligned in columns.
+**Character:** One variable family does every job by moving its axes: wide and slightly rounded for headlines (the lantern's warmth), neutral width for numerals, text optical size for copy. Google Sans Code marks the things a person types or quotes: student IDs, keyboard shortcuts, catalogue numbers, tooltip values.
 
 ### Hierarchy
-- **Display** (Archivo 800, width 80%, 64px, line height 1): the result of the one lever on a screen, such as the marginal reach per extra advisor. One per screen.
-- **Headline** (Archivo 700, width 88%, 44px, 32px below the small breakpoint, line height 1.06): the screen's finding written as a sentence, with up to two numbers under the marker. Page headers use the same face at 36px (28px on phones).
-- **Title** (Archivo 700, width 92%, 20px): panel and section titles.
-- **Body** (Geist 400, 13px on the board, 14px elsewhere): descriptions, notes, context. Cap prose at 75ch.
-- **Label** (Geist 600, 12px): field labels, KPI labels, table headers, role buttons. Advisor column headers on the board are the one uppercase label (13px, 0.06em tracking).
-- **Data** (Geist Mono 600, tabular): student IDs, probabilities, counts, hours, stepper values.
+- **Display** (600, 2.5rem to 3.9rem, 1.02): the landing hero headline only, white on night.
+- **Headline** (600, 1.85rem phone to 2.6rem, 1.02, wdth 108, ROND 40): every page title, written as the screen's finding in one sentence; landing section titles at 2.2rem to 3rem. Balanced wrapping on h1 to h3.
+- **Numeral** (650, 1.9rem standard, 2.6rem large, 1, tabular, wdth 100, ROND 20): KPI figures in Stat; numbers roll to new values with id-ID digits.
+- **Title** (600, 17px, -0.01em): plate titles; role-card and action titles step up to 18px.
+- **Body** (400, 15px, relaxed 1.625): page descriptions and landing copy, capped at 75ch (52ch in stage rows); 14px inside plates and table cells.
+- **Label** (500, 13px, Quiet Ink): figure labels, tier badges (600), contact marks; 12px for table column headers (600) and captions; 11px for nav group names and tab-bar labels.
+- **Mono** (500, 10px to 11px, tabular): IDs, `kbd` shortcuts, catalogue tags, tooltip values.
 
 ### Named Rules
-**The Four Sizes Rule.** The board screen uses exactly four sizes: 64, 44, 20, 13 px. Rank inside a size by weight, case, and family, not by adding a fifth size.
+**The Finding Title Rule.** A page title is the screen's finding as one sentence in Headline type. Nothing sits above it: no eyebrow, kicker, or category label.
 
-**The Condensed Numeral Rule.** Big standalone numbers are Archivo 800 at reduced width with tight tracking (-0.03em). Inline data numbers are Geist Mono.
-
-**The Probability Format Rule.** Probabilities in tables and cards show two decimals with an id-ID comma (0,87); 0.995 and above prints as 0,99+, never as certainty. In sentences, use percentages. Scenario results are always labelled "Skenario model, bukan efek kausal".
+**The Tabular Rule.** Every number in a table cell, mono run, or Stat uses tabular figures and the shared id-ID formatter.
 
 ## Layout
 
-Desktop: a fixed 240px slate rail on the left, content on the putty ground to its right. The board screen opens with a two-column row, the finding sheet beside a 340px slate capacity panel (stacked below 1280px), then the board tray. Advisor columns flow horizontally with a 204px minimum each and scroll sideways rather than wrap. Rhythm: 20px between major blocks, 12px between columns, 8px between student cards, 24 to 32px inside sheets.
+The signed-in shell is a floating glass rail (264px, inset 12px from the viewport, lg and up) beside a main column capped at 1360px, padded 300px from the left on desktop and 16 to 24px on phones. Phones replace the rail with a glass top bar (56px) and a floating glass tab bar (64px, four destinations plus Menu) pinned above the safe area; main content reserves 112px at the bottom for it.
 
-Phones: the rail collapses into a top band with a horizontally scrolling nav and a compact role chip (a disclosure) so the finding keeps the first screen. The finding sheet, capacity panel, and board stack.
+Plates stack in 20px gaps. The dashboard pairs a night-plate sky spanning the wide column with a 340px figure rail (xl and up); below xl the rail becomes a two-column grid of figures. Plates pad 20px on phones and 24px from sm. Table cells pad 14px by 16px (9px vertical in dense tables).
 
-Sign-in: a split screen, slate hero on the left (5 parts) and three pinned role sheets on the right (6 parts); stacked on phones.
+The landing is a full-bleed night hero (headline column left, the constellation on the right 60%), then a day sheet that rises over it with 36px top corners and holds content at max 72rem (1152px) with 3xl text measures. Stages alternate copy and a real record in a 5:6 grid with 64px gutters.
 
-**The Below The Line Rule.** Capacity never overflows a column. Students who do not fit are counted below a dashed rule under the board, not squeezed into it.
+The generated day atlas plate sits fixed behind every working screen under a 35% paper wash, drifting at a fraction of scroll (one depth clock) while the reading plane holds still.
 
 ## Elevation & Depth
 
-Depth is physical and shallow: paper pinned to a board. Sheets carry one soft drop shadow; slate surfaces are flat and separate by tone. Lift happens on hover only, for things that can be opened or chosen.
+Depth is three layers: the atlas plate (back, drifting), solid content plates (middle, still), and glass navigation (front). Shadows are soft, navy-tinted, and long with negative spread, so plates read as cards resting on paper rather than floating. Glass adds an inner specular rim on top of its drop shadow. There are no hard offset shadows.
 
 ### Shadow Vocabulary
-- **Pinned sheet** (`box-shadow: 0 1px 0 rgb(22 20 15 / 0.06), 0 14px 30px -18px rgb(22 20 15 / 0.28)`): every paper sheet at rest.
-- **Card hairline** (`box-shadow: 0 1px 0 rgb(22 20 15 / 0.06)`): student cards at rest on the board tray.
-- **Lifted** (`box-shadow: 0 10px 28px -10px rgb(22 20 15 / 0.28)`): hover state of student cards and role sheets, paired with a 2px upward move; also popovers.
+- **Plate** (`0 1px 2px rgb(11 27 58 / 0.05), 0 10px 30px -16px rgb(11 27 58 / 0.22)`): every content plate at rest.
+- **Lift** (`0 2px 6px rgb(11 27 58 / 0.08), 0 18px 40px -18px rgb(11 27 58 / 0.32)`): hover on interactive day plates (role cards).
+- **Surface** (`0 1px 2px rgb(11 27 58 / 0.05), 0 8px 24px -14px rgb(11 27 58 / 0.18)`): HeroUI surfaces.
+- **Overlay** (`0 2px 8px rgb(11 27 58 / 0.08), 0 28px 56px -20px rgb(11 27 58 / 0.34)`): popovers, tooltips, the command palette.
+- **Glass rim**: white frost at 56%, blur 22px, saturate 1.8, 1px white border at 70%, inset top highlight, plus a 40px soft drop. The night variant is night-2 at 50% with blur 20px.
+- **Primary glow**: the primary button carries an inner top highlight and a blue-tinted under-glow.
 
 ### Named Rules
-**The Pinned Sheet Rule.** A primary sheet may carry a pin: a 14 to 16px ink dot centred on its top edge. The pin is the sheet's only ornament. Slate never casts a shadow.
+**The Glass Is Navigation Rule.** Liquid glass belongs to the sidebar, phone top and tab bars, sheets and the command palette (as blurred backdrops behind white dialogs), the active nav indicator, and the landing nav pill and its primary action. Content (tables, figures, charts, forms) always sits on solid white plates; sign-in role cards are solid night plates. On Chromium, small glass controls also bend what is behind them through an SVG displacement lens.
+
+**The Reduced Transparency Rule.** Under prefers-reduced-transparency, glass turns opaque (white on day, night-2 on night) with no backdrop filter.
 
 ## Shapes
 
-Generous, soft corners throughout: 24px on sheets and slate panels, 20px on student cards, steppers, inputs, nav items, and pin holes, 16px on role switch buttons, 12px on keyboard hints. Buttons, stepper controls, and tier pins are fully round. Borders are rare: sheets have none; dashed 1.5px strokes in Rule Strong mark empty capacity (pin holes) and the below-the-line divider.
+Generously rounded, soft-cornered geometry with radius that grows with the size of the object: controls 10px, fields and tooltips 12px, nav items and menu tiles 16px, content plates 20px, role cards and the phone top bar 22px, night plates 24px, the floating rail and bottom sheets 28px, the landing day sheet 36px at the top. Chips, the tab bar, buttons, avatars, stage numerals, and star dots are full pills or circles. Plates carry a near-invisible 1px navy border (6% alpha); night plates carry none. Day tier dots wear a 2px white ring so they read on any fill.
 
 ## Components
 
 ### Buttons
-Round and quiet; the ink pill is the only loud one.
-- **Shape:** fully round pill, 40px tall, 16px side padding.
-- **Primary:** ink fill, paper text; hover to ink hover. Active nudges down 1px.
-- **Outline:** paper fill with a Rule Strong stroke; hover to putty deep.
-- **Ghost / Link:** no fill; ghost hovers to putty deep, link underlines with a 3 to 4px offset.
-- **Focus:** a 2px slate outline offset 2px; on slate surfaces the outline turns lime.
+Confident, rounded, blue.
+- **Shape:** full pill (HeroUI button), 600 weight with a hair of negative tracking.
+- **Primary:** Atlas Blue fill, white text, inner top highlight and blue under-glow; hover blue-hover, press blue-press.
+- **On night:** white fill with Night text, 48px tall, 24px side padding (landing "Masuk ke demo"), with the glass lens on Chromium.
+- **Quiet link:** text-only pill with an icon (landing "Lihat cara kerja").
+- **Links as buttons:** LinkButton dresses a Next.js link in the HeroUI button variants.
+
+### Chips
+- **Archetype chip:** 28px pill, Blue Wash fill, Deep Atlas Blue text, a 14px line icon per archetype. Never a risk colour.
+- **Stopped flag:** small Blue Wash pill with a flag icon, "Terakhir dibuka", on the row the advisor opened last in this tab.
 
 ### Cards / Containers
-- **Sheet:** paper, 24px corners, pinned sheet shadow, 24px padding (32px for the finding sheet). Section sheets title in Archivo 20px.
-- **KPI sheet:** a label in Geist 12px, a condensed numeral, an optional note; the numeral may take the marker.
-- **Slate panel:** slate, 24px corners, flat, slate ink text; holds controls and the one display numeral.
-- **Board tray:** putty deep, 24px corners, 20px padding; holds advisor columns.
+- **Plate:** Plate White, 20px corners, Plate shadow, 6% navy hairline, 20 to 24px padding; header holds a 17px title, an optional Quiet Ink description, and actions on the right.
+- **Night plate:** Night fill, 24px corners, Night Ink text; hosts the cohort sky and its legend.
+- **Empty state:** a plate with a generated atlas illustration (empty atlas or missing star), a short title, a description, and one action.
 
 ### Inputs / Fields
-- **Style:** paper fill, Rule Strong 1px stroke, 20px corners, 40px tall.
-- **Focus:** stroke turns slate with a 3px half-opacity slate ring.
-- **Error / Disabled:** destructive stroke with a faint destructive ring; disabled at half opacity.
-- **Stepper (on slate):** slate raised tile with a muted label, round minus and plus buttons, the value in Geist Mono 20px white.
+- **Style:** white field, 1px Strong Hairline border, 12px corners, faint drop shadow, Quiet Ink placeholder, blue caret.
+- **Focus:** 2px Atlas Blue outline offset 2px (Starlight inside night surfaces), shared by every focusable element.
 
 ### Navigation
-Slate rail, Geist 14px medium. Default items in slate muted; hover to slate raised; the active item sits on slate raised in white with its icon in lime. The user panel and role switch sit at the rail's foot; the selected role is a lime fill with ink text.
+- **Rail:** floating glass panel with the lantern wordmark, command search, nav grouped under 11px group names, and a user card with the role switch at its foot.
+- **Items:** 40px rows, 14px medium Slate Ink with a 18px Quiet Ink icon and a mono shortcut key on xl; hover washes white at 45%.
+- **Active:** a glass white indicator glides between items on a spring; the icon turns Atlas Blue and the text Navy Ink.
+- **Phone:** glass top bar (wordmark, search) and floating glass tab bar; the active tab is a white pill with a blue icon; Menu opens a blurred bottom sheet with every page as a 48px tile.
+- **Command palette:** a white overlay dialog (24px corners) over a blurred backdrop, opened from the rail search field (white at 70%, 16px corners, Ctrl K) or the top bar; the selected result takes Blue Wash with a blue icon.
 
-### Tier Pin
-A 10px round pin in the tier colour, ringed 2px in paper so it reads on any card; 8px inside column summaries. The badge form pairs the pin with the label in Geist 12px semibold.
+### Tier badge
+A star dot plus its label in 13px semibold Navy Ink. Dot size: Rendah 8px, Pantau and Tinggi 10px, Kritis 12px, each with a white ring.
 
-### Student Card
-A paper card on the board tray: tier pin at the left, student ID and probability in Geist Mono 13px across the top, module and action in muted Geist below. Hover lifts it and rings the pin in lime. Cards settle in with a staggered rise (420ms, cubic-bezier(0.16, 1, 0.3, 1), 22ms per card, from 45% opacity) whenever capacity changes; reduced motion disables it.
+### Contact mark
+Contact state is a mark, not a hue: each status has its own line icon (contacted, scheduled, unreachable, not contacted) read before its colour.
 
-### Marker
-The lime highlighter. On paper, a stroke covering 58% to 94% of the line height behind ink. On slate, a solid lime fill with ink text and slight rounding, because a half stroke would leave dark ink on a dark ground.
+### Stat
+A 13px label, a Numeral value that rolls to new values, an optional note. Tone tints the value Atlas Blue or tier-critical for risk figures only.
+
+### Data table
+HeroUI table with transparent 12px column headers in Quiet Ink, a separator rule under the header, 14px cells, and tabular numbers right-aligned. Rows that link get a Blue Wash hover and a 2px inset blue focus ring.
+
+### Cohort sky (signature)
+The WebGL constellation: one star per student grouped by archetype, star size as the magnitude key and night tier colour as warmth, faint atlas grid lines behind, constellation lines joining each archetype, and tracked labels naming each cluster with its flagged count. It turns slowly, tilts a little on drag, never zooms or pans, and freezes under reduced motion. A legend always pairs each star size and colour with its tier label.
+
+### Capacity band
+A 12px pill track: Atlas Blue for advisor contacts, Starlight for automated messages, Queue Track for students still waiting. The lit share is what capacity reaches; the rest is the queue. Always with a legend and an accessible sentence.
+
+### Scenario label
+Every what-if, counterfactual, or effectiveness-weighted figure carries the label "Skenario model, bukan efek kausal".
+
+### Charts
+2px lines with white-ringed 4px dots, bars at most 24px with 4px rounded ends, solid hairline grids, Quiet Ink 12px axes, a legend for two or more series, and a tooltip that leads with the mono value, then the series name keyed by a short line in the series colour.
+
+### Motion
+- **Rise:** content rises 14px out of a 6px blur over 640ms on an expo-out curve, staggered 70ms; the start state is visible-by-default content that the animation plays over.
+- **Route change:** each in-app navigation fades its content up 12px over 420ms; the first paint after a hard load is never hidden.
+- **Settle:** numerals settle once from light and narrow to their final weight and width.
+- **Landing:** sections reveal and records drift on scroll-driven timelines (compositor only; unsupported browsers show the final state); the sky dawns in after the headline.
+- **Reduced motion** disables every entrance, drift, and parallax.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** set every screen on putty with content on paper sheets and controls on slate.
-- **Do** put at most two key numbers of a finding under the lime marker.
-- **Do** show tier as a pin plus a label, using the validated ramp unchanged.
-- **Do** set IDs, counts, and probabilities in Geist Mono with tabular figures and id-ID formatting.
-- **Do** keep the board screen to 64, 44, 20, and 13 px.
-- **Do** mark empty capacity with a dashed pin hole and send overflow below the dashed line.
-- **Do** label every scenario result "Skenario model, bukan efek kausal".
+- **Do** keep content on solid white plates (20px corners, Plate shadow) and reserve glass for navigation.
+- **Do** pair every tier colour with its label and its dot size; use day tier tokens on light grounds and night star colours only on the night plate.
+- **Do** use Atlas Blue for every action, selection, link, and focus ring, and nothing else for those jobs.
+- **Do** write each page title as the screen's finding in one sentence, in Headline type, with nothing above it.
+- **Do** format numbers through the shared id-ID formatter and print probabilities of 0.995 and above as 0,99+.
+- **Do** label every scenario or counterfactual result "Skenario model, bukan efek kausal".
+- **Do** let entrance motion play over content that is already visible, and disable it under reduced motion; make glass opaque under reduced transparency.
 
 ### Don't:
-- **Don't** use lime as a fill or text colour on paper, or add a second accent colour.
-- **Don't** let colour alone identify a tier or a chart series.
-- **Don't** print a probability as 1,00; use 0,99+.
-- **Don't** give slate surfaces shadows or give sheets borders.
-- **Don't** use hard offset shadows; depth is the soft pinned sheet only.
-- **Don't** bring back the retired navy, amber, or Plus Jakarta Sans system.
+- **Don't** use amber, orange, or red for anything on day surfaces that is not a risk tier or the at-risk chart series.
+- **Don't** put tables, figures, charts, or forms on glass.
+- **Don't** set an eyebrow, kicker, or category label above a heading.
+- **Don't** bring back the noticeboard materials: putty, slate, lime highlighter, Archivo, or Geist.
+- **Don't** use hard offset shadows; depth is soft navy-tinted shadow and glass rim.
+- **Don't** hide content on first paint to stage an entrance.

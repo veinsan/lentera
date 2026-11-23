@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Routes anyone may open: the landing page, sign-in, and the presenter's demo links (which sign in themselves).
+const PUBLIC = (path: string) => path === "/" || path.startsWith("/login") || path.startsWith("/demo/");
+
 /**
  * Refreshes the Supabase session cookies and makes the optimistic sign-in redirect.
  * Authorization itself happens on the server: getCurrentUser() for pages, token verification in the API.
@@ -22,11 +25,10 @@ export async function proxy(request: NextRequest) {
   // getClaims verifies the JWT signature against the project's JWKS.
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
-  const onLogin = request.nextUrl.pathname.startsWith("/login");
-  const onDemoLink = request.nextUrl.pathname.startsWith("/demo/"); // signs in itself, also switches roles
+  const path = request.nextUrl.pathname;
 
-  if (!signedIn && !onLogin && !onDemoLink) return redirectWithCookies(request, "/login", response);
-  if (signedIn && onLogin) return redirectWithCookies(request, "/dashboard", response);
+  if (!signedIn && !PUBLIC(path)) return redirectWithCookies(request, "/login", response);
+  if (signedIn && path.startsWith("/login")) return redirectWithCookies(request, "/dashboard", response);
   return response;
 }
 
@@ -37,5 +39,6 @@ function redirectWithCookies(request: NextRequest, path: string, from: NextRespo
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Static files from public/ and the generated metadata images skip the session check.
+  matcher: ["/((?!_next/static|_next/image|atlas/|illustrations/|icon.svg|robots.txt|sitemap.xml|opengraph-image).*)"],
 };

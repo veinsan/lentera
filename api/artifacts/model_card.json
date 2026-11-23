@@ -314,10 +314,17 @@
   ],
   "leaderboard": {
     "public_f1": 0.78443,
-    "private_f1": null,
+    "private_f1": 0.77775,
     "submission_ref": 57840543,
     "submission_sha256": "7e36b66a4e94eb846e83afa3a48ab3e36388bc61fffc9437457be020d4838c66",
-    "submitted_utc": "2026-10-31 13:53:00.967000"
+    "submitted_utc": "2026-10-31 13:53:00.967000",
+    "selected": {
+      "ref": 57470830,
+      "file": "sub_v5.csv",
+      "submitted_utc": "2026-10-21 07:05:31.427000",
+      "public_f1": 0.8015,
+      "private_f1": 0.79363
+    }
   },
   "presentation_stress": {
     "note": "Satu presentation di-hold-out per run; menguji transfer ke cohort baru.",

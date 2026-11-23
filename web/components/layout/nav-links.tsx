@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutGroup, motion } from "motion/react";
+import { NAV_GROUPS, NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { NAV_ITEMS } from "@/lib/nav";
+
+/** The student profile belongs to the worklist. */
+export function activeHref(pathname: string) {
+  return pathname.startsWith("/mahasiswa") ? "/prioritas" : pathname;
+}
 
 /** Placeholder rows while the session streams in, so no link appears that the role cannot open. */
 export function NavLinksFallback() {
   return (
-    <ul className="flex flex-col gap-1" aria-hidden>
-      {NAV_ITEMS.slice(0, 4).map((item) => (
-        <li key={item.href} className="h-10 animate-pulse rounded-xl bg-slate-raised" />
+    <ul className="flex flex-col gap-1.5 px-1" aria-hidden>
+      {NAV_ITEMS.slice(0, 5).map((item) => (
+        <li key={item.href} className="h-10 animate-pulse rounded-2xl bg-white/50" />
       ))}
     </ul>
   );
@@ -18,31 +24,51 @@ export function NavLinksFallback() {
 
 /** allowed: hrefs the signed-in role may open (icons stay on the client, so only strings cross the boundary). */
 export function NavLinks({ allowed }: { allowed: string[] }) {
-  const pathname = usePathname();
-  // The student profile belongs to the worklist.
-  const active = pathname.startsWith("/mahasiswa") ? "/prioritas" : pathname;
+  const active = activeHref(usePathname());
+  const items = NAV_ITEMS.filter((item) => allowed.includes(item.href));
   return (
-    <ul className="-mx-1 flex gap-1 overflow-x-auto px-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
-      {NAV_ITEMS.filter((item) => allowed.includes(item.href)).map(({ href, label, icon: Icon }) => {
-        const isActive = active === href || active.startsWith(`${href}/`);
-        return (
-          <li key={href}>
-            <Link
-              href={href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-slate-muted hover:bg-slate-raised hover:text-sidebar-foreground",
-              )}
-            >
-              <Icon className={cn("size-4", isActive && "text-brand-accent")} aria-hidden />
-              {label}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <LayoutGroup id="sidebar-nav">
+      <div className="flex flex-col gap-5">
+        {NAV_GROUPS.map((group) => {
+          const inGroup = items.filter((i) => i.group === group);
+          if (!inGroup.length) return null;
+          return (
+            <div key={group}>
+              <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.02em] text-ink-3">{group}</p>
+              <ul className="flex flex-col gap-0.5">
+                {inGroup.map(({ href, label, icon: Icon, key }) => {
+                  const on = active === href || active.startsWith(`${href}/`);
+                  return (
+                    <li key={href} className="relative">
+                      {on && (
+                        <motion.span
+                          layoutId="nav-active"
+                          transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                          className="glass glass-lens absolute inset-0 rounded-2xl bg-white/90"
+                        />
+                      )}
+                      <Link
+                        href={href}
+                        aria-current={on ? "page" : undefined}
+                        className={cn(
+                          "relative flex h-10 items-center gap-3 rounded-2xl px-3 text-[14px] font-medium transition-colors duration-200",
+                          on ? "text-ink" : "text-ink-2 hover:bg-white/45 hover:text-ink",
+                        )}
+                      >
+                        <Icon className={cn("size-[18px] shrink-0", on ? "text-blue" : "text-ink-3")} aria-hidden />
+                        <span className="flex-1">{label}</span>
+                        <kbd className="hidden font-mono text-[11px] text-ink-3 xl:inline" title={`Tekan ${key}`}>
+                          {key}
+                        </kbd>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </LayoutGroup>
   );
 }

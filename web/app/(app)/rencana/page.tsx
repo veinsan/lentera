@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ClipboardList } from "lucide-react";
 import { CapacityPlanner } from "@/components/domain/capacity-planner";
 import { EmptyState } from "@/components/domain/empty-state";
 import { Section } from "@/components/domain/section";
 import { PageHeader } from "@/components/layout/page-header";
 import { RoleGate } from "@/components/layout/role-gate";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { PlanResult } from "@/lib/api";
+import { DataTable } from "@/components/ui/data-table";
+import { getModelCard, type PlanResult } from "@/lib/api";
+import { getCurrentUser } from "@/lib/auth";
 import { getLatestCohort } from "@/lib/data";
 import { fmtInt, fmtPct } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Rencana Intervensi" };
+export const metadata: Metadata = { title: "Rencana intervensi" };
 
 export default function Page() {
   return (
-    <Suspense fallback={<PageHeader title="Rencana Intervensi" description="Memuat kohort..." />}>
+    <Suspense fallback={<PageHeader title="Menghitung kapasitas konselor..." />}>
       <RoleGate roles={["coordinator", "admin"]}>
         <PlannerContent />
       </RoleGate>
@@ -25,29 +25,29 @@ export default function Page() {
 }
 
 async function PlannerContent() {
-  const cohort = await getLatestCohort();
+  const [user, cohort] = await Promise.all([getCurrentUser(), getLatestCohort()]);
   if (!cohort) {
     return (
       <>
-        <PageHeader title="Rencana Intervensi" description="Alokasikan intervensi sesuai kapasitas konselor." />
+        <PageHeader title="Belum ada kohort untuk direncanakan." />
         <EmptyState
-          icon={ClipboardList}
-          title="Belum ada kohort untuk direncanakan"
-          description="Rencana intervensi dihitung dari kohort yang sudah dinilai."
+          title="Rencana menunggu kohort"
+          description="Rencana intervensi dihitung dari kohort minggu ke-4 yang sudah dinilai."
           action={{ href: "/unggah", label: "Unggah kohort" }}
         />
       </>
     );
   }
+  const card = await getModelCard(user.accessToken);
   return (
     <>
       <PageHeader
         title="Setiap jam konselor dihitung sebagai mahasiswa berisiko yang terjangkau."
-        description={`${cohort.name} · berapa mahasiswa berisiko yang terjangkau dengan kapasitas konselor yang ada.`}
+        description={`${cohort.name}. Ubah kapasitas dan asumsi playbook; papan, kurva, dan alokasi dihitung ulang langsung.`}
       />
-      <div className="flex flex-col gap-6">
-        <CapacityPlanner cohortId={cohort.id} />
-        <Section title="Rencana tersimpan">
+      <div className="flex flex-col gap-5">
+        <CapacityPlanner cohortId={cohort.id} ece={card.ok ? card.data.calibration.ece : null} />
+        <Section title="Rencana tersimpan" description="Sepuluh rencana terakhir untuk kohort ini.">
           <SavedPlans cohortId={cohort.id} />
         </Section>
       </div>
@@ -63,41 +63,27 @@ async function SavedPlans({ cohortId }: { cohortId: string }) {
     .eq("cohort_id", cohortId)
     .order("created_at", { ascending: false })
     .limit(10);
-  if (!data?.length) return <p className="text-sm text-muted-foreground">Belum ada rencana tersimpan.</p>;
+  if (!data?.length) return <p className="text-sm text-ink-3">Belum ada rencana tersimpan. Simpan rencana di atas untuk membandingkannya nanti.</p>;
+  const rows = data.map((p) => ({
+    id: p.id as number,
+    at: new Date(p.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" }),
+    params: p.params as { advisors: number; hours_per_advisor: number },
+    s: (p.result as PlanResult).summary,
+  }));
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>#</TableHead>
-          <TableHead>Disimpan</TableHead>
-          <TableHead className="text-right">Konselor x jam</TableHead>
-          <TableHead className="text-right">Dihubungi konselor</TableHead>
-          <TableHead className="text-right">Berisiko terjangkau</TableHead>
-          <TableHead className="text-right">Cakupan</TableHead>
-          <TableHead>Asumsi</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((p) => {
-          const s = (p.result as PlanResult).summary;
-          const params = p.params as { advisors: number; hours_per_advisor: number };
-          return (
-            <TableRow key={p.id}>
-              <TableCell className="font-mono">{p.id}</TableCell>
-              <TableCell>
-                {new Date(p.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" })}
-              </TableCell>
-              <TableCell className="text-right font-mono tabular-nums">
-                {params.advisors} x {params.hours_per_advisor}
-              </TableCell>
-              <TableCell className="text-right font-mono tabular-nums">{fmtInt(s.advisor_contacts)}</TableCell>
-              <TableCell className="text-right font-mono tabular-nums">{fmtInt(s.expected_at_risk_reached_advisor)}</TableCell>
-              <TableCell className="text-right font-mono tabular-nums">{fmtPct(s.advisor_coverage, 1)}</TableCell>
-              <TableCell className="text-xs text-muted-foreground">{s.is_scenario ? "Efektivitas disesuaikan" : "Default"}</TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+    <DataTable
+      label="Rencana tersimpan"
+      rows={rows}
+      rowId={(r) => r.id}
+      columns={[
+        { id: "id", label: "#", rowHeader: true, cell: (r) => <span className="font-mono font-semibold">{r.id}</span> },
+        { id: "at", label: "Disimpan", cell: (r) => r.at },
+        { id: "cap", label: "Konselor × jam", align: "end", cell: (r) => `${r.params.advisors} × ${r.params.hours_per_advisor}` },
+        { id: "c", label: "Dihubungi konselor", align: "end", cell: (r) => fmtInt(r.s.advisor_contacts) },
+        { id: "r", label: "Berisiko terjangkau", align: "end", cell: (r) => <span className="font-semibold">{fmtInt(r.s.expected_at_risk_reached_advisor)}</span> },
+        { id: "cov", label: "Cakupan", align: "end", cell: (r) => fmtPct(r.s.advisor_coverage, 1) },
+        { id: "as", label: "Asumsi", cell: (r) => <span className="text-ink-3">{r.s.is_scenario ? "Efektivitas disesuaikan" : "Default"}</span> },
+      ]}
+    />
   );
 }

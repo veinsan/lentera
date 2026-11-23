@@ -1,206 +1,390 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "@heroui/styles";
 
 /*
-  Tokens for the Papan Minggu Ke-4 world (see .impeccable/surfaces/web-app.md; DESIGN.md is rewritten from the build).
-  shadcn names map onto roles: --card is the paper sheet, --background the putty board, --sidebar the slate rail.
-  shadcn's --accent is the hover surface, so the lime highlighter is --brand-accent (Tailwind: brand-accent).
+  Lentera, star atlas world (.impeccable/surfaces/web-app.md and web-app-page-tsx.md; DESIGN.md is written from the build).
+  HeroUI reads its own variable names (--background, --surface, --accent, --muted is a text colour); this file sets
+  them from the atlas palette and adds the world's own tokens. Warm hues belong to risk tiers only.
 */
-:root {
-  --background: #ece7dd;
-  --foreground: #16140f;
-  --card: #fbfaf6;
-  --card-foreground: #16140f;
-  --popover: #fbfaf6;
-  --popover-foreground: #16140f;
-  --primary: #16140f;
-  --primary-hover: #34302a;
-  --primary-foreground: #fbfaf6;
-  --secondary: #e3dcce;
-  --secondary-foreground: #16140f;
-  --muted: #e3dcce;
-  --muted-foreground: #625d52;
-  --accent: #e8e1d3;
-  --accent-foreground: #16140f;
-  --brand-accent: #d9f24a;
-  --brand-accent-foreground: #16140f;
-  --destructive: #b42318;
-  --success: #2f7d5b;
-  --border: #d9d1c1;
-  --input: #cfc6b4;
-  --ring: #1f2b2e;
-
-  --slate: #1f2b2e;
-  --slate-raised: #2c3a3e;
-  --slate-line: #3a4a4f;
-  --slate-foreground: #e9e6dd;
-  --slate-muted: #a4aba3;
-
-  --risk-low: #e2a27a;
-  --risk-watch: #cf7448;
-  --risk-high: #b04a26;
-  --risk-critical: #7a2610;
-  --on-risk-light: #16140f;
-  --on-risk-dark: #ffffff;
-  --uncertain: #7a7f8c;
-
-  --chart-1: #a93a1c; /* at risk */
-  --chart-2: #2f6db5; /* not at risk */
-  --chart-3: #9aa1ae; /* neutral */
-
-  --sidebar: #1f2b2e;
-  --sidebar-foreground: #e9e6dd;
-  --sidebar-primary: #d9f24a;
-  --sidebar-primary-foreground: #16140f;
-  --sidebar-accent: #2c3a3e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #3a4a4f;
-  --sidebar-ring: #d9f24a;
-
-  --shadow-overlay: 0 10px 28px -10px rgb(22 20 15 / 0.28);
-  --shadow-sheet: 0 1px 0 rgb(22 20 15 / 0.06), 0 14px 30px -18px rgb(22 20 15 / 0.28);
-}
 
 @theme inline {
-  --font-sans: var(--font-geist);
-  --font-heading: var(--font-archivo);
-  --font-display: var(--font-archivo);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-gsf), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-gsf), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-gsc), ui-monospace, monospace;
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-brand-accent: var(--brand-accent);
-  --color-brand-accent-foreground: var(--brand-accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-success: var(--success);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-slate: var(--slate);
-  --color-slate-raised: var(--slate-raised);
-  --color-slate-line: var(--slate-line);
-  --color-slate-foreground: var(--slate-foreground);
-  --color-slate-muted: var(--slate-muted);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-blue: var(--blue);
+  --color-blue-hover: var(--blue-hover);
+  --color-blue-soft: var(--blue-soft);
+  --color-blue-ink: var(--blue-ink);
+  --color-queue-track: var(--queue-track);
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
+  --color-night-3: var(--night-3);
+  --color-night-ink: var(--night-ink);
+  --color-night-muted: var(--night-muted);
+  --color-night-line: var(--night-line);
+  --color-starlight: var(--starlight);
 
-  --color-risk-low: var(--risk-low);
-  --color-risk-watch: var(--risk-watch);
-  --color-risk-high: var(--risk-high);
-  --color-risk-critical: var(--risk-critical);
-  --color-on-risk-light: var(--on-risk-light);
-  --color-on-risk-dark: var(--on-risk-dark);
+  --color-tier-low: var(--tier-low);
+  --color-tier-watch: var(--tier-watch);
+  --color-tier-high: var(--tier-high);
+  --color-tier-critical: var(--tier-critical);
   --color-uncertain: var(--uncertain);
+  --color-chart-risk: var(--chart-risk);
+  --color-chart-safe: var(--chart-safe);
+  --color-chart-neutral: var(--chart-neutral);
 
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
-  --shadow-overlay: var(--shadow-overlay);
-  --shadow-sheet: var(--shadow-sheet);
+  --shadow-plate: var(--plate-shadow);
+  --shadow-lift: var(--lift-shadow);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-quick: cubic-bezier(0.4, 0, 1, 1);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  :root {
+    /* Atlas palette */
+    --paper: #f3f7fd;
+    --ink: #0b1b3a;
+    --ink-2: #3e4d72;
+    --ink-3: #5b6a8e;
+    --line: #dce5f3;
+    --line-strong: #c5d2e8;
+    --blue: #2457f5;
+    --blue-hover: #1c48d8;
+    --blue-press: #173cb8;
+    --blue-soft: #e7eeff;
+    --blue-ink: #1a3fb8;
+    --queue-track: #dbe4f3;
+
+    --night: #081634;
+    --night-2: #0d1f4a;
+    --night-3: #15295c;
+    --night-ink: #eaf1ff;
+    --night-muted: #a9b8d9;
+    --night-line: rgb(169 184 217 / 0.18);
+    --starlight: #8fb0ff;
+
+    /*
+      Risk tiers as a diverging scale: Rendah is the cool pole (not flagged); Pantau, Tinggi, Kritis are one warm
+      ordinal arm (dataviz validator: monotone lightness, one hue, light end 2.08:1 on white). Always with a label.
+    */
+    --tier-low: #6b8fd8;
+    --tier-watch: #f0a35a;
+    --tier-high: #de6a2e;
+    --tier-critical: #b0381f;
+    --uncertain: #8a96b3;
+    /* Two-series pair (validator: all six checks pass on white). */
+    --chart-risk: #c4402a;
+    --chart-safe: #2457f5;
+    --chart-neutral: #9aa6c0;
+
+    /* HeroUI semantic variables */
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --surface: #ffffff;
+    --surface-foreground: var(--ink);
+    --surface-secondary: #f5f8fd;
+    --surface-secondary-foreground: var(--ink);
+    --surface-tertiary: #edf2fa;
+    --surface-tertiary-foreground: var(--ink);
+    --overlay: #ffffff;
+    --overlay-foreground: var(--ink);
+    --muted: var(--ink-3);
+    --default: #e9eff8;
+    --default-foreground: var(--ink);
+    --accent: var(--blue);
+    --accent-foreground: #ffffff;
+    --success: #13795b;
+    --success-foreground: #ffffff;
+    --warning: #b7790a;
+    --warning-foreground: #ffffff;
+    --danger: var(--tier-critical);
+    --danger-foreground: #ffffff;
+    --segment: #ffffff;
+    --segment-foreground: var(--ink);
+    --border: var(--line);
+    --separator: #e6ecf6;
+    --focus: var(--blue);
+    --link: var(--blue-ink);
+    --backdrop: rgb(8 22 52 / 0.36);
+    --field-background: #ffffff;
+    --field-foreground: var(--ink);
+    --field-placeholder: var(--ink-3);
+    --field-border: var(--line-strong);
+    --field-border-width: 1px;
+    --radius: 0.625rem;
+    --field-radius: 0.75rem;
+    --scrollbar-thumb: rgb(11 27 58 / 0.18);
+
+    --surface-shadow: 0 1px 2px rgb(11 27 58 / 0.05), 0 8px 24px -14px rgb(11 27 58 / 0.18);
+    --overlay-shadow: 0 2px 8px rgb(11 27 58 / 0.08), 0 28px 56px -20px rgb(11 27 58 / 0.34);
+    --field-shadow: 0 1px 2px rgb(11 27 58 / 0.05);
+    --plate-shadow: 0 1px 2px rgb(11 27 58 / 0.05), 0 10px 30px -16px rgb(11 27 58 / 0.22);
+    --lift-shadow: 0 2px 6px rgb(11 27 58 / 0.08), 0 18px 40px -18px rgb(11 27 58 / 0.32);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    color: var(--ink);
+    background: var(--paper);
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-    scrollbar-color: #bdb3a0 transparent;
+    min-height: 100dvh;
+    background: transparent;
+    text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: var(--brand-accent);
-    color: var(--brand-accent-foreground);
+    background: rgb(36 87 245 / 0.22);
+    color: var(--ink);
+  }
+  input,
+  textarea {
+    caret-color: var(--blue);
   }
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid var(--blue);
     outline-offset: 2px;
   }
-  .bg-slate :focus-visible,
-  [data-slate] :focus-visible {
-    outline-color: var(--brand-accent);
+  .night :focus-visible {
+    outline-color: var(--starlight);
   }
   a {
-    text-underline-offset: 3px;
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
   }
-  .font-mono {
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  .tabular,
+  .font-mono,
+  td,
+  th {
     font-variant-numeric: tabular-nums;
   }
 }
 
+/* Liquid glass: the navigation layer only. Content sits on solid plates beneath it. */
+@utility glass {
+  background: rgb(255 255 255 / 0.56);
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  backdrop-filter: blur(22px) saturate(1.8);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(36 87 245 / 0.04),
+    0 1px 2px rgb(11 27 58 / 0.06),
+    0 16px 40px -20px rgb(11 27 58 / 0.3);
+  @media (prefers-reduced-transparency: reduce) {
+    background: #ffffff;
+    backdrop-filter: none;
+  }
+}
+@utility glass-night {
+  background: rgb(13 31 74 / 0.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid rgb(169 184 217 / 0.22);
+  box-shadow:
+    inset 0 1px 0 rgb(234 241 255 / 0.18),
+    inset 0 -1px 0 rgb(234 241 255 / 0.05),
+    0 18px 44px -20px rgb(0 0 0 / 0.55);
+  @media (prefers-reduced-transparency: reduce) {
+    background: var(--night-2);
+    backdrop-filter: none;
+  }
+}
+/* Chromium bends what is behind small glass controls through #liquid-lens; components/brand/liquid-lens.tsx sets data-lens. */
+@utility glass-lens {
+  :root[data-lens="on"] & {
+    -webkit-backdrop-filter: url(#liquid-lens) blur(8px) saturate(1.9);
+    backdrop-filter: url(#liquid-lens) blur(8px) saturate(1.9);
+  }
+}
+@utility plate {
+  background: var(--surface);
+  border: 1px solid rgb(11 27 58 / 0.06);
+  border-radius: 20px;
+  box-shadow: var(--plate-shadow);
+}
+@utility night-plate {
+  color: var(--night-ink);
+  background-color: var(--night);
+  border-radius: 24px;
+}
+
 @layer components {
-  /* The paper sheet pinned to the board. */
-  .sheet {
-    background: var(--card);
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-sheet);
+  /* Display voice: Google Sans Flex wide and rounded at large optical size. */
+  .display {
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" 108, "ROND" 40;
+    font-weight: 600;
+    letter-spacing: -0.032em;
+    line-height: 1.02;
   }
-  /* The lime highlighter stroke behind a key number. */
-  .marker {
-    background: linear-gradient(transparent 58%, var(--brand-accent) 58%, var(--brand-accent) 94%, transparent 94%);
-    padding-inline: 0.08em;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
+  .numeral {
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" 100, "ROND" 20;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
   }
-  /* On slate the half-height stroke leaves dark ink on a dark ground; the stroke covers the whole line there. */
-  .marker-solid {
-    background: var(--brand-accent);
-    color: var(--brand-accent-foreground);
-    border-radius: 0.12em;
-    padding-inline: 0.12em;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
+
+  /* One authored entrance: content rises into place from a visible-by-default state, staggered by --i. */
+  .rise {
+    animation: rise 640ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
   }
-  /* The board refills when capacity changes: cards settle in from an already-visible state, staggered. */
-  .board-in {
-    animation: board-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(var(--i, 0) * 22ms);
-  }
-  @keyframes board-in {
+  @keyframes rise {
     from {
-      opacity: 0.45;
-      transform: translateY(6px);
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(6px);
     }
   }
+
+  /* HeroUI in the atlas world: the kit's structure, the world's type, weight, and density. */
+  .button {
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .button--primary {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      0 1px 2px rgb(11 27 58 / 0.18),
+      0 8px 18px -10px rgb(36 87 245 / 0.7);
+  }
+  .lentera-table .table__column {
+    padding-block: 0.65rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-3);
+    background: transparent;
+    white-space: nowrap;
+  }
+  .lentera-table .table__column::after {
+    content: none;
+  }
+  .lentera-table .table__header {
+    border-bottom: 1px solid var(--separator);
+  }
+  .lentera-table .table__cell {
+    padding: 0.85rem 1rem;
+    font-size: 14px;
+    color: var(--ink);
+    vertical-align: middle;
+  }
+  .lentera-table--dense .table__cell {
+    padding-block: 0.55rem;
+  }
+  .lentera-table--links .table__row {
+    cursor: pointer;
+  }
+  .lentera-table--links .table__row:hover .table__cell,
+  .lentera-table--links .table__row[data-hovered="true"] .table__cell {
+    background: rgb(231 238 255 / 0.6);
+  }
+  .lentera-table .table__row[data-focus-visible="true"] .table__cell {
+    box-shadow: inset 0 0 0 2px var(--blue);
+  }
+
+  /*
+    Landing scroll motion runs on the compositor through scroll-driven animations. Browsers without them keep
+    every element in its final, visible state, so nothing waits on support or JavaScript.
+  */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+    }
+    .hero-depth-far {
+      animation: depth-far linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+    .hero-depth-mid {
+      animation: depth-mid linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(6px);
+    }
+  }
+  @keyframes drift {
+    from {
+      transform: translateY(36px);
+    }
+    to {
+      transform: translateY(-36px);
+    }
+  }
+  @keyframes depth-far {
+    to {
+      transform: translateY(22vh) scale(1.04);
+    }
+  }
+  @keyframes depth-mid {
+    to {
+      transform: translateY(10vh);
+      opacity: 0.35;
+    }
+  }
+  /* The sky arrives after the headline: a slow dawn of the stars, never a pop. */
+  .sky-in {
+    animation: sky-in 1600ms var(--ease-out-expo) 300ms both;
+  }
+  @keyframes sky-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+      filter: blur(8px);
+    }
+  }
+  /* Numerals settle once on their variable axes: light and narrow to their final weight and width. */
+  .settle {
+    animation: settle 1100ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 70ms + 200ms);
+  }
+  @keyframes settle {
+    from {
+      font-variation-settings: "wdth" 80, "ROND" 0;
+      font-weight: 300;
+      opacity: 0.2;
+    }
+  }
+
+
   @media (prefers-reduced-motion: reduce) {
-    .board-in {
+    .rise,
+    .sky-in,
+    .reveal,
+    .drift,
+    .settle,
+    .hero-depth-far,
+    .hero-depth-mid {
       animation: none;
     }
-  }
-  .display-numeral {
-    font-family: var(--font-archivo);
-    font-stretch: 80%;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
   }
 }

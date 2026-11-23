@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@heroui/react";
 import { Check, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export function MessageCard({ message }: { message: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex flex-col gap-3">
-      <p className="whitespace-pre-line rounded-md bg-muted p-4 text-sm leading-relaxed">{message}</p>
+      <p className="rounded-2xl bg-surface-secondary p-4 text-[15px] leading-relaxed whitespace-pre-line text-ink">{message}</p>
       <Button
-        variant="outline"
+        variant="secondary"
         className="self-end"
-        onClick={async () => {
+        onPress={async () => {
           await navigator.clipboard.writeText(message);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);

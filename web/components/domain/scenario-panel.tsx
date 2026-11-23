@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Checkbox, Spinner } from "@heroui/react";
 import { FlaskConical } from "lucide-react";
+import { Num } from "@/components/domain/stat";
 import type { Counterfactual } from "@/lib/api";
 import { postJson } from "@/lib/api-browser";
 import { fmtPct } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 type SimResult = { applicable: boolean; probability: number | null; flagged?: boolean };
 
-/** Model scenarios for one student. Always labelled as a model scenario, not a causal effect (DESIGN.md). */
+/** Model scenarios for one student. Always labelled as a model scenario, not a causal effect. */
 export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counterfactual }) {
   const helpful = new Set(cf.single.map((s) => s.lever));
   const [chosen, setChosen] = useState<string[]>([]);
@@ -25,35 +26,35 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
     start(async () => {
       const res = await postJson<SimResult>(`/students/${studentId}/simulate`, { levers: next });
       if (res.status === 200) setResult(res.body as SimResult);
-      else setError("Simulasi gagal dijalankan.");
+      else setError("Simulasi gagal dijalankan. API model belum menjawab; coba lagi.");
     });
   }
 
   return (
-    <div className="rounded-2xl border border-dashed border-uncertain bg-muted p-5">
-      <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+    <div className="rounded-2xl border border-dashed border-uncertain bg-surface-secondary p-5">
+      <p className="flex items-center gap-2 text-xs font-semibold text-ink-2">
         <FlaskConical className="size-4" aria-hidden />
         Skenario model, bukan efek kausal
       </p>
 
       {!cf.applicable ? (
-        <p className="mt-3 text-sm">
-          Data aktivitas LMS mahasiswa ini berupa placeholder, jadi skenario perubahan perilaku tidak bisa dihitung. Lakukan
-          cek administrasi dan akses terlebih dahulu.
+        <p className="mt-3 text-sm leading-relaxed text-ink">
+          Data aktivitas LMS mahasiswa ini berupa placeholder, jadi skenario perubahan perilaku tidak bisa dihitung. Lakukan cek
+          administrasi dan akses terlebih dahulu.
         </p>
       ) : (
         <>
-          <div className="mt-3 text-sm">
+          <div className="mt-3 text-sm leading-relaxed text-ink">
             {cf.best ? (
               <p>
-                <span className="font-semibold">Jalur di bawah threshold:</span> {cf.best.labels.join(" + ")} menurunkan
-                probabilitas dari <Prob v={cf.base} /> ke <Prob v={cf.best.probability} />.
+                <span className="font-semibold">Jalur di bawah ambang:</span> {cf.best.labels.join(" + ")} menurunkan probabilitas dari{" "}
+                <Prob v={cf.base} /> ke <Prob v={cf.best.probability} />.
               </p>
             ) : cf.reason === "not_flagged" ? (
-              <p>Mahasiswa ini sudah di bawah threshold {fmtPct(cf.threshold, 1)}.</p>
+              <p>Mahasiswa ini sudah di bawah ambang {fmtPct(cf.threshold, 1)}.</p>
             ) : cf.closest ? (
               <p>
-                <span className="font-semibold">Belum ada kombinasi yang menembus threshold.</span> Penurunan terbesar:{" "}
+                <span className="font-semibold">Belum ada kombinasi yang menembus ambang.</span> Penurunan terbesar:{" "}
                 {cf.closest.labels.join(" + ")}, dari <Prob v={cf.base} /> ke <Prob v={cf.closest.probability} />.
               </p>
             ) : (
@@ -61,44 +62,51 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
             )}
           </div>
 
-          <fieldset className="mt-4">
-            <legend className="text-xs font-semibold text-muted-foreground">Coba kombinasi sendiri</legend>
-            <div className="mt-2 flex flex-col gap-1.5">
+          <fieldset className="mt-5">
+            <legend className="text-xs font-semibold text-ink-2">Coba kombinasi sendiri</legend>
+            <div className="mt-2.5 flex flex-col gap-2">
               {cf.levers.map((l) => {
                 const usable = helpful.has(l.key);
                 return (
-                  <label key={l.key} className={cn("flex items-center gap-2 text-sm", !usable && "text-muted-foreground")}>
-                    <input
-                      type="checkbox"
-                      className="size-4 accent-[var(--primary)]"
-                      checked={chosen.includes(l.key)}
-                      disabled={!usable || pending}
-                      onChange={() => toggle(l.key)}
-                    />
-                    {l.label}
-                    {!usable && <span className="text-xs">(tidak menurunkan risiko mahasiswa ini)</span>}
-                  </label>
+                  <Checkbox
+                    key={l.key}
+                    isSelected={chosen.includes(l.key)}
+                    isDisabled={!usable || pending}
+                    onChange={() => toggle(l.key)}
+                  >
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Checkbox.Content>
+                      <span className={usable ? "text-sm text-ink" : "text-sm text-ink-3"}>
+                        {l.label}
+                        {!usable && <span className="text-xs"> (tidak menurunkan risiko mahasiswa ini)</span>}
+                      </span>
+                    </Checkbox.Content>
+                  </Checkbox>
                 );
               })}
             </div>
           </fieldset>
 
-          <div className="mt-4 flex items-baseline gap-3 text-sm" aria-live="polite">
-            <span className="text-muted-foreground">Probabilitas skenario:</span>
+          <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-separator pt-4 text-sm" aria-live="polite">
+            <span className="text-ink-3">Probabilitas skenario</span>
             {pending ? (
-              <span className="text-muted-foreground">menghitung...</span>
+              <Spinner size="sm" />
             ) : result?.probability != null ? (
               <>
-                <span className="font-mono text-xl font-semibold">{fmtPct(result.probability)}</span>
-                <span className="text-xs text-muted-foreground">
-                  dari {fmtPct(cf.base)} · {result.flagged ? "masih ter-flag" : "di bawah threshold"}
+                <span className="numeral text-[1.6rem] text-blue">
+                  <Num value={result.probability} format="pct" />
+                </span>
+                <span className="text-xs text-ink-3">
+                  dari {fmtPct(cf.base)} · {result.flagged ? "masih ter-flag" : "di bawah ambang"}
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">pilih lever di atas</span>
+              <span className="text-ink-3">pilih lever di atas</span>
             )}
           </div>
-          {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+          {error && <p className="mt-2 text-sm text-danger">{error}</p>}
         </>
       )}
     </div>
@@ -106,5 +114,5 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
 }
 
 function Prob({ v }: { v: number }) {
-  return <span className="font-mono font-semibold">{fmtPct(v)}</span>;
+  return <span className="font-semibold tabular-nums">{fmtPct(v)}</span>;
 }
