@@ -152,10 +152,17 @@ Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Port 
 
 Windows Smart App Control on the owner's machine blocks unsigned executables and DLLs. It blocks the uv-managed Python 3.12, the pandas 3.1.0 wheel, and the `pytest.exe` launcher. Use the python.org Python 3.13 (`api/.python-version`) and run tools as `uv run python -m <tool>`.
 
+## Production
+
+- Web: `https://lentera-khaki.vercel.app` (Vercel project `lentera`, root `web`, functions in `sin1`). A push to `main` deploys it through the Vercel GitHub integration. `.vercelignore` keeps `data/`, `api/`, and env files out of CLI uploads; its patterns start with `/` because a bare `supabase` also matches `web/lib/supabase`.
+- API: `https://lentera-api.delightfulforest-3e8ecdc4.malaysiawest.azurecontainerapps.io` (Azure for Students, resource group `lentera-rg`, region `malaysiawest`, 1 vCPU, 2 GiB, scale 0 to 1). The `api` workflow deploys it with OIDC. Secrets live in the Container App; `CORS_ORIGINS` lists the Vercel domain and the local ports.
+- Azure CLI is installed but not on the shell PATH here: call `C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`. The active `gh` account is not `veinsan`; use `GH_TOKEN=$(gh auth token --user veinsan)` for one command instead of switching accounts.
+- Piping values into `vercel env add` from Windows PowerShell 5.1 prepends a UTF-8 BOM. Pipe from Bash into `node <npm>/vercel/dist/vc.js` instead and check the pulled value byte for byte.
+
 ## Build
 
 - Frontend: `pnpm build` and `pnpm lint` from `web/`. A successful build reports zero TypeScript errors, prerenders the static pages, and lists `/mahasiswa/[id]` as Partial Prerender.
-- API: `docker build -t lentera-api api/` succeeds and the container answers `GET /health`.
+- API: Docker is not installed on the owner's machine; the `api` workflow builds the image and checks `GET /health` in the container.
 
 ## Git Rules
 

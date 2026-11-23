@@ -14,3 +14,7 @@ node_modules/
 
 # Competition data stays local
 data/
+
+# Vercel CLI link and pulled env files
+.vercel
+.env*

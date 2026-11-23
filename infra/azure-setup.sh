@@ -6,7 +6,7 @@ set -euo pipefail
 
 GH_OWNER=${GH_OWNER:-veinsan}
 GH_REPO=${GH_REPO:-lentera}
-LOCATION=${LOCATION:-southeastasia}   # Azure for Students may limit regions; change if creation is refused.
+LOCATION=${LOCATION:-malaysiawest}   # Azure for Students allows only eastasia, centralindia, japanwest, koreacentral, malaysiawest.
 RG=${RG:-lentera-rg}
 ENV_NAME=${ENV_NAME:-lentera-env}
 APP=${APP:-lentera-api}

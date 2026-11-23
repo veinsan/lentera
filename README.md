@@ -54,7 +54,7 @@ API:
 
 1. Push to `main`. The `api` workflow runs pytest, builds `api/Dockerfile`, checks `GET /health` in the container, and pushes `ghcr.io/veinsan/lentera-api` with the commit SHA and `latest` tags.
 2. Create a GitHub classic token with only the `read:packages` scope. Container Apps uses it to pull the private image.
-3. Open Azure Cloud Shell (Bash), upload `infra/azure-setup.sh`, and run `bash azure-setup.sh`. It asks for `SUPABASE_URL`, the Supabase service role key, and the token, then creates the resource group, the Container Apps environment, the app (1 vCPU, 2 GiB, scale 0 to 1), and an OIDC sign-in for GitHub Actions limited to the resource group.
+3. With `az login` done (locally or in Azure Cloud Shell), run `bash infra/azure-setup.sh`. It asks for `SUPABASE_URL`, the Supabase service role key, and the token, then creates the resource group, the Container Apps environment, the app in `malaysiawest` (1 vCPU, 2 GiB, scale 0 to 1), and an OIDC sign-in for GitHub Actions limited to the resource group.
 4. Set the five repository variables the script prints (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, `AZURE_CONTAINERAPP`). From then on, every push to `main` that touches `api/` deploys a new revision and checks that the public `/health` reports the new commit SHA.
 
 Web:

@@ -1,0 +1,8 @@
+# Vercel builds web/ only; never upload data, the API, or env files.
+/data
+/api
+/supabase
+/infra
+**/.env*
+**/node_modules
+**/.next

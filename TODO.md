@@ -6,7 +6,7 @@
 | DEC-01 | Confirm product name "Lentera" | Pending | Owner decides. |
 | DEC-02 | Confirm final-round presentation date | Pending | Owner provides the date; it sets the build deadline. |
 | DEC-03 | Confirm pnpm for `web/` | Done | Owner chose pnpm. |
-| DEC-04 | Confirm Azure subscription type and Container Apps | Pending | Owner checks the Azure account. |
+| DEC-04 | Confirm Azure subscription type and Container Apps | Done | Azure for Students (ITB tenant). The allowed-regions policy permits five regions; the API runs in `malaysiawest` on Container Apps. |
 | DEC-05 | Confirm playbook minutes, effectiveness defaults, tier cutoffs 0.6 and 0.85, low-score cutoff 60, and scenario levers | Pending | Owner reviews `PRD.md` section 5.1 and `ARCHITECTURE.md` scenarios. |
 | DEC-06 | Confirm with the DSCO committee that a TypeScript frontend is acceptable | Pending | Owner asks the committee. |
 | DEC-07 | Confirm design tokens | Pending | Owner reviews `DESIGN.md`. |
@@ -29,7 +29,7 @@
 | API-06 | Drift report | Pending | None |
 | API-07 | Request logging | Pending | None |
 | API-08 | Dockerfile and tests | Done | `api/Dockerfile` (python:3.13-slim, uv sync --locked --no-dev, non-root, one uvicorn worker). Workflow run 45123400284 on commit 06b81ef: pytest green, image built, container `GET /health` returned the commit SHA, image pushed to `ghcr.io/veinsan/lentera-api` (SHA and `latest`). |
-| API-09 | GitHub Actions deploy to Azure | In progress | Test, build, and push jobs pass; the deploy job is skipped until the repository variables exist. Next: DEC-04, then the owner runs `infra/azure-setup.sh` in Azure Cloud Shell and sets the five variables it prints. |
+| API-09 | GitHub Actions deploy to Azure | In progress | Container App `lentera-api` created in `lentera-rg` (malaysiawest) from the ghcr image; public `/health` answers in about 1 s and `/model` returns 401 without a token. OIDC app `lentera-github-deploy` (Contributor on the resource group only) and the five repository variables are set. Run 45123921635 failed because `astral-sh/setup-uv@v10` does not exist; now pinned to `v10.4.0`. Done when the next push to `main` deploys a revision and the public `/health` reports its SHA. |
 | W-01 | Design tokens and app shell | Done | Tokens in `web/app/globals.css`; sidebar with six routes, active state (student profile highlights Daftar Prioritas), Plus Jakarta Sans and JetBrains Mono. Checked in the browser at 1280 px: redirect `/` to `/dashboard`, client navigation, no console errors. |
 | W-02 | Sign-in and role-aware layout | In progress | Login form, `proxy.ts` session refresh and redirect, role-filtered sidebar with user panel and sign-out, role gate on Rencana and Unggah; `pnpm build` and `pnpm lint` pass; signed-out visit to `/model` redirects to `/login`. Coordinator UI checked: six links, user panel, gated pages open. Pending: advisor and admin UI check (RLS for both already verified through the API). |
 | W-03 | Cohort upload page | Done | Checked as the coordinator at 1440 px: an 8-row file showed the quality report (1 placeholder row, 5 relabeled `highest_education` values), scoring returned the summary, and the cohort list refreshed; the test cohort was then deleted. |
@@ -40,6 +40,6 @@
 | W-08 | Intervention log | Done | A saved note appeared in the history and the worklist status filter showed the student as contacted; the test note was then deleted. |
 | W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |
 | W-10 | Model and monitoring page | In progress | Model card sections, fairness tabs, and charts render from `/model` and were checked at 1440 px. Chart palette and tier ramp pass the dataviz validator. Drift and request statistics wait for API-06 and API-07. |
-| W-11 | Vercel deployment | Pending | Steps in `README.md` Deployment. Needs the Azure API URL from API-09, then `CORS_ORIGINS` on the API set to the Vercel domain. |
+| W-11 | Vercel deployment | Done | `https://lentera-khaki.vercel.app`, Vercel project `lentera` linked to `veinsan/lentera` (root `web`, functions in `sin1`). Env values checked byte for byte after a BOM was found and fixed. Signed in as the coordinator on production: dashboard numbers match local (6,502 scored, tiers 1,583/986/1,306/2,627), the planner preview from the browser to Azure returns 382 contacts, 353 reached, +59 per advisor, and student 1001 shows 84.6% with SHAP reasons and scenarios. |
 | D-01 | Demo accounts and demo cohort | In progress | `api/scripts/seed_demo_users.py` created admin, coordinator (all modules), and advisor (M03, M06) on Supabase; the password is `DEMO_PASSWORD` in `api/.env`. Demo cohort `Kohort uji DSCO (test.csv)` (6,502 rows) is stored. |
 | D-02 | Architecture diagram and demo script | Pending | None |

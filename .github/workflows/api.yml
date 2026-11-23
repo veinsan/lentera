@@ -27,7 +27,7 @@ jobs:
         working-directory: api
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.4.0  # full version: this action publishes no major tag
         with:
           enable-cache: true
       - run: uv sync --locked
@@ -77,7 +77,8 @@ jobs:
       - name: Deploy new revision
         run: |
           az containerapp update -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --image "$IMAGE:${{ github.sha }}" --set-env-vars IMAGE_TAG=${{ github.sha }}
+            --image "$IMAGE:${{ github.sha }}" --set-env-vars IMAGE_TAG=${{ github.sha }} \
+            --revision-suffix "r${{ github.run_number }}-${GITHUB_SHA::7}"  # short and unique per run
       - name: Check public /health reports the new image
         run: |
           fqdn=$(az containerapp show -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \

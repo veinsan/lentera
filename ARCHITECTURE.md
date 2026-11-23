@@ -17,7 +17,7 @@ Steps marked Done in `TODO.md` are implemented; everything else below is planned
 | Model artifact storage | Committed to the GitHub repository under `api/artifacts/` | Agreed |
 | Source control | GitHub, private repository `veinsan/lentera` | Agreed |
 
-Pending: the owner confirms the Azure subscription type (for example, Azure for Students), which decides the Container Apps region and spending limit.
+The Azure subscription is Azure for Students. Its policy allows only eastasia, centralindia, japanwest, koreacentral, and malaysiawest; the API runs in malaysiawest, the closest allowed region to Indonesia.
 
 ## System Structure
 
