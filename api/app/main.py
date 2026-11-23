@@ -10,9 +10,10 @@ import httpx
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+import pandas as pd
+from pydantic import BaseModel, Field
 
-from app import quality, rules, scenarios
+from app import planner, quality, rules, scenarios
 from app.auth import User, current_user, require_role
 from app.explain import Explainer
 from app.model import ARTIFACTS, Model
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
     app.state.explainer = Explainer(app.state.model)
     app.state.schema = quality.load_schema()
     app.state.targets = scenarios.load_targets()
+    app.state.plan_cache = {}  # cohort_id -> predictions frame; stored predictions never change
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
     yield
@@ -149,3 +151,52 @@ def student_simulate(student_id: int, body: SimulateBody, request: Request, user
         return {"applicable": False, "base": base, "probability": None, "levers": body.levers}
     return {"applicable": True, "base": base, "probability": float(p), "levers": body.levers,
             "flagged": bool(p >= model.threshold)}
+
+
+class PlaybookOverride(BaseModel):
+    minutes: float | None = Field(None, ge=0, le=240)
+    effectiveness: float | None = Field(None, ge=0, le=1)
+
+
+class PlanBody(BaseModel):
+    cohort_id: str = Field(..., min_length=36, max_length=36)
+    advisors: int = Field(..., ge=0, le=200)
+    hours_per_advisor: float = Field(..., ge=0, le=80)
+    overrides: dict[str, PlaybookOverride] = {}
+
+
+def _plan(request: Request, body: PlanBody, user: User, store: SupabaseStore) -> dict:
+    unknown = set(body.overrides) - set(rules.ARCHETYPES)
+    if unknown:
+        raise HTTPException(422, f"Archetype tidak dikenal: {', '.join(sorted(unknown))}")
+    cache = request.app.state.plan_cache
+    if body.cohort_id not in cache:
+        try:
+            cache[body.cohort_id] = pd.DataFrame(store.get_predictions(body.cohort_id))
+        except httpx.HTTPError as e:
+            raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+    students = cache[body.cohort_id]
+    if students.empty:
+        raise HTTPException(404, "Kohort tidak ditemukan.")
+    students = students[students.code_module.map(user.sees)].rename(columns={"student_id": "id"})
+    overrides = {k: v.model_dump(exclude_none=True) for k, v in body.overrides.items()}
+    result = planner.plan(students, body.advisors, body.hours_per_advisor, overrides)
+    result.pop("assignments")  # thousands of rows; recomputable from params
+    return result
+
+
+@app.post("/plans/preview")
+def plan_preview(body: PlanBody, request: Request, user: User = Depends(require_role("coordinator", "admin")),
+                 store: SupabaseStore = Depends(get_store)) -> dict:
+    return _plan(request, body, user, store)
+
+
+@app.post("/plans")
+def plan_save(body: PlanBody, request: Request, user: User = Depends(require_role("coordinator", "admin")),
+              store: SupabaseStore = Depends(get_store)) -> dict:
+    result = _plan(request, body, user, store)
+    try:
+        plan_id = store.save_plan(cohort_id=body.cohort_id, user_id=user.id, params=body.model_dump(), result=result)
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
+    return {"id": plan_id, **result}

@@ -1,7 +1,32 @@
 // Typed client for the FastAPI service. Server components call it; the browser never sees API_URL.
 import { unstable_rethrow } from "next/navigation";
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+// 127.0.0.1, not localhost: on Windows localhost tries IPv6 first and adds about 2 s per call.
+const API_URL = process.env.API_URL ?? "http://127.0.0.1:8000";
+
+export type PlaybookRow = { archetype: string; action: string; label: string; minutes: number; effectiveness: number };
+
+export type PlanResult = {
+  summary: {
+    capacity_minutes: number;
+    minutes_used: number;
+    flagged: number;
+    advisor_contacts: number;
+    automated_contacts: number;
+    unassigned: number;
+    expected_at_risk_cohort: number;
+    expected_at_risk_reached_advisor: number;
+    expected_at_risk_reached_automated: number;
+    advisor_coverage: number;
+    advisor_mean_probability: number | null;
+    estimated_retained_scenario: number | null;
+    is_scenario: boolean;
+    marginal_per_advisor: number;
+    per_action: { action: string; channel: "advisor" | "automated" | "unassigned"; students: number; expected_at_risk: number; minutes: number }[];
+  };
+  curve: { hours: number; advisor_contacts: number; expected_at_risk_reached: number; value: number }[];
+  playbook: PlaybookRow[];
+};
 
 export type Binary = {
   n: number;

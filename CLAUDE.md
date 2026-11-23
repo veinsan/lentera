@@ -115,6 +115,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Cohort upload: data quality gate, scoring with reason codes, storage in Supabase, upload page with report and summary
 - [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
 - [x] Student profile: reason codes, scenario panel (what-if and counterfactual), message template, weekly chart, intervention log and history
+- [x] Capacity planner: advisor capacity inputs, live preview, reach curve, allocation table, editable playbook assumptions with scenario labeling, saved plans
 - [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [ ] Sign-in with three roles
@@ -145,7 +146,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role.
 
-Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Pages that read the API need the local API on port 8000, or `API_URL` (server) and `NEXT_PUBLIC_API_URL` (browser uploads) in `web/.env.local`.
+Local frontend: `pnpm dev` from `web/`, then open `http://localhost:3000`. Port 3000 is often taken by another project on the owner's machine; then run `pnpm dev --port 3001` and start the API with `CORS_ORIGINS=http://localhost:3000,http://localhost:3001`. The web defaults to `http://127.0.0.1:8000` for the API, because `localhost` on Windows tries IPv6 first and adds about 2 s per call. Pages that read the API need the local API on port 8000, or `API_URL` (server) and `NEXT_PUBLIC_API_URL` (browser uploads) in `web/.env.local`.
 
 ## Local Environment
 

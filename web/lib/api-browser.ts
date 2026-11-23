@@ -2,7 +2,8 @@
 // The API checks the user's Supabase access token; CORS_ORIGINS on the API must list this app's origin.
 import { createClient } from "@/lib/supabase/client";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// 127.0.0.1, not localhost: on Windows localhost tries IPv6 first and adds about 2 s per call.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 export type UploadResponse<T> = { status: number; body: T | { detail: string } };
 

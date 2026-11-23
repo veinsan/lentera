@@ -93,7 +93,7 @@ flowchart LR
 | `GET /cohorts/{id}/drift` | Signed in | PSI report for a stored cohort |
 | `POST /students/{id}/simulate` | Signed in | Probability for user-chosen lever values |
 | `GET /students/{id}/counterfactual` | Signed in | Smallest lever set below the threshold, largest reduction, helpful single levers, plus the playbook entry, the filled message template, and the lever list for the what-if panel |
-| `POST /plans/preview` | Coordinator, admin | Allocation and reach curve without saving |
+| `POST /plans/preview` | Coordinator, admin | Allocation, reach curve, effective playbook, and the marginal reach of one more advisor, for the user's modules; predictions are cached per cohort in the API process |
 | `POST /plans` | Coordinator, admin | Allocation saved to `plans` |
 
 ### Repository Layout

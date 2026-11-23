@@ -88,5 +88,11 @@ def plan(students: pd.DataFrame, advisors: int, hours_per_advisor: float, overri
     book = playbook_table(overrides)
     capacity = advisors * hours_per_advisor * 60
     result = allocate(students, capacity, book)
-    return dict(summary=summarize(students, result, capacity, book), curve=reach_curve(students, book),
+    summary = summarize(students, result, capacity, book)
+    # Marginal value of one more advisor at the same hours: the number a staffing decision needs.
+    more = allocate(students, capacity + hours_per_advisor * 60, book)
+    summary["marginal_per_advisor"] = float(more.loc[more.channel == "advisor", "probability"].sum()
+                                            - summary["expected_at_risk_reached_advisor"])
+    return dict(summary=summary, curve=reach_curve(students, book),
+                playbook=book.reset_index(names="archetype").to_dict("records"),
                 assignments=result[["id", "action", "channel", "probability"]].to_dict("records"))

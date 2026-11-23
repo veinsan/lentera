@@ -67,6 +67,24 @@ class SupabaseStore:
         rows = r.json()
         return rows[0] if rows else None
 
+    def get_predictions(self, cohort_id: str) -> list[dict]:
+        """All predictions of a cohort for planning, in pages of 1,000 (the PostgREST row limit)."""
+        rows, start = [], 0
+        while True:
+            r = self.rest.get("/predictions", params={"select": "student_id,code_module,probability,archetype",
+                                                      "cohort_id": f"eq.{cohort_id}", "order": "student_id"},
+                              headers={"Range": f"{start}-{start + BATCH - 1}"})
+            r.raise_for_status()
+            page = r.json()
+            rows += page
+            if len(page) < BATCH:
+                return rows
+            start += BATCH
+
+    def save_plan(self, *, cohort_id: str, user_id: str, params: dict, result: dict) -> int:
+        return self._insert("plans", [dict(cohort_id=cohort_id, created_by=user_id, params=params, result=result)],
+                            returning="id")[0]["id"]
+
     def delete_cohort(self, cohort_id: str, path: str) -> None:
         # Students, predictions, and plans cascade from the cohort row.
         self.rest.delete("/cohorts", params={"id": f"eq.{cohort_id}"})
