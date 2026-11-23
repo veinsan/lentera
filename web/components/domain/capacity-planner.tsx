@@ -261,7 +261,7 @@ function AdvisorBoard({ plan, revision }: { plan: PlanResult; revision: number }
       )}
       <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-dashed border-line-strong pt-4 text-sm">
         <p className="text-ink-2">
-          <b className="font-semibold text-ink tabular-nums">{fmtInt(s.advisor_contacts)}</b> dihubungi konselor ·{" "}
+          <b className="font-semibold text-ink tabular-nums">{fmtInt(s.advisor_contacts)}</b> dihubungi konselor,{" "}
           <b className="font-semibold text-ink tabular-nums">{fmtInt(s.automated_contacts)}</b> dapat pesan otomatis
         </p>
         <p className="text-ink-3">
@@ -281,7 +281,7 @@ function AdvisorColumn({ column: c }: { column: PlanResult["board"]["columns"][n
       <div className="px-1">
         <h3 className="text-sm font-semibold text-ink">Konselor {c.advisor}</h3>
         <p className="text-xs text-ink-3 tabular-nums">
-          {fmtInt(c.students)} kontak · {fmtNum(c.minutes_used / 60, 1)}/{fmtNum(c.capacity_minutes / 60, 0)} jam
+          {fmtInt(c.students)} kontak, {fmtNum(c.minutes_used / 60, 1)}/{fmtNum(c.capacity_minutes / 60, 0)} jam
         </p>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white" aria-hidden>
           <span className="block h-full rounded-full bg-blue" style={{ width: `${Math.min(100, (c.minutes_used / (c.capacity_minutes || 1)) * 100)}%` }} />
@@ -313,7 +313,8 @@ function AdvisorColumn({ column: c }: { column: PlanResult["board"]["columns"][n
                   </span>
                 </span>
                 <span className="block truncate text-xs text-ink-3">
-                  {st.code_module ? fmtModule(st.code_module) : ""} · {ACTION_LABELS[st.action] ?? st.action}
+                  {st.code_module ? `${fmtModule(st.code_module)}, ` : ""}
+                  {ACTION_LABELS[st.action] ?? st.action}
                 </span>
               </span>
             </Link>

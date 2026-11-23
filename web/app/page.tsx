@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowDown, ArrowRight, KeyRound, Lock, ScanEye, UserRoundCheck } from "lucide-react";
 import { LanternMark, Wordmark } from "@/components/brand/lantern-mark";
 import { DemoSignIn } from "@/components/domain/demo-sign-in";
+import { KaggleScores } from "@/components/domain/kaggle-scores";
 import { HeroSky } from "@/components/sky/sky-stage";
 import { LinkButton } from "@/components/ui/link-button";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
@@ -37,7 +38,7 @@ export default function Landing() {
     <div className="text-ink">
       <LandingNav />
       <Hero />
-      <main id="konten" className="relative z-10 -mt-10 overflow-hidden rounded-t-[36px] bg-paper">
+      <main id="konten" className="relative z-10 -mt-10 overflow-clip rounded-t-[36px] bg-paper">
         {/* The generated atlas plate under the day sections; content plates stay solid white above it. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-[url(/atlas/day-atlas.webp)] bg-[length:100%_auto] bg-repeat-y opacity-75" />
         <div className="relative">
@@ -391,19 +392,9 @@ function Proof() {
     ],
     ["Kalibrasi (ECE)", fmtNum(model.ece, 4), "selisih rata-rata antara peluang yang diberikan dan kejadian sebenarnya"],
     [
-      "Reproduksi submission 31 Oktober",
-      `${fmtInt(model.parity_rows)} dari ${fmtInt(model.rows)}`,
-      "label model yang berjalan di Lentera sama persis dengan file yang dikirim ke Kaggle",
-    ],
-    [
-      "Kaggle, model yang berjalan di Lentera",
-      `${fmtNum(model.kaggle_public, 5)} · ${fmtNum(model.kaggle_private, 5)}`,
-      "skor public dan private submission 31 Oktober",
-    ],
-    [
-      "Kaggle, submission terpilih tim",
-      `${fmtNum(model.selected_public, 5)} · ${fmtNum(model.selected_private, 5)}`,
-      "skor public dan private submission yang dipilih untuk leaderboard akhir",
+      "Skor Kaggle",
+      <KaggleScores key="kaggle" pub={model.selected_public} priv={model.selected_private} />,
+      "F1 model final tim di leaderboard DSCO 2026",
     ],
   ];
   return (
@@ -413,8 +404,8 @@ function Proof() {
           Angka yang bisa dicek ulang.
         </h2>
         <p className="mt-4 text-[17px] leading-relaxed text-ink-2">
-          Setiap angka berasal dari artefak model yang dibangun ulang dari pipeline DSCO. Model card lengkap, fairness per kelompok, dan
-          drift ada di halaman Model setelah masuk.
+          Validasi dan kalibrasi dihitung ulang dari pipeline DSCO, skor Kaggle diambil dari leaderboard kompetisi. Model card lengkap,
+          fairness per kelompok, dan drift ada di halaman Model setelah masuk.
         </p>
       </div>
       <dl className="reveal plate mt-12 divide-y divide-separator px-5 sm:px-8">
@@ -437,7 +428,7 @@ function Proof() {
 
 function Close() {
   return (
-    <section aria-labelledby="masuk-title" className="night relative isolate overflow-hidden bg-night px-6 pt-24 pb-20 text-night-ink">
+    <section aria-labelledby="masuk-title" className="night relative isolate overflow-clip bg-night px-6 pt-24 pb-20 text-night-ink">
       <Image src="/atlas/night-sky.webp" alt="" fill sizes="100vw" className="-z-10 object-cover object-top opacity-60" />
       <div className="mx-auto max-w-6xl">
         <h2 id="masuk-title" className="display reveal max-w-2xl text-[2.2rem] text-white sm:text-[3rem]">

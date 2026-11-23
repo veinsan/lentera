@@ -17,7 +17,7 @@ Lentera turns the DSCO 2026 week 4 at-risk predictions into decisions: which stu
 
 ## Positioning
 
-A probability per student is what every entry produces. Lentera's mechanism is prescriptive and capacity-aware: calibrated probabilities (ECE 0.0075) let it count expected at-risk students reached per advisor hour, archetypes route each flagged student to a different action, SHAP reasons separate actionable signals from context, and a counterfactual shows the behavior change that would move a student below the threshold. The deployed model reproduces its own Kaggle submission of 31 October exactly (6,502 of 6,502 rows; public 0.78443, private 0.77775). The team's selected leaderboard submission is a different file (public 0.80150, private 0.79363); the interface labels the two separately.
+A probability per student is what every entry produces. Lentera's mechanism is prescriptive and capacity-aware: calibrated probabilities (ECE 0.0075) let it count expected at-risk students reached per advisor hour, archetypes route each flagged student to a different action, SHAP reasons separate actionable signals from context, and a counterfactual shows the behavior change that would move a student below the threshold. The deployed model reproduces its own Kaggle submission of 31 October exactly (6,502 of 6,502 rows; public 0.78443, private 0.77775). The team's final model is the LightGBM and DAE-MLP blend in `dsco/notebooks/dsco_lgbm_dae_pair_final.ipynb`, scored public 0.80150 and private 0.79363 (`sub_v5.csv`). The interface shows only that score, as the team's final model on the DSCO 2026 leaderboard, and names no submission (owner decision, 2026-11-23).
 
 ## Operating Context
 

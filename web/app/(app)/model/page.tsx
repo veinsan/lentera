@@ -6,6 +6,7 @@ import { CapacityChart } from "@/components/charts/capacity-chart";
 import { ImportanceChart } from "@/components/charts/importance-chart";
 import { ApiError } from "@/components/domain/api-error";
 import { FairnessTable } from "@/components/domain/fairness-table";
+import { KaggleScores } from "@/components/domain/kaggle-scores";
 import { ModelTabs } from "@/components/domain/model-tabs";
 import { DriftPanel, RequestPanel } from "@/components/domain/monitoring";
 import { Section } from "@/components/domain/section";
@@ -24,7 +25,7 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Model yang berjalan di Lentera menghasilkan ulang submission Kaggle-nya, baris demi baris."
+        title="Peluang dari model ini terkalibrasi dan stabil antar-seed, jadi bisa dipakai untuk membagi jam konselor."
         description="Cara model dibangun dan divalidasi, seberapa jauh prediksinya bisa dipercaya, dan apakah kohort ini masih mirip data latihnya."
       />
       <Suspense fallback={<div className="plate h-48 animate-pulse" aria-label="Memuat model card" />}>
@@ -43,9 +44,6 @@ const SEGMENTS: Partial<Record<keyof ModelCard["segments_seed42"], string>> = {
 };
 const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
 const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-// Kaggle reports "2026-10-31 13:53:00.967000" in UTC; show it as a readable date.
-const utc = (s: string) =>
-  `${new Date(`${s.replace(" ", "T").slice(0, 19)}Z`).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC`;
 
 async function ModelContent() {
   const user = await getCurrentUser();
@@ -71,24 +69,11 @@ async function ModelContent() {
         <Stat label="Kalibrasi (ECE)" value={calibration.ece} format="dec4" note={`Brier ${fmtNum(calibration.brier, 3)}`} />
       </section>
 
-      <Section title="Skor Kaggle" description="Dua submission berbeda, dilabeli terpisah supaya jelas mana yang berjalan di Lentera.">
-        <dl className="divide-y divide-separator">
-          <KaggleRow
-            label="Model yang berjalan di Lentera"
-            note={`Submission ref ${leaderboard.submission_ref}, ${utc(leaderboard.submitted_utc)}; prediksinya direproduksi persis oleh model ini.`}
-            pub={leaderboard.public_f1}
-            priv={leaderboard.private_f1}
-          />
-          {selected && (
-            <KaggleRow
-              label="Submission terpilih tim untuk leaderboard akhir"
-              note={`${selected.file}, ref ${selected.ref}, ${utc(selected.submitted_utc)}.`}
-              pub={selected.public_f1}
-              priv={selected.private_f1}
-            />
-          )}
-        </dl>
-      </Section>
+      {selected && (
+        <Section title="Skor Kaggle" description="F1 model final tim di leaderboard DSCO 2026.">
+          <KaggleScores pub={selected.public_f1} priv={selected.private_f1} />
+        </Section>
+      )}
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section title="Validasi bertingkat" description={`${sentence(card.protocol.inference)}.`}>
@@ -212,8 +197,6 @@ async function ModelContent() {
               </dd>
               <dt className="text-ink-3">SHA256 model</dt>
               <dd className="font-mono text-xs break-all text-ink">{card.model.model_sha256}</dd>
-              <dt className="text-ink-3">SHA256 submission</dt>
-              <dd className="font-mono text-xs break-all text-ink">{leaderboard.submission_sha256}</dd>
               <dt className="text-ink-3">Library</dt>
               <dd className="font-mono text-xs text-ink">
                 {Object.entries(card.model.versions)
@@ -262,25 +245,6 @@ async function ModelContent() {
         ]),
   ];
   return <ModelTabs panels={panels} />;
-}
-
-function KaggleRow({ label, note, pub, priv }: { label: string; note: string; pub: number; priv: number | null }) {
-  return (
-    <div className="grid gap-2 py-4 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-baseline sm:gap-8">
-      <dt>
-        <span className="block text-[15px] font-semibold text-ink">{label}</span>
-        <span className="mt-0.5 block text-sm text-ink-3">{note}</span>
-      </dt>
-      <dd>
-        <span className="block text-xs text-ink-3">Public</span>
-        <span className="numeral text-[1.6rem] text-ink">{fmtNum(pub, 5)}</span>
-      </dd>
-      <dd>
-        <span className="block text-xs text-ink-3">Private</span>
-        <span className="numeral text-[1.6rem] text-ink">{priv == null ? "-" : fmtNum(priv, 5)}</span>
-      </dd>
-    </div>
-  );
 }
 
 function DecisionBadge({ decision }: { decision: ModelCard["comparison"][number]["decision"] }) {

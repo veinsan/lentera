@@ -119,7 +119,7 @@ async function Worklist({ searchParams }: Pick<PageProps<"/prioritas">, "searchP
                   <div>
                     <span className="font-mono text-[14px] font-semibold text-ink">{r.students.source_id}</span>
                     <span className="block text-xs text-ink-3">
-                      {fmtModule(r.code_module)} · {fmtModule(r.students.code_presentation)}
+                      {fmtModule(r.code_module)}, {fmtModule(r.students.code_presentation)}
                     </span>
                     <span className="mt-1.5 block">
                       <ArchetypeChip archetype={r.archetype} />

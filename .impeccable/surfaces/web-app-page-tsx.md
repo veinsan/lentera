@@ -7,7 +7,7 @@ related_targets: []
 
 # Surface: Lentera public landing page
 
-Scope: the public route / (web/app/page.tsx and its components). Visitor mode: Persuade. Audience: DSCO final judges opening the deployed URL, and the presenter opening the demo. Job: understand in seconds what Lentera does, believe it is careful and safe, and enter the demo. Action: "Masuk ke demo" leads to /login with the three one-click roles; the closing section offers the three roles directly. Proof: the deployed model card (nested CV F1, calibration, parity with its Kaggle submission), the team's selected Kaggle submission scores labelled as such, the demo cohort aggregates, row level security and server-only keys as safety facts. Constraints: Indonesian copy, every number from a generated artifact, no testimonials, no invented customers or effects, no em dashes.
+Scope: the public route / (web/app/page.tsx and its components). Visitor mode: Persuade. Audience: DSCO final judges opening the deployed URL, and the presenter opening the demo. Job: understand in seconds what Lentera does, believe it is careful and safe, and enter the demo. Action: "Masuk ke demo" leads to /login with the three one-click roles; the closing section offers the three roles directly. Proof: the deployed model card (nested CV F1, calibration) and the team's final Kaggle score, public and private, with no submission named, the demo cohort aggregates, row level security and server-only keys as safety facts. Constraints: Indonesian copy, every number from a generated artifact, no testimonials, no invented customers or effects, no em dashes.
 
 ## Direction contract
 

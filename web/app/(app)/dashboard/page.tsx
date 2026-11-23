@@ -171,11 +171,11 @@ async function DashboardContent() {
 
 function Context({ cohort, user, preds }: { cohort: Cohort; user: CurrentUser; preds: PredictionLite[] }) {
   const allModules = new Set(preds.map((p) => p.code_module)).size === 7 && user.modules.length >= 7;
-  const scope = user.role === "admin" || allModules ? "semua modul" : user.modules.map(fmtModule).join(", ");
+  const scope = user.role === "admin" || allModules ? "semua modul" : `modul ${new Intl.ListFormat("id-ID").format(user.modules.map(fmtModule))}`;
   const uploaded = new Date(cohort.uploaded_at).toLocaleDateString("id-ID", { dateStyle: "medium", timeZone: "Asia/Jakarta" });
   return (
     <>
-      {cohort.name} · diunggah {uploaded} · cutoff minggu ke-4 (hari ke-28) · {scope}
+      {cohort.name}, diunggah {uploaded}, cutoff minggu ke-4 (hari ke-28), {scope}
     </>
   );
 }

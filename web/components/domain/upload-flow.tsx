@@ -93,7 +93,7 @@ export function UploadFlow() {
             <>
               <FileSpreadsheet className="size-7 text-blue" aria-hidden />
               <span className="text-sm font-semibold text-ink">{file.name}</span>
-              <span className="text-xs text-ink-3">{fmtInt(file.size / 1024)} KB · klik atau seret file lain untuk mengganti</span>
+              <span className="text-xs text-ink-3">{fmtInt(file.size / 1024)} KB, klik atau seret file lain untuk mengganti</span>
             </>
           ) : (
             <>

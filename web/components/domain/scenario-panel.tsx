@@ -99,7 +99,7 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
                   <Num value={result.probability} format="pct" />
                 </span>
                 <span className="text-xs text-ink-3">
-                  dari {fmtPct(cf.base)} · {result.flagged ? "masih ter-flag" : "di bawah ambang"}
+                  dari {fmtPct(cf.base)}, {result.flagged ? "masih ter-flag" : "di bawah ambang"}
                 </span>
               </>
             ) : (

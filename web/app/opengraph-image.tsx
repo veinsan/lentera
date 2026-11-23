@@ -24,7 +24,7 @@ export default async function Image() {
               Dari prediksi minggu ke-4 ke rencana kontak setiap konselor.
             </div>
             <div style={{ fontSize: 28, color: "#a9b8d9" }}>
-              {fmtInt(cohort.flagged)} dari {fmtInt(cohort.scored)} mahasiswa ter-flag · {plan.advisors} konselor menjangkau {fmtInt(plan.reached)} yang
+              {fmtInt(cohort.flagged)} dari {fmtInt(cohort.scored)} mahasiswa ter-flag, {plan.advisors} konselor menjangkau {fmtInt(plan.reached)} yang
               berisiko
             </div>
           </div>

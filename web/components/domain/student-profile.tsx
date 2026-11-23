@@ -48,7 +48,7 @@ export async function StudentProfileView({ id, panel = false }: { id: string; pa
               Mahasiswa <span className="font-mono tracking-normal">{student.source_id}</span>
             </h1>
             <p className="mt-1.5 text-sm text-ink-3">
-              {fmtModule(student.code_module)} · {fmtModule(student.code_presentation)} · {student.cohort.name}
+              {fmtModule(student.code_module)}, {fmtModule(student.code_presentation)}, {student.cohort.name}
             </p>
           </div>
           <div className="text-right">
@@ -90,7 +90,7 @@ export async function StudentProfileView({ id, panel = false }: { id: string; pa
           </p>
           <p className="mt-1.5 text-sm text-ink-2">
             {last
-              ? `${formatDate(last.created_at)} · ${ACTION_LABELS[last.action_type] ?? last.action_type}`
+              ? `${formatDate(last.created_at)}, ${ACTION_LABELS[last.action_type] ?? last.action_type}`
               : `${fmtInt(interventions.length)} catatan intervensi`}
           </p>
         </div>
@@ -168,9 +168,9 @@ function History({ items, userId }: { items: Intervention[]; userId: string }) {
             <ContactMark status={i.contact_status} />
           </p>
           <p className="mt-1 text-xs text-ink-3">
-            {formatDate(i.created_at)} · {i.advisor_id === userId ? "Anda" : "Konselor lain"}
-            {i.issue_category && ` · ${ISSUE_LABELS[i.issue_category]}`}
-            {i.follow_up_on && ` · tindak lanjut ${new Date(i.follow_up_on).toLocaleDateString("id-ID", { dateStyle: "medium" })}`}
+            {formatDate(i.created_at)}, {i.advisor_id === userId ? "Anda" : "Konselor lain"}
+            {i.issue_category && `, ${ISSUE_LABELS[i.issue_category]}`}
+            {i.follow_up_on && `, tindak lanjut ${new Date(i.follow_up_on).toLocaleDateString("id-ID", { dateStyle: "medium" })}`}
           </p>
           {i.notes && <p className="mt-2 leading-relaxed whitespace-pre-line text-ink">{i.notes}</p>}
           <span className="sr-only">{CONTACT_STATUS_LABELS[i.contact_status]}</span>

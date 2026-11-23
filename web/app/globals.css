@@ -305,6 +305,7 @@
     every element in its final, visible state, so nothing waits on support or JavaScript.
   */
   @supports (animation-timeline: view()) {
+    /* view() follows the nearest scroll container: ancestors of .reveal and .drift use overflow-clip, never overflow-hidden, or the animation freezes half way. */
     .reveal {
       animation: reveal linear both;
       animation-timeline: view();

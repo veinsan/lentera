@@ -46,7 +46,8 @@ export function initials(name: string) {
 
 async function UserCard() {
   const user = await getCurrentUser();
-  const scope = user.role === "admin" ? "Semua modul" : user.modules.map(fmtModule).join(", ") || "Belum ada modul";
+  const scope =
+    user.role === "admin" ? "semua modul" : user.modules.length ? new Intl.ListFormat("id-ID").format(user.modules.map(fmtModule)) : "belum ada modul";
   return (
     <div className="rounded-[22px] bg-white/60 p-2.5 shadow-[0_1px_2px_rgb(11_27_58/0.06)]">
       <div className="mb-3 flex items-center gap-3 px-1">
@@ -56,7 +57,7 @@ async function UserCard() {
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-ink">{user.fullName || user.email}</p>
           <p className="truncate text-xs text-ink-3">
-            {ROLE_LABELS[user.role]} · {scope}
+            {ROLE_LABELS[user.role]}, {scope}
           </p>
         </div>
       </div>

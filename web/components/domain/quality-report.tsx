@@ -31,7 +31,7 @@ export function QualityReportView({ report }: { report: QualityReport }) {
       <div className={cn("flex items-center gap-3 rounded-2xl px-4 py-3", status.className)}>
         <status.icon className="size-5 shrink-0" aria-hidden />
         <p className="text-sm font-semibold">
-          {status.label} · {fmtInt(report.rows)} baris
+          {status.label}, {fmtInt(report.rows)} baris
         </p>
       </div>
 

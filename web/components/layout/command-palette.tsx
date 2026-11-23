@@ -138,7 +138,7 @@ export function CommandPalette({ allowed, role }: { allowed: string[]; role: Rol
                     onSelect={() => start(async () => void (await signInAs(r.key)))}
                     icon={<UserRound className="size-4" />}
                   >
-                    Masuk sebagai {r.label} <span className="text-ink-3">· {r.scope}</span>
+                    Masuk sebagai {r.label} <span className="text-ink-3">({r.scope})</span>
                   </Item>
                 ))}
                 <Item value="keluar" onSelect={() => start(async () => await signOut())} icon={<LogOut className="size-4" />}>

@@ -342,5 +342,6 @@ Every what-if, counterfactual, or effectiveness-weighted figure carries the labe
 - **Don't** put tables, figures, charts, or forms on glass.
 - **Don't** set an eyebrow, kicker, or category label above a heading.
 - **Don't** bring back the noticeboard materials: putty, slate, lime highlighter, Archivo, or Geist.
+- **Don't** separate values with a middle dot (·). Join them with commas or words, or give each value its own label.
 - **Don't** use hard offset shadows; depth is soft navy-tinted shadow and glass rim.
 - **Don't** hide content on first paint to stage an entrance.

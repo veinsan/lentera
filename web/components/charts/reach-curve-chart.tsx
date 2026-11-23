@@ -46,7 +46,7 @@ export function ReachCurveChart({ curve, currentHours }: { curve: Point[]; curre
             if (!p.active || !d) return null;
             return (
               <ChartTooltip
-                title={`${fmtInt(d.hours)} jam konselor per minggu · ${fmtInt(d.advisor_contacts)} mahasiswa dihubungi`}
+                title={`${fmtInt(d.hours)} jam konselor per minggu, ${fmtInt(d.advisor_contacts)} mahasiswa dihubungi`}
                 rows={[{ name: "perkiraan mahasiswa berisiko terjangkau", value: fmtInt(d.expected_at_risk_reached), color: "var(--chart-safe)" }]}
               />
             );
