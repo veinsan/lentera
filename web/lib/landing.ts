@@ -4,21 +4,17 @@ import type { Sky } from "@/lib/sky";
 
 export type Landing = {
   model: {
-    nested_f1: number;
-    nested_f1_sd: number;
-    seeds: number;
+    cv_f1: number;
+    cv_f1_sd: number;
+    folds: number;
     ece: number;
     brier: number;
     threshold: number;
     signals: number;
     actionable_signals: number;
     archetypes: number;
-    parity_rows: number;
-    rows: number;
     kaggle_public: number;
     kaggle_private: number;
-    selected_public: number;
-    selected_private: number;
   };
   cohort: {
     name: string;

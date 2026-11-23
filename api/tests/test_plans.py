@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.auth import User, current_user
 from app.main import app, get_store
+from app import rules
 from app.rules import ARCHETYPES
 
 COHORT = "00000000-0000-0000-0000-00000000c0de"
@@ -45,7 +46,7 @@ def test_preview_limits_to_user_modules_and_capacity(client):
     assert r.status_code == 200, r.text
     s = r.json()["summary"]
     visible = [x for x in client.store.rows if x["code_module"] in ("m01", "m02")]
-    assert s["flagged"] == sum(x["probability"] >= 0.375 for x in visible)
+    assert s["flagged"] == sum(x["probability"] >= rules.THRESHOLD for x in visible)
     assert s["minutes_used"] <= 2 * 5 * 60 and s["marginal_per_advisor"] >= 0
     assert "assignments" not in r.json() and len(r.json()["playbook"]) == 6 and len(r.json()["curve"]) == 21
 

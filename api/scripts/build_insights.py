@@ -1,6 +1,6 @@
-"""Build api/artifacts/insights.json: per-module course design insights from training data and nested OOF labels.
+"""Build api/artifacts/insights.json: per-module course design insights from training data and out-of-fold labels of the final model.
 
-Run from api/: uv run python scripts/build_insights.py [path/to/dsco]
+Run from api/: uv run python scripts/build_insights.py
 """
 import json
 import sys
@@ -16,7 +16,6 @@ from app import rules  # noqa: E402
 from app.pipeline.features import WEEKS, normalize, placeholder_activity  # noqa: E402
 
 DATA = ROOT.parent / "data"
-DSCO = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parents[1] / "dsco"
 
 # Recommendation cutoffs are proposals awaiting owner confirmation (TODO DEC-05).
 LOW_AUC, HIGH_UNCERTAIN, HIGH_BASE_RISK = 0.75, 0.40, 0.58
@@ -53,11 +52,11 @@ def recommendations(s: dict) -> list[dict]:
 
 
 def main() -> None:
-    train = pd.read_csv(DATA / "train.csv")
-    oof = pd.read_csv(DSCO / "outputs/experiments/cat_clean_rank_42/oof.csv")
+    train = pd.read_csv(DATA / "train.csv").sort_values("id").reset_index(drop=True)
+    oof = pd.read_csv(DATA / "blend/oof.csv")  # out-of-fold blend probabilities of scripts/train.py
     assert (oof.id == train.id).all()
     d = normalize(train)
-    d["y"], d["p"], d["label"] = train.at_risk, oof.probability, oof.prediction
+    d["y"], d["p"], d["label"] = train.at_risk, oof.oof_blend, rules.plugin_labels(oof.oof_blend.to_numpy())
     d["placeholder"] = placeholder_activity(train).to_numpy()
 
     modules = {}
@@ -83,7 +82,7 @@ def main() -> None:
         modules[mod] = s
 
     out = dict(
-        source="train.csv (26.086 baris) dan label nested OOF seed 42",
+        source="train.csv (26.086 baris) dan label plug-in dari probabilitas out-of-fold model final (5 fold)",
         overall=dict(at_risk_rate=float(d.y.mean()), uncertain_share=float(rules.uncertain(d.p).mean())),
         cutoffs=dict(low_auc=LOW_AUC, high_uncertain=HIGH_UNCERTAIN, high_base_risk=HIGH_BASE_RISK),
         modules=modules,

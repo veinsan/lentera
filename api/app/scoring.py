@@ -5,13 +5,15 @@ import pandas as pd
 
 from app import rules
 from app.explain import Explainer
-from app.model import Model
-from app.pipeline.features import normalize
+from app.model import Model, blend
+from app.pipeline.features import Context, normalize
 
 
-def score_cohort(model: Model, explainer: Explainer, raw: pd.DataFrame) -> pd.DataFrame:
-    raw = raw.reset_index(drop=True)
-    p = model.predict_proba(raw)
+def score_cohort(model: Model, explainer: Explainer, raw: pd.DataFrame, ctx: Context | None = None) -> pd.DataFrame:
+    """Each row is ranked within this cohort (pass the context built from `raw` to reuse it afterwards)."""
+    raw = raw.reset_index(drop=True) if ctx is None else raw
+    p_lgb, p_mlp, X = model.parts(raw, ctx or model.context(raw))
+    p = blend(p_lgb, p_mlp)
     norm = normalize(raw)
     arch = rules.archetype(raw)
     return pd.DataFrame(dict(
@@ -24,7 +26,7 @@ def score_cohort(model: Model, explainer: Explainer, raw: pd.DataFrame) -> pd.Da
         uncertain=rules.uncertain(p),
         archetype=arch,
         recommended_action=[rules.PLAYBOOK[a]["action"] for a in arch],
-        reasons=explainer.reasons(raw),
+        reasons=explainer.reasons(raw, X=X),
     ))
 
 

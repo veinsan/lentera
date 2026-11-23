@@ -10,16 +10,16 @@ Pending: the owner confirms the product name "Lentera".
 
 ## 1. Problem Statement
 
-The DSCO 2026 model predicts `at_risk` for each student from data available in the first four weeks of a course presentation: demographics, assessment submissions and scores, and online learning activity (week 1 to week 4 interactions). The model is a CatBoost classifier with a nested cross-validation F1 of 0.7738; its Kaggle submission scored 0.78443 public and 0.77775 private. A probability alone does not tell an institution what to do. Lentera turns each prediction into a decision.
+The DSCO 2026 model predicts `at_risk` for each student from data available in the first four weeks of a course presentation: demographics, assessment submissions and scores, and online learning activity (week 1 to week 4 interactions). The model is the team's final notebook model, a LightGBM and denoising-autoencoder MLP blend with a 5-fold cross-validation F1 of 0.7758; the team's final Kaggle score is 0.80150 public and 0.79363 private. A probability alone does not tell an institution what to do. Lentera turns each prediction into a decision.
 
 The problem has four parts, each grounded in the model's out-of-fold (OOF) predictions on the 26,086 training rows.
 
-- **Advisor time is limited, but risk is concentrated.** The top 10% of students by predicted probability are at risk 99.5% of the time and contain 18.9% of all at-risk students. The top 30% have a precision of 92.4% and a recall of 52.6%. An institution that contacts students in probability order reaches far more at-risk students per advisor hour than one that contacts students at random.
+- **Advisor time is limited, but risk is concentrated.** The top 10% of students by predicted probability are at risk 99.4% of the time and contain 18.9% of all at-risk students. The top 30% have a precision of 92.8% and a recall of 52.8%. An institution that contacts students in probability order reaches far more at-risk students per advisor hour than one that contacts students at random.
 - **At-risk students are at risk for different reasons, and each reason needs a different action.** 3,045 training students have no recorded online activity and no submission by the cutoff. 98.8% of them are at risk, and they need an administrative check (enrollment status, access problems). 2,669 students are active online but missed a due assessment. 88.5% of them are at risk, and they need deadline support. One generic "at risk" flag sends all of them the same message.
-- **The model is least reliable where human judgment matters most.** Active students with no missed submission make up 19,680 training rows. They are at risk 39.8% of the time, and the model's AUC on this segment is 0.757, against 0.846 overall. 92.8% of the selected model's OOF errors at seed 42 fall in this segment.
-- **Course design limits what can be predicted at week 4.** Modules M05 and M07 have no graded assessment by week 4 (`has_score` is 0 for every student). M07 has the lowest module AUC (0.696), and 53.9% of M07 students fall in the uncertain probability band of 0.25 to 0.55. Coordinators can change this by adding an early graded assessment.
+- **The model is least reliable where human judgment matters most.** Active students with no missed submission make up 19,680 training rows. They are at risk 39.8% of the time, and the model's AUC on this segment is 0.762, against 0.848 overall. 92.8% of the model's OOF errors fall in this segment.
+- **Course design limits what can be predicted at week 4.** Modules M05 and M07 have no graded assessment by week 4 (`has_score` is 0 for every student). M07 has the lowest module AUC (0.696), and 58.1% of M07 students fall in the uncertain probability band of 0.25 to 0.55. Coordinators can change this by adding an early graded assessment.
 
-The probabilities are well calibrated on OOF data (expected calibration error 0.0075 over ten bins, Brier score 0.158). Lentera can therefore report the expected number of truly at-risk students in any contacted group as the sum of their probabilities.
+The probabilities are well calibrated on OOF data (expected calibration error 0.0075 over ten bins, Brier score 0.157). Lentera can therefore report the expected number of truly at-risk students in any contacted group as the sum of their probabilities.
 
 ## 2. Goals
 
@@ -27,7 +27,7 @@ Lentera is the final-round demonstration for DSCO 2026. The final round scores t
 
 | Judging aspect | Weight | What Lentera shows |
 | --- | --- | --- |
-| Model analysis and justification | 40% | The model card page: nested validation, ablation, calibration, per-module and per-segment reliability, fairness breakdown, and the parity check that the deployed model reproduces the submitted predictions. |
+| Model analysis and justification | 40% | The model card page: 5-fold out-of-fold validation, the LightGBM and DAE-MLP components against their blend, calibration, per-module and per-segment reliability, fairness breakdown, and the parity check that the deployed model reproduces the trained notebook model. |
 | Prescriptive insight | 35% | The capacity planner, archetype routing, per-student reason codes split into actionable signals and context, counterfactual "path below the threshold", intervention playbook, and course design recommendations. |
 | Presentation and visualization | 25% | A dashboard that follows the advisor's workflow from cohort overview to a single student, plus the system architecture diagram. |
 
@@ -53,7 +53,7 @@ Pending: the owner sets the final-round presentation date, which fixes the build
 ### Cohort and planning
 
 - As an academic leader, I want to see the risk distribution of the current cohort so that I know the size of the problem before I allocate staff.
-  - **Acceptance criteria:** The dashboard shows the number of scored students, the number flagged at the model threshold of 0.375, the expected number of at-risk students (sum of probabilities), counts per risk tier and per archetype, and a module by presentation heatmap of mean predicted risk.
+  - **Acceptance criteria:** The dashboard shows the number of scored students, the number flagged at the model threshold (0.387), the expected number of at-risk students (sum of probabilities), counts per risk tier and per archetype, and a module by presentation heatmap of mean predicted risk.
 - As an academic leader, I want to enter advisor capacity and see the resulting intervention plan so that I can justify a staffing decision.
   - **Acceptance criteria:** After the user enters the number of advisors and hours per advisor, the planner returns the number of students assigned to each intervention, the expected number of at-risk students reached, the share of all expected at-risk students that number represents, and the mean probability of the contacted group.
   - **Acceptance criteria:** The planner draws a curve of expected at-risk students reached against total advisor hours, so the user sees the marginal value of one more advisor.
@@ -69,7 +69,7 @@ Pending: the owner sets the final-round presentation date, which fixes the build
   - **Acceptance criteria:** The student profile lists the student's top SHAP contributions in two groups: actionable signals (activity, submission, and score features) and context (demographic, course, and registration features). Each item has a one-line explanation, such as "Terakhir aktif 9 hari sebelum cutoff".
   - **Acceptance criteria:** The profile states that context features are never grounds for an intervention on their own.
 - As an advisor, I want to see what would bring a student below the threshold so that I can give the student a concrete target.
-  - **Acceptance criteria:** The profile shows the smallest combination of predefined actionable levers (for example, submit the pending assessment, be active on more days in week 4) that moves the predicted probability below 0.375, with the probability before and after. When no combination reaches 0.375, the profile shows the combination with the largest reduction.
+  - **Acceptance criteria:** The profile shows the smallest combination of predefined actionable levers (for example, submit the pending assessment, be active on more days in week 4) that moves the predicted probability below the threshold, with the probability before and after. When no combination reaches the threshold, the profile shows the combination with the largest reduction.
   - **Acceptance criteria:** Only levers that lower the student's probability on their own are offered.
   - **Acceptance criteria:** The section is labeled as a model scenario, not a causal effect. Students without recorded online activity get an administrative check instead of a scenario.
 - As an advisor, I want a message template for the recommended intervention so that I can contact the student quickly.
@@ -88,7 +88,7 @@ Pending: the owner sets the final-round presentation date, which fixes the build
 ### Model transparency
 
 - As a judge, I want to read how the model was built and validated so that I can assess its justification.
-  - **Acceptance criteria:** The model page shows the model version, training data hash, nested CV F1 per seed and mean, public leaderboard F1, threshold and how it was chosen, the ablation table, the calibration curve, per-module and per-segment metrics, and flag rate, precision, and recall by gender, disability, age band, and IMD band.
+  - **Acceptance criteria:** The model page shows the model version, training data hash, 5-fold CV F1 per fold and out-of-fold, the team's Kaggle F1 (public and private), threshold and how it was chosen, the component comparison, the calibration curve, per-module and per-segment metrics, and flag rate, precision, and recall by gender, disability, age band, and IMD band.
 - As a coordinator, I want to know whether an uploaded cohort differs from the training data so that I know when predictions need caution.
   - **Acceptance criteria:** For each uploaded cohort the model page shows the population stability index (PSI) of the top features and of the predicted probability against the training data, with features above 0.2 highlighted.
 
@@ -96,13 +96,13 @@ Pending: the owner sets the final-round presentation date, which fixes the build
 
 ### Scoring and model
 
-- FR-01: The API scores a cohort CSV with the same preprocessing, feature set, and CatBoost model (500 trees, depth 6, learning rate 0.05, L2 3, seed 42, trained on all 26,086 training rows) as the submitted DSCO model.
-- FR-02: The API applies the threshold 0.375 to set the `flagged` label.
-- FR-03: The API assigns each student one risk tier from the predicted probability: Low below 0.375, Watch from 0.375 to below 0.6, High from 0.6 to below 0.85, Critical from 0.85.
+- FR-01: The API scores a cohort CSV with the same preprocessing, feature set, and model as the DSCO final notebook (`dsco/notebooks/dsco_lgbm_dae_pair_final.ipynb`): LightGBM (1,405 trees, 15 leaves, learning rate 0.01, seed 42) and an MLP on denoising-autoencoder activations, logits averaged, trained on all 26,086 training rows. Module-presentation ranks are computed over the training rows plus the scored cohort, as the notebook does over train and test.
+- FR-02: The API applies the threshold 0.387 to set the `flagged` label: the notebook's expected-F1 plug-in rule applied once to the DSCO test cohort, without labels.
+- FR-03: The API assigns each student one risk tier from the predicted probability: Low below 0.387, Watch from 0.387 to below 0.6, High from 0.6 to below 0.85, Critical from 0.85.
 - FR-04: The API marks a prediction as uncertain when the probability is between 0.25 and 0.55.
 - FR-05: The API assigns each student exactly one archetype, checked in this order: Silent (placeholder activity block and no submission by cutoff), No LMS record (placeholder activity block), Missed submission (`no_submission_by_cutoff` is 1), Low score (`has_score` is 1 and `avg_score` below 60), Fading (week 4 interactions below half of week 1 interactions), Engaged (all others).
 - FR-06: The API computes SHAP values for every scored student and stores the top contributions, grouped as actionable or context.
-- FR-07: The API computes a counterfactual for a flagged student: the smallest set of predefined levers that moves the probability below 0.375, searched over at most three levers, plus the combination with the largest reduction. Levers that do not lower the student's probability on their own are excluded.
+- FR-07: The API computes a counterfactual for a flagged student: the smallest set of predefined levers that moves the probability below the threshold, searched over at most three levers, plus the combination with the largest reduction. Levers that do not lower the student's probability on their own are excluded.
 - FR-08: The API recomputes the probability for a user-chosen set of lever values (what-if).
 
 ### Planning and intervention

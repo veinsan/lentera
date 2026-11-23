@@ -10,7 +10,7 @@ from app.model import Model
 from app.scoring import score_cohort, summarize
 
 DATA = Path(__file__).resolve().parents[2] / "data"
-DSCO_SUBMISSION = Path(__file__).resolve().parents[3] / "dsco" / "outputs" / "final" / "submission.csv"
+RUN_LABELS = DATA / "blend" / "labels.csv"
 pytestmark = pytest.mark.skipif(not (DATA / "test.csv").exists(), reason="competition data is local only")
 
 
@@ -37,16 +37,17 @@ def test_test_csv_passes_with_repairs(schema, text):
     assert report["shares"]["placeholder_activity"] == pytest.approx(0.1456, abs=1e-3)
 
 
-@pytest.mark.skipif(not DSCO_SUBMISSION.exists(), reason="DSCO workspace not available")
-def test_scoring_from_csv_text_reproduces_submission(schema, text):
+@pytest.mark.skipif(not RUN_LABELS.exists(), reason="training outputs are local only")
+def test_scoring_from_csv_text_reproduces_the_trained_labels(schema, text):
     _, typed = quality.validate(text, schema)
     model = Model()
     scored = score_cohort(model, Explainer(model), typed)
-    ref = pd.read_csv(DSCO_SUBMISSION)
+    ref = pd.read_csv(RUN_LABELS)  # written by scripts/train.py --finalize from the same pipeline
     assert (scored.source_id.to_numpy() == ref.id.to_numpy()).all()
     assert (scored.flagged.astype(int).to_numpy() == ref.at_risk.to_numpy()).all()
     s = summarize(scored)
-    assert s["flagged"] == 3875 and sum(s["tiers"].values()) == 6502 and set(s["archetypes"]) == set(rules.ARCHETYPES)
+    assert s["flagged"] == ref.at_risk.sum() and sum(s["tiers"].values()) == 6502
+    assert set(s["archetypes"]) == set(rules.ARCHETYPES)
     assert "ggg" not in s["modules"] and s["modules"]["m07"] == 181 + 372
 
 

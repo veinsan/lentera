@@ -1,6 +1,6 @@
 """Build web/lib/generated/landing.json: every number and star on the public landing page.
 
-Run from api/: uv run python scripts/build_landing.py [path/to/dsco]
+Run from api/: uv run python scripts/build_landing.py
 Scores data/test.csv (the demo cohort) through the same quality gate, model, rules, and planner as an upload,
 so the landing page shows the stored demo cohort without a signed-in request. Rerun after any artifact change.
 """
@@ -19,7 +19,6 @@ from app.model import Model  # noqa: E402
 from app.pipeline.features import normalize  # noqa: E402
 
 DATA = ROOT.parent / "data"
-DSCO = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parents[1] / "dsco"
 OUT = ROOT.parent / "web/lib/generated/landing.json"
 ADVISORS, HOURS = 5, 10  # the planner's opening values on the capacity page
 ADVISOR_MODULES = ["m03", "m06"]  # the demo advisor's modules (scripts/seed_demo_users.py)
@@ -37,24 +36,18 @@ def main() -> None:
     tiers, arch = rules.tier(p), rules.archetype(typed)
     modules = normalize(typed).code_module.to_numpy()
 
-    submitted = pd.read_csv(DSCO / "outputs/final/submission.csv").set_index("id").loc[typed["id"].astype(int)]
-    parity = int((flagged.astype(int) == submitted.at_risk.to_numpy()).sum())
-
     students = pd.DataFrame(dict(id=typed["id"].astype(int), probability=p, archetype=arch, code_module=modules))
     plan = planner.plan(students, ADVISORS, HOURS)["summary"]
 
     lb = card["leaderboard"]
     data = dict(
         model=dict(
-            nested_f1=card["nested"]["mean_f1"], nested_f1_sd=card["nested"]["sd_f1"],
-            seeds=len(card["nested"]["per_seed"]),
+            cv_f1=card["cv"]["oof_f1"], cv_f1_sd=card["cv"]["sd_f1"], folds=len(card["cv"]["per_fold"]),
             ece=card["calibration"]["ece"], brier=card["calibration"]["brier"],
             threshold=rules.THRESHOLD,
             signals=len(SIGNALS), actionable_signals=sum(g == ACTIONABLE for g, _ in SIGNALS.values()),
             archetypes=len(rules.ARCHETYPES),
-            parity_rows=parity, rows=len(typed),
-            kaggle_public=lb["public_f1"], kaggle_private=lb["private_f1"],
-            selected_public=lb["selected"]["public_f1"], selected_private=lb["selected"]["private_f1"],
+            kaggle_public=lb["selected"]["public_f1"], kaggle_private=lb["selected"]["private_f1"],
         ),
         cohort=dict(
             name="Kohort uji DSCO (test.csv)",

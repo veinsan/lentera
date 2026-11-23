@@ -15,26 +15,25 @@ pytestmark = pytest.mark.skipif(not TEST_CSV.exists(), reason="competition data 
 @pytest.fixture(scope="module")
 def setup():
     m = Model()
-    return m, Explainer(m), pd.read_csv(TEST_CSV).sample(200, random_state=1).reset_index(drop=True)
+    rows = pd.read_csv(TEST_CSV).sample(200, random_state=1).reset_index(drop=True)
+    return m, Explainer(m), rows, m.frame(rows)
 
 
 def test_shap_sums_to_raw_logit(setup):
-    m, e, rows = setup
-    x = m.state.transform(rows)
-    values = e.shap(x)
-    raw = m.cbm.predict(x, prediction_type="RawFormulaVal")
-    np.testing.assert_allclose(values.sum(axis=1), raw, atol=1e-6)
+    m, e, _, X = setup
+    values = e.shap(X)
+    np.testing.assert_allclose(values.sum(axis=1), m.booster.predict(X, raw_score=True), atol=1e-6)
 
 
 def test_signal_shap_keeps_the_total(setup):
-    m, e, rows = setup
-    values = e.shap(m.state.transform(rows))
-    np.testing.assert_allclose(e.signal_shap(values).sum(axis=1), values[:, :-1].sum(axis=1), atol=1e-9)
+    _, e, _, X = setup
+    values = e.shap(X)
+    np.testing.assert_allclose(e.signal_shap(values, X).sum(axis=1), values[:, :-1].sum(axis=1), atol=1e-9)
 
 
 def test_placeholder_rows_report_activity_once(setup):
-    m, e, rows = setup
-    reasons = e.reasons(rows)
+    _, e, rows, X = setup
+    reasons = e.reasons(rows, X=X)
     placeholder = placeholder_activity(rows).to_numpy()
     assert placeholder.any() and (~placeholder).any()
     for r, ph in zip(reasons, placeholder):

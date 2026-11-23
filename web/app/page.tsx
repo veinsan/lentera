@@ -226,7 +226,7 @@ function Stages() {
             </Record>
           }
         >
-          Model CatBoost memberi setiap mahasiswa probabilitas yang terkalibrasi. Karena peluangnya jujur, jumlahnya menjadi perkiraan
+          Gabungan LightGBM dan DAE-MLP memberi setiap mahasiswa probabilitas yang terkalibrasi. Karena peluangnya jujur, jumlahnya menjadi perkiraan
           berapa mahasiswa yang benar-benar berisiko, dan perkiraan itu yang dipakai untuk merencanakan kapasitas.
         </StageRow>
 
@@ -386,14 +386,14 @@ function Safety() {
 function Proof() {
   const rows: [string, React.ReactNode, string][] = [
     [
-      "F1 validasi silang bersarang",
-      `${fmtNum(model.nested_f1, 4)} ± ${fmtNum(model.nested_f1_sd, 4)}`,
-      `rata-rata ${model.seeds} seed; threshold dipilih di inner fold, bukan di data uji`,
+      `F1 validasi silang ${model.folds}-fold`,
+      `${fmtNum(model.cv_f1, 4)} ± ${fmtNum(model.cv_f1_sd, 4)}`,
+      "prediksi out-of-fold; ambang plug-in dari probabilitas, tanpa melihat label",
     ],
     ["Kalibrasi (ECE)", fmtNum(model.ece, 4), "selisih rata-rata antara peluang yang diberikan dan kejadian sebenarnya"],
     [
       "Skor Kaggle",
-      <KaggleScores key="kaggle" pub={model.selected_public} priv={model.selected_private} />,
+      <KaggleScores key="kaggle" pub={model.kaggle_public} priv={model.kaggle_private} />,
       "F1 model final tim di leaderboard DSCO 2026",
     ],
   ];
@@ -420,7 +420,7 @@ function Proof() {
         ))}
       </dl>
       <p className="mt-4 text-xs text-ink-3">
-        Ambang ter-flag: {fmtPct(model.threshold, 1)} probabilitas, dipilih pada prediksi out-of-fold.
+        Ambang ter-flag: {fmtPct(model.threshold, 1)} probabilitas, dari aturan plug-in expected F1 pada kohort uji, tanpa label.
       </p>
     </section>
   );

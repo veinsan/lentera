@@ -19,9 +19,10 @@ DERIVED = ["interaction_volume", "early_interactions", "late_interactions", "lat
 def setup():
     m = Model()
     test = pd.read_csv(DATA / "test.csv")
-    p = m.predict_proba(test)
-    flagged = test[p >= rules.THRESHOLD].sample(300, random_state=2).reset_index(drop=True)
-    return m, sc.load_targets(), flagged
+    ctx = m.context(test)
+    p = pd.Series(m.predict_proba(test, ctx), index=test.id)
+    flagged = test[(p >= rules.THRESHOLD).to_numpy()].sample(300, random_state=2).reset_index(drop=True)
+    return m, sc.load_targets(), flagged, ctx, p
 
 
 def test_recompute_reproduces_dataset_formulas():
@@ -34,7 +35,7 @@ def test_recompute_reproduces_dataset_formulas():
 
 @pytest.mark.parametrize("levers", [[x] for x in sc.LEVERS] + [sc.LEVERS])
 def test_levers_keep_rows_consistent(setup, levers):
-    _, targets, flagged = setup
+    _, targets, flagged, _, _ = setup
     real = flagged[~placeholder_activity(flagged)]
     out = sc.apply_levers(real, levers, targets)
     assert np.allclose(out.interaction_volume, out[WEEKS].sum(axis=1))
@@ -43,7 +44,7 @@ def test_levers_keep_rows_consistent(setup, levers):
 
 
 def test_submit_changes_only_missed_submissions(setup):
-    _, targets, flagged = setup
+    _, targets, flagged, _, _ = setup
     out = sc.apply_levers(flagged, ["submit"], targets)
     missed = flagged.no_submission_by_cutoff.eq(1)
     pd.testing.assert_frame_equal(out[~missed], sc.apply_levers(flagged, [], targets)[~missed])
@@ -51,10 +52,28 @@ def test_submit_changes_only_missed_submissions(setup):
     assert (out[missed].assessment_completion_rate == 1).all()
 
 
+def test_submit_keeps_the_module(setup):
+    # fix_categories reads an M04 row with no score and no missed submission as M07; a lever must not move the student.
+    m, targets, _, ctx, _ = setup
+    m04 = ctx.source[(ctx.source.code_module == "M04") & ctx.source.no_submission_by_cutoff.eq(1)
+                     & ctx.source.has_score.eq(0)].head(20)
+    assert len(m04)
+    f = ctx.features(sc.apply_levers(m04, ["submit"], targets))
+    assert f.code_module.eq("M04").all() and f.assess_window.eq(1).all()
+
+
+def test_unchanged_row_keeps_its_cohort_probability(setup):
+    m, targets, flagged, ctx, p = setup
+    real = flagged[~placeholder_activity(flagged)].head(20)
+    same = m.predict_proba(sc.apply_levers(real, [], targets), ctx)
+    np.testing.assert_allclose(same, p.loc[real.id].to_numpy(), atol=1e-6)
+
+
 def test_counterfactual_contract(setup):
-    m, targets, flagged = setup
-    results = sc.counterfactual(m, flagged, targets)
+    m, targets, flagged, ctx, p = setup
+    results = sc.counterfactual(m, flagged, targets, ctx)
     placeholder = placeholder_activity(flagged).to_numpy()
+    np.testing.assert_allclose([r["base"] for r in results], p.loc[flagged.id].to_numpy(), atol=1e-6)
     for r, ph in zip(results, placeholder):
         assert r["applicable"] == (not ph)
         if r["best"]:

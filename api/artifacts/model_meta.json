@@ -1,40 +1,54 @@
 {
-  "model_version": "cat_clean_rank-seed42-v1",
-  "threshold": 0.375,
+  "model_version": "lgbm_dae_pair-seed42-v1",
+  "threshold": 0.387,
   "params": {
-    "iterations": 500,
-    "depth": 6,
-    "learning_rate": 0.05,
-    "l2_leaf_reg": 3.0,
-    "loss_function": "Logloss",
-    "random_seed": 42,
-    "thread_count": 8,
-    "verbose": false,
-    "allow_writing_files": false
+    "lightgbm": {
+      "objective": "binary",
+      "learning_rate": 0.01,
+      "num_leaves": 15,
+      "min_child_samples": 100,
+      "subsample": 0.7,
+      "subsample_freq": 1,
+      "colsample_bytree": 0.4,
+      "reg_lambda": 5.0,
+      "n_estimators": 1405,
+      "seed": 42,
+      "bagging_seed": 42,
+      "feature_fraction_seed": 42,
+      "data_random_seed": 42,
+      "deterministic": true,
+      "force_row_wise": true,
+      "num_threads": 8,
+      "verbosity": -1
+    },
+    "dae": {
+      "noise": 0.15,
+      "hidden": 1500,
+      "epochs": 300,
+      "batch": 256,
+      "lr": 0.001,
+      "wd": 1e-05
+    },
+    "head": {
+      "max_epochs": 60,
+      "batch": 256,
+      "lr": 0.0003,
+      "wd": 0.0001
+    }
   },
-  "cat_features": [
-    "code_module",
-    "code_presentation",
-    "gender",
-    "region",
-    "highest_education",
-    "imd_band",
-    "age_band",
-    "disability",
-    "cohort"
-  ],
-  "n_features": 77,
+  "n_features": 198,
   "n_train": 26086,
   "input_sha256": {
     "train.csv": "1d65730e2f8627089cdb4258941324ef0c5ac0d3d0c58045ee1d496218089788",
     "test.csv": "7bcd123cefe6fb5329f06a5c6bc1aa3bd7ffe58fe9d275c251652bcca03d6ab9",
     "sample_submission.csv": "7b6b512e01cb05d81285d56e722f5f345a2e9a931899fed129f6c1a537d7904b"
   },
-  "model_sha256": "4c486fdcb9553c7ac706156aaf926f75fee33a2648b8f9cef55bbf04b04a6d9e",
+  "model_sha256": "29322208de98b65d5c5e57eb33e7aacf8bf03ed02b90a486188133370b0222d7",
   "versions": {
-    "catboost": "1.2.10",
-    "pandas": "3.1.1",
+    "lightgbm": "4.6.0",
+    "torch": "2.15.0",
     "numpy": "2.5.4",
+    "pandas": "3.1.1",
     "scikit-learn": "1.9.1"
   }
 }

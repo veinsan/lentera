@@ -6,7 +6,7 @@ import pandas as pd
 
 from app.pipeline.features import placeholder_activity
 
-THRESHOLD = 0.375  # chosen on seed-42 OOF in the DSCO nested pipeline
+THRESHOLD = 0.387  # plugin_labels on the DSCO test cohort (scripts/train.py --finalize): 3,759 of 6,502 flagged
 # Tier cutoffs above the threshold and the uncertain band are proposals awaiting owner confirmation (TODO DEC-05).
 TIERS = [(0.85, "critical"), (0.6, "high"), (THRESHOLD, "watch"), (0.0, "low")]
 UNCERTAIN = (0.25, 0.55)
@@ -52,6 +52,19 @@ PLAYBOOK = {
 def tier(p: np.ndarray | pd.Series) -> np.ndarray:
     p = np.asarray(p, dtype=float)
     return np.select([p >= cut for cut, _ in TIERS], [name for _, name in TIERS], "low")
+
+
+def plugin_labels(prob: np.ndarray) -> np.ndarray:
+    """The notebook's expected-F1 plug-in rule: flag the top k, k maximizing the expected F1 of calibrated probabilities.
+
+    It needs no labels. THRESHOLD is this rule applied once to the DSCO test cohort (scripts/train.py --finalize).
+    """
+    prob = np.asarray(prob, dtype=float)
+    order = np.argsort(-prob)
+    expected_f1 = 2 * np.cumsum(prob[order]) / (np.arange(1, len(prob) + 1) + prob.sum())
+    labels = np.zeros(len(prob), dtype=int)
+    labels[order[:int(expected_f1.argmax()) + 1]] = 1
+    return labels
 
 
 def uncertain(p: np.ndarray | pd.Series) -> np.ndarray:

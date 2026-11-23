@@ -61,6 +61,17 @@ class SupabaseStore:
             raise
         return cohort_id
 
+    def get_cohort_csv(self, cohort_id: str) -> bytes:
+        """The uploaded CSV of a cohort, as stored when it was scored."""
+        r = self.rest.get("/cohorts", params={"id": f"eq.{cohort_id}", "select": "storage_path"})
+        r.raise_for_status()
+        rows = r.json()
+        if not rows:
+            raise httpx.HTTPStatusError("cohort not found", request=r.request, response=r)
+        f = self.storage.get(f"/object/cohorts/{rows[0]['storage_path']}")
+        f.raise_for_status()
+        return f.content
+
     def get_student(self, student_id: int) -> dict | None:
         r = self.rest.get("/students", params={"id": f"eq.{student_id}", "select": "id,cohort_id,code_module,raw"})
         r.raise_for_status()

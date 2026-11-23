@@ -8,7 +8,7 @@ At the week 4 cutoff, an institution knows which students the model flags but no
 
 ## Key Features
 
-The model service reproduces the DSCO submission and every feature below is implemented. See `PRD.md` for scope and `TODO.md` for status.
+The model service runs the DSCO final model and every feature below is implemented. See `PRD.md` for scope and `TODO.md` for status.
 
 - Upload a week 4 cohort CSV and review a data quality report before scoring.
 - See the cohort's risk tiers, archetypes, and module by presentation risk heatmap.
@@ -27,7 +27,7 @@ A screenshot or demo is not yet available.
 
 - **Next.js** for the dashboard frontend, hosted on Vercel.
 - **FastAPI** for the Python model service, so inference uses the same Python code and library versions as the DSCO model. Hosted on Azure Container Apps from a GitHub Actions image.
-- **CatBoost** is the DSCO competition model (nested CV F1 0.7738, public leaderboard F1 0.78443).
+- **LightGBM and a denoising-autoencoder MLP** form the DSCO final model (5-fold CV F1 0.7758; Kaggle F1 0.80150 public, 0.79363 private). The API runs the MLP half in numpy, so the image needs no torch.
 - **Supabase** for authentication, the Postgres database with row level security, and file storage.
 
 ## Installation and Setup

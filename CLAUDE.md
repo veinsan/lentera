@@ -23,7 +23,8 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 | pnpm | 12.18, frontend package manager |
 | Python | 3.13 (python.org build; see Local Environment) |
 | FastAPI | API service |
-| catboost | 1.2.10 |
+| lightgbm | 4.6.0; the DAE-MLP half of the model runs in numpy |
+| torch | 2.15.0 CPU, training only (`uv run --frozen --with torch==2.15.0`), not in the API image |
 | pandas | 3.1.1 |
 | numpy | 2.5.4 |
 | scikit-learn | 1.9.1 |
@@ -33,7 +34,7 @@ Lentera deploys the DSCO 2026 at-risk model as a web app. Advisors, course coord
 | Vercel | Frontend hosting |
 | Azure Container Apps | API hosting, image from `ghcr.io` |
 
-The ML library versions match `dsco/outputs/audit/requirements-lock.txt`, except pandas 3.1.1 instead of 3.1.0. The parity check passed with 3.1.1 (6,502 of 6,502 labels, maximum probability difference 1.1e-16). Changing them can change probabilities near the threshold, so a version change requires a new parity check (`skills/verify-model-parity/SKILL.md`).
+The served model is the DSCO final notebook `dsco/notebooks/dsco_lgbm_dae_pair_final.ipynb` (LightGBM and DAE-MLP, logits averaged), retrained on CPU by `api/scripts/train.py`. The parity check passed on 2026-11-23: the 198 LightGBM features of `test.csv` equal the notebook's, LightGBM probabilities are identical, the numpy DAE-MLP differs from torch by at most 1.2e-7, and 6,502 of 6,502 labels reproduce the training run. Changing preprocessing, parameters, or versions can change probabilities near the threshold, so a version change requires a new parity check (`skills/verify-model-parity/SKILL.md`).
 
 ## Design System
 
@@ -81,7 +82,7 @@ api/
   app/
     main.py                FastAPI app, routers, CORS
     auth.py                Supabase JWT verification and role checks
-    pipeline/              Preprocessing ported from dsco/src/train_only.py
+    pipeline/              Notebook features and the cohort ranking context (dsco_lgbm_dae_pair_final.ipynb)
     explain.py             SHAP and reason codes
     rules.py               Tier, uncertain band, archetype, playbook
     scenarios.py           Levers, what-if, counterfactual
@@ -113,7 +114,7 @@ data/                      Local only, gitignored
 - Format probabilities and counts through `web/lib/format.ts` so every page shows them the same way.
 - Python: type hints on public functions, pydantic models for request and response bodies.
 - Keep `api/app/rules.py`, `scenarios.py`, and `planner.py` free of I/O so they are unit-testable.
-- Thresholds and tier cutoffs live in one place, `api/app/rules.py`, and reach the frontend through API responses or stored predictions. The frontend never hardcodes 0.375, 0.6, or 0.85.
+- Thresholds and tier cutoffs live in one place, `api/app/rules.py`, and reach the frontend through API responses or stored predictions. The frontend never hardcodes 0.387, 0.6, or 0.85.
 - Every number shown in the interface comes from an artifact or a query. Do not type metrics into components or copy.
 - Interface text is Indonesian. Code, comments, and documents are English.
 - If an instruction is ambiguous, ask what it means before coding.
@@ -132,7 +133,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
 - [x] Student profile: reason codes, scenario panel (what-if and counterfactual), message template, weekly chart, intervention log and history
 - [x] Capacity planner: advisor capacity inputs, live preview, reach curve, allocation table, editable playbook assumptions with scenario labeling, saved plans
-- [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts, drift report (PSI per feature and probability distribution), API health (requests, errors, latency per endpoint)
+- [x] Model & Monitoring page: KPIs, 5-fold cross-validation, model components (LightGBM, DAE-MLP, blend), calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, artifacts, drift report (PSI per feature and probability distribution), API health (requests, errors, latency per endpoint)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [x] Drift report stored per scored cohort (`api/app/drift.py`) and request logging middleware with `GET /monitoring/requests`
 - [x] Deployment: API on Azure Container Apps through GitHub Actions, web on Vercel (see Production)
@@ -153,6 +154,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 
 - API: `uv run python -m pytest` from `api/`.
 - Local API server: `uv run --env-file .env python -m uvicorn app.main:app --reload` from `api/`, then open `http://localhost:8000/docs`. `CORS_ORIGINS` (comma-separated) sets the allowed frontend origins; the default is `http://localhost:3000`.
+- Model training: `uv run --frozen --with torch==2.15.0 python scripts/train.py` from `api/` (about 2 hours on CPU, mostly the DAE), then `uv run --frozen python scripts/train.py --finalize` for the threshold. Keep `--frozen`: `uv run` with resolver options such as `--exclude-newer` re-locks the project and downgrades packages.
 - Model parity: `uv run python scripts/parity_check.py` from `api/`, following `skills/verify-model-parity/SKILL.md`.
 - Frontend: no automated tests yet. Verify pages manually in a browser with each demo role. The owner works in Orca: use its embedded browser through the `orca` CLI (`orca tab create`, `orca screenshot --page <id>`), not Chrome. Start dev servers outside the Claude Code sandbox, or the browser cannot reach them.
 - Landing data: `uv run python scripts/build_landing.py` from `api/` rewrites `web/lib/generated/landing.json` from `data/test.csv`, the model, the planner, and `artifacts/model_card.json`. Rerun it after any artifact change. Kaggle scores live in `api/artifacts/kaggle_submissions.csv` (Kaggle CLI export) and reach the model card through `scripts/build_model_card.py`.

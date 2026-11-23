@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from app.model import ARTIFACTS, Model
-from app.pipeline.features import WEEKS, normalize, placeholder_activity
+from app.pipeline.features import WEEKS, Context, normalize, placeholder_activity
 from app.rules import THRESHOLD
 
 LEVERS = ["submit", "return_to_activity", "week4_median", "more_active_days"]
@@ -94,29 +94,35 @@ def apply_levers(raw: pd.DataFrame, levers: list[str] | tuple[str, ...], targets
     return recompute_activity(d)
 
 
-def simulate(model: Model, raw: pd.DataFrame, levers: list[str], targets: dict) -> np.ndarray:
-    """What-if probabilities for the given levers; NaN for rows without a real activity block."""
+def simulate(model: Model, raw: pd.DataFrame, levers: list[str], targets: dict, ctx: Context | None = None) -> np.ndarray:
+    """What-if probabilities for the given levers; NaN for rows without a real activity block.
+
+    `ctx` is the cohort the rows belong to; without it the rows are their own cohort.
+    """
+    ctx = ctx or model.context(raw)
     out = np.full(len(raw), np.nan)
     ok = ~placeholder_activity(raw).to_numpy()
     if ok.any():
-        out[ok] = model.predict_proba(apply_levers(raw[ok], levers, targets))
+        out[ok] = model.predict_proba(apply_levers(raw[ok], levers, targets), ctx)
     return out
 
 
-def counterfactual(model: Model, raw: pd.DataFrame, targets: dict) -> list[dict]:
+def counterfactual(model: Model, raw: pd.DataFrame, targets: dict, ctx: Context | None = None) -> list[dict]:
     """For each row: probability of every lever combination (up to MAX_LEVERS) and the smallest one below the threshold.
 
     Ties in size go to the lowest probability. Rows with the placeholder activity block get an administrative check.
+    `ctx` is the cohort the rows belong to, so an unchanged row keeps its stored probability.
     """
     raw = raw.reset_index(drop=True)
+    ctx = ctx or model.context(raw)
     combos = [c for k in range(1, MAX_LEVERS + 1) for c in itertools.combinations(LEVERS, k)]
-    base = model.predict_proba(raw)
+    base = model.predict_proba(raw, ctx)
     ok = ~placeholder_activity(raw).to_numpy()
     probs = np.full((len(raw), len(combos)), np.nan)
     if ok.any():
         sub = raw[ok]
         variants = pd.concat([apply_levers(sub, c, targets) for c in combos], ignore_index=True)
-        probs[ok] = model.predict_proba(variants).reshape(len(combos), -1).T
+        probs[ok] = model.predict_proba(variants, ctx).reshape(len(combos), -1).T
     results = []
     for i in range(len(raw)):
         if not ok[i]:

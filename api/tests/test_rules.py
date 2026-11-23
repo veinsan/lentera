@@ -10,7 +10,8 @@ TRAIN_CSV = Path(__file__).resolve().parents[2] / "data" / "train.csv"
 
 
 def test_tier_boundaries():
-    p = np.array([0.0, 0.374, 0.375, 0.599, 0.6, 0.849, 0.85, 1.0])
+    t = rules.THRESHOLD
+    p = np.array([0.0, t - 1e-6, t, 0.599, 0.6, 0.849, 0.85, 1.0])
     assert rules.tier(p).tolist() == ["low", "low", "watch", "watch", "high", "high", "critical", "critical"]
 
 

@@ -102,11 +102,13 @@ export type ModelCard = {
     model_sha256: string;
     input_sha256: Record<string, string>;
     versions: Record<string, string>;
-    params: Record<string, number | string | boolean>;
+    params: Record<string, Record<string, number | string | boolean>>;
   };
   protocol: { outer: string; inner: string; seeds: number[]; early_stopping: string; inference: string };
-  nested: {
-    per_seed: { seed: number; f1: number; precision: number; recall: number; auc: number }[];
+  /** Five-fold out-of-fold evaluation of the blend, labels from the expected-F1 plug-in rule. */
+  cv: {
+    per_fold: { fold: number; f1: number; precision: number; recall: number; auc: number }[];
+    oof_f1: number;
     mean_f1: number;
     sd_f1: number;
   };
@@ -114,27 +116,26 @@ export type ModelCard = {
   comparison: {
     method: string;
     seeds: number;
+    folds: number;
     f1: number;
     f1_sd: number;
     auc: number;
+    logloss: number;
     hard_f1: number;
     m07_f1: number;
     decision: "dipilih" | "ditolak" | "pembanding";
     reason: string | null;
   }[];
-  ablation: { name: string; label: string; f1_seed42: number; f1_seed137: number }[];
   leaderboard: {
     public_f1: number;
     private_f1: number | null;
     submission_ref: number;
-    submission_sha256: string;
+    submission_sha256: string | null;
     submitted_utc: string;
-    /** The submission the team selected for the final leaderboard; not the model deployed in Lentera. */
+    /** The team's selected Kaggle submission of the notebook this model retrains. */
     selected?: { ref: number; file: string; submitted_utc: string; public_f1: number; private_f1: number };
-  };
-  presentation_stress: {
-    note: string;
-    per_presentation: (SegmentMetrics & { presentation: string; threshold: number })[];
+    retrain_label_matches: number | null;
+    rows: number;
   };
   calibration: {
     bins: { lower: number; upper: number; n: number; predicted: number; observed: number }[];

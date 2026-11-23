@@ -35,6 +35,9 @@ class FakeStore:
     def get_student(self, student_id):
         return self.rows.get(student_id)
 
+    def get_cohort_csv(self, cohort_id):
+        return (DATA / "test.csv").read_bytes()
+
 
 @pytest.fixture
 def client(cohort):
@@ -57,7 +60,7 @@ def test_counterfactual_round_trip_and_contract(client, cohort):
     r = client.get(f"/students/{i}/counterfactual")
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["base"] == pytest.approx(p[i], abs=1e-12)  # stored row reproduces the scored probability
+    assert body["base"] == pytest.approx(p[i], abs=1e-6)  # stored row, ranked in its cohort, keeps its probability
     assert body["archetype"] == "missed_submission" and body["playbook"]["action"] == "deadline_call"
     assert "asesmen" in body["message"] and len(body["levers"]) == 4
     assert all(s["probability"] < body["base"] for s in body["single"])

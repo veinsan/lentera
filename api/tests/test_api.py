@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.auth import User, current_user
 from app.main import app
+from app import rules
 from app.model import ARTIFACTS
 
 
@@ -22,7 +23,7 @@ def test_health_reports_loaded_model(client):
     assert r.status_code == 200
     body = r.json()
     meta = json.loads((ARTIFACTS / "model_meta.json").read_text())
-    assert body["status"] == "ok" and body["model_version"] == meta["model_version"] and body["threshold"] == 0.375
+    assert body["status"] == "ok" and body["model_version"] == meta["model_version"] and body["threshold"] == rules.THRESHOLD
 
 
 @pytest.mark.parametrize("path, artifact", [("/model", "model_card.json"), ("/insights", "insights.json")])

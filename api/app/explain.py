@@ -1,7 +1,8 @@
 """SHAP reason codes. Related features are summed into one signal (SHAP is additive), then phrased in Indonesian.
 
-Actionable signals describe behavior an intervention can change. Context signals describe who the student is or
-which course they take; the app never recommends an intervention because of a context signal.
+The values are TreeSHAP of the LightGBM half of the blend, in log-odds; the DAE-MLP half has no per-feature
+attribution. Actionable signals describe behavior an intervention can change. Context signals describe who the
+student is or which course they take; the app never recommends an intervention because of a context signal.
 """
 from __future__ import annotations
 
@@ -9,7 +10,6 @@ import math
 
 import numpy as np
 import pandas as pd
-from catboost import Pool
 
 from app.model import Model
 
@@ -17,38 +17,41 @@ ACTIONABLE, CONTEXT = "actionable", "context"
 
 SIGNALS: dict[str, tuple[str, list[str]]] = {
     "submission": (ACTIONABLE, [
-        "no_submission_by_cutoff", "submitted_count", "submitted_Assessment_1", "submitted_Assessment_2",
-        "assessment_completion_rate", "assessment_completion_rate_Assessment_1",
-        "assessment_completion_rate_Assessment_2", "missed_due"]),
+        "no_submission_by_cutoff", "submitted_count", "assessment_completion_rate",
+        "assessment_completion_rate_Assessment_1", "assessment_completion_rate_Assessment_2", "recency_x_nosub"]),
     "timeliness": (ACTIONABLE, [
-        "late_submission_count", "avg_submission_delay", "median_submission_delay", "max_submission_delay",
-        "min_submission_delay", "submission_delay_Assessment_1", "submission_delay_Assessment_2"]),
+        "late_submission_count", "avg_submission_delay", "max_submission_delay", "min_submission_delay",
+        "submission_delay_Assessment_1", "submission_delay_Assessment_2", "first_delay", "rk_first_delay"]),
     "score": (ACTIONABLE, [
-        "has_score", "avg_score", "median_score", "max_score", "min_score", "score_std", "score_trend",
-        "weighted_score_total", "score_Assessment_1", "weighted_score_Assessment_1", "score_Assessment_2",
-        "weighted_score_Assessment_2", "avg_score_cohort_pct"]),
-    "active_days": (ACTIONABLE, ["active_days", "active_day_ratio", "active_days_cohort_pct", "active_weeks"]),
-    "recency": (ACTIONABLE, [
-        "last_activity_day", "days_since_last_activity", "last_activity_day_cohort_pct", "first_activity_day",
-        "activity_span_days"]),
+        "has_score", "avg_score", "max_score", "min_score", "score_std", "score_trend", "weighted_score_total",
+        "score_Assessment_1", "weighted_score_Assessment_1", "score_Assessment_2", "weighted_score_Assessment_2",
+        "first_score", "score_is_practice", "score_lt40", "rk_first_score", "rk_weighted_score_total",
+        "score_x_delay", "score_x_engage"]),
+    "active_days": (ACTIONABLE, ["active_days", "active_weeks", "zero_weeks", "rk_active_days"]),
+    "recency": (ACTIONABLE, ["last_activity_day", "first_activity_day", "activity_span_days", "recency",
+                             "rk_recency"]),
     "volume": (ACTIONABLE, [
-        "interaction_volume", "interaction_volume_cohort_pct", "avg_daily_interactions", "max_daily_interactions",
-        "avg_interactions_per_active_day", "avg_interactions_per_active_week", "interaction_variability",
-        "inter_per_credit", "early_interactions", "week1_interactions", "week2_interactions",
-        "week3_interactions"]),
+        "interaction_volume", "avg_daily_interactions", "max_daily_interactions", "avg_interactions_per_active_week",
+        "interaction_variability", "early_interactions", "week1_interactions", "week2_interactions",
+        "week3_interactions", "min_week", "log_volume", "vol_over_mp_median", "rk_week1", "rk_week2", "rk_week3",
+        "rk_mean", "rk_min", "rk_std", "rk_interaction_volume", "rk_min_week", "rk_max_daily_interactions"]),
     "week4_trend": (ACTIONABLE, [
-        "week4_interactions", "week4_interactions_cohort_pct", "week4_share", "late_interactions",
-        "late_to_early_interactions_ratio", "interaction_trend"]),
-    "breadth": (ACTIONABLE, ["unique_sites", "unique_sites_cohort_pct", "unique_activity_types", "sites_per_day"]),
-    "no_lms_record": (ACTIONABLE, ["no_activity"]),
+        "week4_interactions", "late_interactions", "late_to_early_interactions_ratio", "interaction_trend",
+        "week_pattern", "stop_w4", "rk_week4"]),
+    "breadth": (ACTIONABLE, ["unique_sites", "unique_activity_types", "clicks_per_site", "rk_unique_sites",
+                             "rk_unique_activity_types", "rk_clicks_per_site"]),
+    "no_lms_record": (ACTIONABLE, ["vle_missing"]),
     "course": (CONTEXT, [
-        "code_module", "code_presentation", "cohort", "module_presentation_length", "assessments_due_total",
-        "assessments_due_Assessment_1", "assessments_due_Assessment_2"]),
-    "registration": (CONTEXT, ["registration_days_from_start", "registration_days_from_start_cohort_pct"]),
-    "workload": (CONTEXT, ["studied_credits"]),
+        "code_module", "code_presentation", "mp", "module_presentation_length", "assessments_due_total",
+        "assessments_due_Assessment_1", "assessments_due_Assessment_2", "assess_window", "is_B", "year2014"]),
+    "registration": (CONTEXT, ["registration_days_from_start", "rk_registration_days_from_start"]),
+    "workload": (CONTEXT, ["studied_credits", "extra_credits", "credits_x_prev", "rk_studied_credits"]),
     "prior_attempts": (CONTEXT, ["num_of_prev_attempts"]),
-    "demographics": (CONTEXT, ["gender", "region", "highest_education", "imd_band", "age_band", "disability"]),
+    "demographics": (CONTEXT, ["gender", "region", "highest_education", "imd_band", "age_band", "disability",
+                               "edu_ord", "imd_ord", "imd_missing", "age_ord"]),
 }
+# The notebook's segment mixes behavior and course context, so its SHAP goes to the signal its value stands for.
+SEGMENT_SIGNAL = {"A_no_vle": "no_lms_record", "B_no_assess": "course"}  # every other segment: "submission"
 
 LABELS = {
     "submission": "Pengumpulan asesmen", "timeliness": "Ketepatan waktu", "score": "Nilai",
@@ -58,8 +61,13 @@ LABELS = {
     "prior_attempts": "Percobaan sebelumnya", "demographics": "Demografi",
 }
 
-
 ACTIVITY = ["active_days", "recency", "volume", "week4_trend", "breadth"]
+_SIGNAL_OF = {f: s for s, (_, fs) in SIGNALS.items() for f in fs}
+
+
+def signal_of(feature: str) -> str | None:
+    """The signal a model feature belongs to; a module-presentation percentile (mpq_) follows its source column."""
+    return _SIGNAL_OF.get(feature.removeprefix("mpq_"))
 
 
 def _pct(v: float) -> str:
@@ -68,7 +76,7 @@ def _pct(v: float) -> str:
 
 def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
     """r is the raw CSV row, x the model feature row (placeholders already set to missing)."""
-    placeholder = x.no_activity == 1
+    placeholder = x.vle_missing == 1
     if signal in ACTIVITY and placeholder:
         return "Tidak ada catatan aktivitas LMS yang valid"
     if signal in {"submission", "timeliness"} and r.no_submission_by_cutoff == 0 and r.assessment_completion_rate == 0:
@@ -92,14 +100,14 @@ def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
     if signal == "score":
         if r.has_score == 0:
             return "Belum ada asesmen yang dinilai"
-        return f"Rata-rata nilai {r.avg_score:.0f} ({_pct(x.avg_score_cohort_pct)})"
+        return f"Rata-rata nilai {r.avg_score:.0f} ({_pct(x.mpq_avg_score)})"
     if signal == "active_days":
-        return f"Aktif {round(r.active_days)} hari dalam 4 minggu ({_pct(x.active_days_cohort_pct)})"
+        return f"Aktif {round(r.active_days)} hari dalam 4 minggu ({_pct(x.rk_active_days)})"
     if signal == "recency":
         gap = 28 - r.last_activity_day
         return f"Terakhir aktif hari ke-{round(r.last_activity_day)}, {round(gap)} hari sebelum cutoff"
     if signal == "volume":
-        return f"Total {round(r.interaction_volume)} interaksi ({_pct(x.interaction_volume_cohort_pct)})"
+        return f"Total {round(r.interaction_volume)} interaksi ({_pct(x.rk_interaction_volume)})"
     if signal == "week4_trend":
         return f"Interaksi minggu 4: {round(r.week4_interactions)} (minggu 1: {round(r.week1_interactions)})"
     if signal == "breadth":
@@ -108,7 +116,7 @@ def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
         return ("Data aktivitas LMS berupa placeholder, tidak ada catatan valid" if placeholder
                 else "Data aktivitas LMS terekam")
     if signal == "course":
-        return f"Course {x.code_module.upper()} presentasi {x.code_presentation.upper()}"
+        return f"Course {str(x.code_module).upper()} presentasi {str(x.code_presentation).upper()}"
     if signal == "registration":
         d = r.registration_days_from_start
         return f"Registrasi {abs(d):.0f} hari {'sebelum' if d < 0 else 'setelah'} course dimulai"
@@ -122,28 +130,33 @@ def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
 class Explainer:
     def __init__(self, model: Model):
         self.model = model
-        cols = model.state.columns
-        mapped = [f for _, fs in SIGNALS.values() for f in fs]
-        assert sorted(mapped) == sorted(cols), set(mapped) ^ set(cols)
-        self.index = {s: [cols.index(f) for f in fs] for s, (_, fs) in SIGNALS.items()}
+        cols = model.features
+        unmapped = [f for f in cols if f != "segmen" and signal_of(f) is None]
+        assert not unmapped, unmapped
+        self.index = {s: [i for i, f in enumerate(cols) if signal_of(f) == s] for s in SIGNALS}
+        self.segment = cols.index("segmen")
 
-    def shap(self, x: pd.DataFrame) -> np.ndarray:
-        """Per-feature SHAP values; the last column is the expected value (log-odds)."""
-        pool = Pool(x, cat_features=self.model.state.cats)
-        return self.model.cbm.get_feature_importance(pool, type="ShapValues")
+    def shap(self, X: pd.DataFrame) -> np.ndarray:
+        """Per-feature SHAP values of the LightGBM half; the last column is its expected value (log-odds)."""
+        return self.model.booster.predict(X, pred_contrib=True)
 
-    def signal_shap(self, values: np.ndarray) -> pd.DataFrame:
-        return pd.DataFrame({s: values[:, ix].sum(axis=1) for s, ix in self.index.items()})
+    def signal_shap(self, values: np.ndarray, X: pd.DataFrame) -> pd.DataFrame:
+        sig = pd.DataFrame({s: values[:, ix].sum(axis=1) for s, ix in self.index.items()})
+        target = X["segmen"].astype(str).map(SEGMENT_SIGNAL).fillna("submission").to_numpy()
+        for s in np.unique(target):
+            sig.loc[target == s, s] += values[target == s, self.segment]
+        return sig
 
-    def reasons(self, raw: pd.DataFrame) -> list[dict]:
+    def reasons(self, raw: pd.DataFrame, ctx=None, X: pd.DataFrame | None = None) -> list[dict]:
         """For each row: signals in each group, sorted by contribution (risk-raising first)."""
-        x = self.model.state.transform(raw)
-        sig = self.signal_shap(self.shap(x))
+        if X is None:
+            X = self.model.frame(raw, ctx)
+        sig = self.signal_shap(self.shap(X), X)
         out = []
         for i in range(len(raw)):
-            r, xr = raw.iloc[i], x.iloc[i]
+            r, xr = raw.iloc[i], X.iloc[i]
             row = sig.iloc[i]
-            if xr.no_activity == 1:
+            if xr.vle_missing == 1:
                 # Every activity signal of a placeholder row comes from the same missing block: report it once.
                 row = row.copy()
                 row["no_lms_record"] += row[ACTIVITY].sum()

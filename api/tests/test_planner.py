@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app import planner
+from app import planner, rules
 from app.rules import ARCHETYPES
 
 
@@ -28,8 +28,8 @@ def test_capacity_and_reach(students, capacity):
 
 def test_only_flagged_students_are_planned(students):
     plan = planner.allocate(students, 10_000, planner.playbook_table())
-    assert (plan.probability >= 0.375).all()
-    assert len(plan) == (students.probability >= 0.375).sum()
+    assert (plan.probability >= rules.THRESHOLD).all()
+    assert len(plan) == (students.probability >= rules.THRESHOLD).sum()
 
 
 def test_effectiveness_override_marks_scenario_and_changes_priority(students):
@@ -68,4 +68,4 @@ def test_board_columns_report_mix_and_sample_across_actions(students):
         sampled = {s["action"] for s in c["top"]}
         assert len(sampled) == min(len(c["actions"]), len(c["top"]))  # one of each action before any repeat
         assert all(s["tier"] in c["tiers"] for s in c["top"])
-    assert result["rules"]["threshold"] == 0.375
+    assert result["rules"]["threshold"] == rules.THRESHOLD

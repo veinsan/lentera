@@ -5,24 +5,28 @@ description: Use after any change to preprocessing, model parameters, the thresh
 
 # Verify Model Parity
 
-The deployed model must reproduce the DSCO submission and every displayed metric must trace to an artifact.
+The deployed model must reproduce the trained DSCO final model (`dsco/notebooks/dsco_lgbm_dae_pair_final.ipynb`, LightGBM + DAE-MLP) and every displayed metric must trace to an artifact.
 
 ## Inputs
 
-- `data/train.csv` and `data/test.csv`, copied locally from `dsco/data/`.
-- `api/artifacts/model.cbm`, `api/artifacts/fit_state.json`, `api/artifacts/model_card.json`.
-- Reference files in the DSCO workspace: `dsco/outputs/final/submission.csv` (SHA256 `7e36b66a4e94eb846e83afa3a48ab3e36388bc61fffc9437457be020d4838c66`) and `dsco/outputs/final/test_probabilities.csv`.
+- `data/train.csv`, `data/test.csv`, `data/sample_submission.csv`, copied locally from `dsco/data/`.
+- `api/artifacts/lgbm.txt`, `dae_mlp.npz`, `fit_state.npz`, `fit_state.json`, `model_meta.json`, `model_card.json`.
+- The training run's local outputs in `data/blend/`: `test_pred.csv` (torch probabilities), `features_test.pkl` (the notebook's features for test.csv), `labels.csv` (flags from `--finalize`), `oof.csv`.
+- For information: the team's Kaggle submission of the notebook, `dsco/sub_v5.csv` (it ran on a GPU, so a CPU retrain matches it closely, not exactly).
 
 ## Procedure
 
-1. From `api/`, run `uv run python scripts/parity_check.py`. The script reads the DSCO workspace from `../../dsco` by default; pass another path as the first argument. Exit code 1 means a label mismatch.
-2. Read its output and confirm:
-   - 6,502 of 6,502 test labels equal the reference submission at threshold 0.375.
-   - The maximum absolute probability difference against the reference probabilities. Report the value; any label mismatch is a failure.
-   - The installed versions of catboost, pandas, numpy, and scikit-learn equal those in `CLAUDE.md`.
-3. Compare `api/artifacts/model_card.json` with `dsco/docs/presentation.md`: nested F1 per seed (0.773766, 0.774437, 0.773273), mean 0.773825, seed SD 0.000477, threshold 0.375, public F1 0.78443.
-4. When the change touches a page or slide that shows numbers, search the changed frontend files for numeric literals and confirm each displayed metric comes from an artifact or a query.
+1. After a retrain (`uv run --frozen --with torch==2.15.0 python scripts/train.py`, then `uv run python scripts/train.py --finalize`), copy the threshold that `--finalize` prints into `THRESHOLD` in `api/app/rules.py`.
+2. From `api/`, run `uv run python scripts/parity_check.py`. It reads the DSCO workspace from `../../dsco` by default; pass another path as the first argument. Exit code 1 means an exact check failed.
+3. Read its output and confirm:
+   - `features_differ` is empty: all 198 LightGBM features of test.csv, ranked within train plus the cohort, equal the notebook's.
+   - `dae_input_max_abs_diff` and `lightgbm_max_abs_diff` are 0.
+   - `label_matches_finalize` is 6,502 of 6,502 and `threshold` equals `threshold_in_rules`.
+   - Report `dae_mlp_max_abs_diff_vs_torch` (numpy against torch float32 kernels), `label_matches_torch_run`, and `label_matches_kaggle_sub_v5`.
+   - The installed versions of lightgbm, pandas, numpy, scikit-learn, and scipy equal those in `CLAUDE.md` and `api/uv.lock`.
+4. Rebuild the generated files in this order: `build_model_card.py`, `build_drift_reference.py`, `build_insights.py`, `build_landing.py`. Then run `uv run python -m pytest`.
+5. When the change touches a page or slide that shows numbers, search the changed frontend files for numeric literals and confirm each displayed metric comes from an artifact or a query.
 
 ## Output
 
-Report the command, the label match count, the maximum probability difference, the library versions, and any metric that does not match its source, with file references. Record the result in the relevant `TODO.md` row. A label mismatch blocks the step.
+Report the commands, the exact-check results, the numpy-versus-torch difference, the agreement with `sub_v5.csv`, the library versions, and any metric that does not match its source, with file references. Record the result in the relevant `TODO.md` row. A failed exact check blocks the step.

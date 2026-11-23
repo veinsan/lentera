@@ -36,6 +36,7 @@ async def lifespan(app: FastAPI):
     app.state.schema = quality.load_schema()
     app.state.targets = scenarios.load_targets()
     app.state.plan_cache = {}  # cohort_id -> predictions frame; stored predictions never change
+    app.state.contexts = {}  # cohort_id -> ranking context for what-if; the last few cohorts only
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
     app.state.drift_reference = drift.load_reference(ARTIFACTS / "drift_reference.json")
@@ -134,7 +135,8 @@ def create_cohort(request: Request, file: UploadFile = File(...), name: str = Fo
     if not report["can_score"]:
         return JSONResponse(status_code=422, content={"detail": "Data tidak lolos pemeriksaan.", "quality_report": report})
     model = request.app.state.model
-    scored = score_cohort(model, request.app.state.explainer, typed)
+    ctx = model.context(typed)
+    scored = score_cohort(model, request.app.state.explainer, typed, ctx)
     drift_report = drift.report(typed, scored.probability.to_numpy(), request.app.state.drift_reference)
     try:
         cohort_id = store.save_cohort(name=name.strip(), user_id=user.id, csv_bytes=content, raw=typed, scored=scored,
@@ -143,27 +145,53 @@ def create_cohort(request: Request, file: UploadFile = File(...), name: str = Fo
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
     request.state.cohort_id = cohort_id
+    _remember_context(request, cohort_id, ctx)
     return {"cohort_id": cohort_id, "summary": summarize(scored), "quality_report": report,
             "drift_report": drift_report, "seconds": round(time.perf_counter() - started, 2)}
 
 
+CONTEXTS_KEPT = 2  # each context holds the cohort's ranking pools, a few tens of MB
+
+
+def _remember_context(request: Request, cohort_id: str, ctx) -> None:
+    contexts = request.app.state.contexts
+    contexts.pop(cohort_id, None)
+    contexts[cohort_id] = ctx
+    while len(contexts) > CONTEXTS_KEPT:
+        contexts.pop(next(iter(contexts)))
+
+
 def _student_frame(request: Request, student_id: int, user: User, store: SupabaseStore):
-    """Stored raw row for one student; 404 also when the student is outside the user's modules."""
+    """Stored raw row for one student and the ranking context of its cohort; 404 outside the user's modules."""
     try:
         student = store.get_student(student_id)
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
     if student is None or not user.sees(student["code_module"]):
         raise HTTPException(404, "Mahasiswa tidak ditemukan.")
-    return quality.frame_from_records([student["raw"]], request.app.state.schema)
+    raw = quality.frame_from_records([student["raw"]], request.app.state.schema)
+    cohort_id = student["cohort_id"]
+    ctx = request.app.state.contexts.get(cohort_id)
+    if ctx is None:
+        # The student is ranked within its cohort, as when it was scored; rebuild that cohort from its stored CSV.
+        try:
+            content = store.get_cohort_csv(cohort_id)
+        except httpx.HTTPError as e:
+            raise HTTPException(502, f"Gagal membaca file kohort: {e.__class__.__name__}") from None
+        _, typed = _validate(request, content)
+        if typed is None:
+            raise HTTPException(409, "File kohort tidak lagi lolos pemeriksaan data.")
+        ctx = request.app.state.model.context(typed)
+    _remember_context(request, cohort_id, ctx)
+    return raw, ctx
 
 
 @app.get("/students/{student_id}/counterfactual")
 def student_counterfactual(student_id: int, request: Request, user: User = Depends(current_user),
                            store: SupabaseStore = Depends(get_store)) -> dict:
-    raw = _student_frame(request, student_id, user, store)
+    raw, ctx = _student_frame(request, student_id, user, store)
     model = request.app.state.model
-    result = scenarios.counterfactual(model, raw, request.app.state.targets)[0]
+    result = scenarios.counterfactual(model, raw, request.app.state.targets, ctx)[0]
     arch = str(rules.archetype(raw)[0])
     book = rules.PLAYBOOK[arch]
     return {**result, "threshold": model.threshold, "archetype": arch,
@@ -182,10 +210,10 @@ def student_simulate(student_id: int, body: SimulateBody, request: Request, user
     unknown = set(body.levers) - set(scenarios.LEVERS)
     if unknown:
         raise HTTPException(422, f"Lever tidak dikenal: {', '.join(sorted(unknown))}")
-    raw = _student_frame(request, student_id, user, store)
+    raw, ctx = _student_frame(request, student_id, user, store)
     model = request.app.state.model
-    p = scenarios.simulate(model, raw, body.levers, request.app.state.targets)[0]
-    base = float(model.predict_proba(raw)[0])
+    p = scenarios.simulate(model, raw, body.levers, request.app.state.targets, ctx)[0]
+    base = float(model.predict_proba(raw, ctx)[0])
     if p != p:  # NaN: placeholder activity block, scenarios do not apply
         return {"applicable": False, "base": base, "probability": None, "levers": body.levers}
     return {"applicable": True, "base": base, "probability": float(p), "levers": body.levers,

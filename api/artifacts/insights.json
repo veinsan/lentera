@@ -1,8 +1,8 @@
 {
-  "source": "train.csv (26.086 baris) dan label nested OOF seed 42",
+  "source": "train.csv (26.086 baris) dan label plug-in dari probabilitas out-of-fold model final (5 fold)",
   "overall": {
     "at_risk_rate": 0.5272176646477037,
-    "uncertain_share": 0.3295637506708579
+    "uncertain_share": 0.333243885609139
   },
   "cutoffs": {
     "low_auc": 0.75,
@@ -13,9 +13,9 @@
     "m01": {
       "n": 602,
       "at_risk_rate": 0.30398671096345514,
-      "auc": 0.7630580226143433,
-      "f1": 0.5384615384615384,
-      "uncertain_share": 0.32558139534883723,
+      "auc": 0.7747825293112667,
+      "f1": 0.5536723163841808,
+      "uncertain_share": 0.33056478405315615,
       "graded_share": 0.8704318936877077,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.03322259136212625,
@@ -50,9 +50,9 @@
     "m02": {
       "n": 6368,
       "at_risk_rate": 0.5230841708542714,
-      "auc": 0.8435966421144125,
-      "f1": 0.7703281027104137,
-      "uncertain_share": 0.3514447236180904,
+      "auc": 0.8453245556380741,
+      "f1": 0.7677779367577622,
+      "uncertain_share": 0.3710741206030151,
       "graded_share": 0.7292713567839196,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.1975502512562814,
@@ -95,9 +95,9 @@
     "m03": {
       "n": 3568,
       "at_risk_rate": 0.6199551569506726,
-      "auc": 0.8702074898515473,
-      "f1": 0.8310867733782645,
-      "uncertain_share": 0.24355381165919282,
+      "auc": 0.8730636592040198,
+      "f1": 0.8370417461326553,
+      "uncertain_share": 0.24439461883408073,
       "graded_share": 0.7323430493273543,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.1412556053811659,
@@ -137,9 +137,9 @@
     "m04": {
       "n": 6303,
       "at_risk_rate": 0.5238775186419166,
-      "auc": 0.8415037709013209,
-      "f1": 0.7668833003673354,
-      "uncertain_share": 0.33491987942249724,
+      "auc": 0.8447256930911986,
+      "f1": 0.771163454675232,
+      "uncertain_share": 0.33523718864033,
       "graded_share": 0.7333016024115501,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.11597651911788037,
@@ -182,9 +182,9 @@
     "m05": {
       "n": 2342,
       "at_risk_rate": 0.43936806148590946,
-      "auc": 0.8301325535110139,
-      "f1": 0.723589001447178,
-      "uncertain_share": 0.34671221178479933,
+      "auc": 0.838958845424798,
+      "f1": 0.7313072841292813,
+      "uncertain_share": 0.3368915456874466,
       "graded_share": 0.0,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.11827497865072588,
@@ -232,9 +232,9 @@
     "m06": {
       "n": 5066,
       "at_risk_rate": 0.5825108566916699,
-      "auc": 0.866886810817826,
-      "f1": 0.818516738747397,
-      "uncertain_share": 0.2726016581129096,
+      "auc": 0.8662725221165563,
+      "f1": 0.8176601848900223,
+      "uncertain_share": 0.25463876825898146,
       "graded_share": 0.7179234109751284,
       "assessments_due_mean": 1.2080536912751678,
       "placeholder_share": 0.1212001579155152,
@@ -282,9 +282,9 @@
     "m07": {
       "n": 1837,
       "at_risk_rate": 0.4055525313010343,
-      "auc": 0.6959854463210169,
-      "f1": 0.5912183055040198,
-      "uncertain_share": 0.5389221556886228,
+      "auc": 0.6956289795215971,
+      "f1": 0.5915670232850849,
+      "uncertain_share": 0.5808383233532934,
       "graded_share": 0.0,
       "assessments_due_mean": 1.0,
       "placeholder_share": 0.18127381600435494,
@@ -333,7 +333,7 @@
         },
         {
           "code": "high_uncertainty",
-          "text": "54% mahasiswa berada di zona tidak pasti (probabilitas 0,25 sampai 0,55). Prioritaskan konselor untuk meninjau kelompok ini."
+          "text": "58% mahasiswa berada di zona tidak pasti (probabilitas 0,25 sampai 0,55). Prioritaskan konselor untuk meninjau kelompok ini."
         }
       ]
     }

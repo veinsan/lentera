@@ -1,8 +1,9 @@
 """Population stability index (PSI) of a cohort against the training data.
 
-Features are compared on their raw scale after the DSCO cleaning (`features()`), not on the cohort percentile ranks the
-model reads: ranks are uniform within every cohort by construction, so they cannot drift. Missing values (placeholder
-activity, no graded score) are their own bin, because a change in the missing share is itself drift.
+Features are compared on their raw scale after the model's cleaning (category repair and the constant-imputation
+reversal), not on the module-presentation percentiles the model reads: percentiles are uniform within every group by
+construction, so they cannot drift. Missing values (placeholder activity, no graded score) are their own bin, because a
+change in the missing share is itself drift.
 """
 from __future__ import annotations
 
@@ -12,7 +13,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from app.pipeline.features import features
+from app.pipeline.features import fix_categories, undo_imputation
+
+
+def features(raw: pd.DataFrame) -> pd.DataFrame:
+    return undo_imputation(fix_categories(raw))
 
 # Raw columns behind the most important model features (model_card importance), with Indonesian labels.
 NUMERIC = {
