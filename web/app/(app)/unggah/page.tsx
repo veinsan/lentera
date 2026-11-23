@@ -22,7 +22,7 @@ export default function Page() {
           <div className="flex flex-col gap-5">
             <Section
               title="Unggah dan periksa"
-              description="Pemeriksaan berjalan sebelum model menilai: kolom wajib, tipe data, ID ganda, label yang diperbaiki otomatis, dan blok aktivitas placeholder."
+              description="Sebelum model menilai, sistem memeriksa kolom wajib, tipe data, ID ganda, label yang diperbaiki otomatis, dan blok aktivitas placeholder."
             >
               <UploadFlow />
             </Section>

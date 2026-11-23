@@ -71,7 +71,7 @@ async function Worklist({ searchParams }: Pick<PageProps<"/prioritas">, "searchP
               {fmtInt(total)} mahasiswa {words.join(", ")}, diurutkan dari probabilitas tertinggi.
             </>
           ) : (
-            <>Hubungi dari atas: {fmtInt(total)} mahasiswa ter&#8209;flag, urut probabilitas terkalibrasi.</>
+            <>Hubungi {fmtInt(total)} mahasiswa ter&#8209;flag dari atas, diurutkan menurut probabilitas terkalibrasi.</>
           )
         }
         description={`${cohort.name}. Klik baris untuk membuka alasan, tindakan, dan skenario mahasiswa tanpa meninggalkan daftar.`}
@@ -174,7 +174,7 @@ function Probability({ row }: { row: WorklistRow }) {
   return (
     <span
       className={cn("font-semibold text-ink tabular-nums", row.uncertain && "rounded-md border border-dashed border-uncertain px-1.5 py-0.5")}
-      title={row.uncertain ? "Zona tidak pasti: tinjau dengan percakapan sebelum bertindak" : undefined}
+      title={row.uncertain ? "Zona tidak pasti, tinjau lewat percakapan sebelum bertindak" : undefined}
     >
       {fmtProb(row.probability)}
       {row.uncertain && <span className="sr-only"> (zona tidak pasti)</span>}

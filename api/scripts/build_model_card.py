@@ -28,8 +28,8 @@ SELECTED_REF = 57470830  # the team's selected Kaggle submission of this noteboo
 COMPONENTS = [
     ("oof_lgb", "LightGBM", "pembanding", "Komponen pohon dari blend."),
     ("oof_mlp", "DAE-MLP", "pembanding",
-     "Komponen neural dari blend; epoch-nya dipilih per fold dari log loss validasi, jadi OOF-nya sedikit optimistis."),
-    ("oof_blend", "Blend LightGBM + DAE-MLP", "dipilih", "Model final notebook DSCO: rata-rata logit kedua komponen."),
+     "Komponen neural dari blend. Epoch-nya dipilih per fold dari log loss validasi, jadi OOF-nya sedikit optimistis."),
+    ("oof_blend", "Blend LightGBM + DAE-MLP", "dipilih", "Model final notebook DSCO, yaitu rata-rata logit kedua komponen."),
 ]
 
 
@@ -141,8 +141,8 @@ def main() -> None:
             outer="StratifiedKFold 5-fold, strata module x target, seed 42",
             inner="ambang plug-in expected F1 dari probabilitas out-of-fold, tanpa label",
             seeds=[42],
-            early_stopping="LightGBM 1.405 tree tanpa early stopping; epoch head DAE-MLP dipilih per fold dari log loss validasi",
-            inference=("LightGBM dan DAE-MLP dilatih pada seluruh 26.086 baris train; autoencoder dilatih tanpa label "
+            early_stopping="LightGBM 1.405 tree tanpa early stopping, sedangkan epoch head DAE-MLP dipilih per fold dari log loss validasi",
+            inference=("LightGBM dan DAE-MLP dilatih pada seluruh 26.086 baris train. Autoencoder dilatih tanpa label "
                        "pada train dan test, lalu logit kedua model dirata-rata")),
         cv=cv,
         segments_seed42={k: segment(y[mk], p[mk], label[mk]) for k, mk in masks.items()},
@@ -158,7 +158,7 @@ def main() -> None:
                                    for s, v in by_signal.items()},
                         top_features={k: float(v) for k, v in top.items()}),
         evaluation_notes=dict(
-            calibration_and_tiers=("Probabilitas out-of-fold blend (5 fold, seed 42) dengan ambang yang dipakai aplikasi; "
+            calibration_and_tiers=("Probabilitas out-of-fold blend (5 fold, seed 42) dengan ambang yang dipakai aplikasi. Ini "
                                    "skor kalibrasi, bukan evaluasi independen."),
             per_module_and_fairness="Label plug-in expected F1 dari probabilitas out-of-fold blend."),
     )

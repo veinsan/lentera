@@ -26,7 +26,7 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
     start(async () => {
       const res = await postJson<SimResult>(`/students/${studentId}/simulate`, { levers: next });
       if (res.status === 200) setResult(res.body as SimResult);
-      else setError("Simulasi gagal dijalankan. API model belum menjawab; coba lagi.");
+      else setError("Simulasi gagal dijalankan karena API model belum menjawab. Coba lagi.");
     });
   }
 
@@ -47,15 +47,15 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
           <div className="mt-3 text-sm leading-relaxed text-ink">
             {cf.best ? (
               <p>
-                <span className="font-semibold">Jalur di bawah ambang:</span> {cf.best.labels.join(" + ")} menurunkan probabilitas dari{" "}
-                <Prob v={cf.base} /> ke <Prob v={cf.best.probability} />.
+                <span className="font-semibold">{cf.best.labels.join(" + ")}</span> menurunkan probabilitas dari <Prob v={cf.base} /> ke{" "}
+                <Prob v={cf.best.probability} />, di bawah ambang.
               </p>
             ) : cf.reason === "not_flagged" ? (
               <p>Mahasiswa ini sudah di bawah ambang {fmtPct(cf.threshold, 1)}.</p>
             ) : cf.closest ? (
               <p>
-                <span className="font-semibold">Belum ada kombinasi yang menembus ambang.</span> Penurunan terbesar:{" "}
-                {cf.closest.labels.join(" + ")}, dari <Prob v={cf.base} /> ke <Prob v={cf.closest.probability} />.
+                <span className="font-semibold">Belum ada kombinasi yang menembus ambang.</span> Penurunan terbesar datang dari{" "}
+                {cf.closest.labels.join(" + ")}, yaitu dari <Prob v={cf.base} /> ke <Prob v={cf.closest.probability} />.
               </p>
             ) : (
               <p>Tidak ada lever yang menurunkan risiko mahasiswa ini menurut model.</p>

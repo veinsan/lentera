@@ -38,7 +38,7 @@ export default function Page() {
 const SEGMENTS: Partial<Record<keyof ModelCard["segments_seed42"], string>> = {
   all: "Semua mahasiswa",
   active: "Punya catatan LMS",
-  hard: "Segmen sulit: aktif, tanpa missed submission",
+  hard: "Segmen sulit (aktif, tanpa missed submission)",
   no_activity: "Tanpa catatan LMS (placeholder)",
 };
 const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
@@ -160,7 +160,7 @@ async function ModelContent() {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Section
           title="Sinyal yang paling memengaruhi model"
-          description={`Rata-rata |SHAP| komponen LightGBM pada kohort uji, dijumlahkan per sinyal; ${card.model.n_features} fitur dikelompokkan menjadi ${Object.keys(card.importance.by_signal).length} sinyal.`}
+          description={`Rata-rata |SHAP| komponen LightGBM pada kohort uji, dijumlahkan per sinyal. Sebanyak ${card.model.n_features} fitur dikelompokkan menjadi ${Object.keys(card.importance.by_signal).length} sinyal.`}
         >
           <ImportanceChart items={Object.values(card.importance.by_signal)} />
         </Section>

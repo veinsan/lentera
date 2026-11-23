@@ -38,12 +38,12 @@ PLAYBOOK = {
                   "diperkuat. Kami bisa menghubungkan Anda dengan tutor sebaya dan jadwal office hours.")),
     "fading": dict(
         action="auto_nudge", label="Nudge otomatis", minutes=0, effectiveness=1.0,
-        description="Pesan otomatis yang dipersonalisasi; naikkan ke telepon jika aktivitas terus turun.",
+        description="Pesan otomatis yang dipersonalisasi. Naikkan ke telepon jika aktivitas terus turun.",
         template=("Halo, aktivitas Anda di course {module} turun dibanding minggu pertama. Terakhir aktif "
                   "hari ke-{last_day}. Materi minggu ini sudah tersedia, semangat melanjutkan!")),
     "engaged": dict(
         action="auto_checkin", label="Check-in otomatis", minutes=0, effectiveness=1.0,
-        description="Pesan check-in otomatis; konselor meninjau jika mahasiswa ter-flag.",
+        description="Pesan check-in otomatis. Konselor meninjau jika mahasiswa ter-flag.",
         template=("Halo, bagaimana perkuliahan course {module} sejauh ini? Jika ada yang ingin "
                   "didiskusikan, tim layanan akademik siap membantu.")),
 }

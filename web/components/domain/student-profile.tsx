@@ -97,7 +97,7 @@ export async function StudentProfileView({ id, panel = false }: { id: string; pa
       </div>
 
       <div className={cn("grid gap-5", !panel && "lg:grid-cols-[3fr_2fr]")}>
-        <Section title="Mengapa mahasiswa ini ter-flag" description="Kontribusi SHAP per sinyal: merah menaikkan risiko, biru menurunkannya.">
+        <Section title="Mengapa mahasiswa ini ter-flag" description="Kontribusi SHAP per sinyal. Merah menaikkan risiko, biru menurunkannya.">
           <div className="flex flex-col gap-7">
             <ReasonList title="Sinyal yang bisa ditindaklanjuti" items={pred.reasons.actionable} maxAbs={maxAbs} />
             <ReasonList
@@ -113,10 +113,10 @@ export async function StudentProfileView({ id, panel = false }: { id: string; pa
             {cfRes.ok ? (
               <ScenarioPanel studentId={studentId} cf={cfRes.data} />
             ) : (
-              <p className="text-sm text-ink-3">API model belum menjawab; skenario akan muncul setelah API aktif.</p>
+              <p className="text-sm text-ink-3">API model belum menjawab. Skenario akan muncul setelah API aktif.</p>
             )}
           </Section>
-          <Section title="Template pesan" description="Diisi dari data mahasiswa sesuai archetype; sesuaikan sebelum dikirim.">
+          <Section title="Template pesan" description="Diisi dari data mahasiswa sesuai archetype. Sesuaikan sebelum dikirim.">
             {cfRes.ok ? <MessageCard message={cfRes.data.message} /> : <p className="text-sm text-ink-3">Belum tersedia.</p>}
           </Section>
         </div>

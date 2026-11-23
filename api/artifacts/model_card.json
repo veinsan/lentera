@@ -59,8 +59,8 @@
     "seeds": [
       42
     ],
-    "early_stopping": "LightGBM 1.405 tree tanpa early stopping; epoch head DAE-MLP dipilih per fold dari log loss validasi",
-    "inference": "LightGBM dan DAE-MLP dilatih pada seluruh 26.086 baris train; autoencoder dilatih tanpa label pada train dan test, lalu logit kedua model dirata-rata"
+    "early_stopping": "LightGBM 1.405 tree tanpa early stopping, sedangkan epoch head DAE-MLP dipilih per fold dari log loss validasi",
+    "inference": "LightGBM dan DAE-MLP dilatih pada seluruh 26.086 baris train. Autoencoder dilatih tanpa label pada train dan test, lalu logit kedua model dirata-rata"
   },
   "cv": {
     "per_fold": [
@@ -171,7 +171,7 @@
       "hard_f1": 0.6334685114503816,
       "m07_f1": 0.580564263322884,
       "decision": "pembanding",
-      "reason": "Komponen neural dari blend; epoch-nya dipilih per fold dari log loss validasi, jadi OOF-nya sedikit optimistis."
+      "reason": "Komponen neural dari blend. Epoch-nya dipilih per fold dari log loss validasi, jadi OOF-nya sedikit optimistis."
     },
     {
       "method": "Blend LightGBM + DAE-MLP",
@@ -184,7 +184,7 @@
       "hard_f1": 0.6386343216531896,
       "m07_f1": 0.5915670232850849,
       "decision": "dipilih",
-      "reason": "Model final notebook DSCO: rata-rata logit kedua komponen."
+      "reason": "Model final notebook DSCO, yaitu rata-rata logit kedua komponen."
     }
   ],
   "leaderboard": {
@@ -851,7 +851,7 @@
     }
   },
   "evaluation_notes": {
-    "calibration_and_tiers": "Probabilitas out-of-fold blend (5 fold, seed 42) dengan ambang yang dipakai aplikasi; skor kalibrasi, bukan evaluasi independen.",
+    "calibration_and_tiers": "Probabilitas out-of-fold blend (5 fold, seed 42) dengan ambang yang dipakai aplikasi. Ini skor kalibrasi, bukan evaluasi independen.",
     "per_module_and_fairness": "Label plug-in expected F1 dari probabilitas out-of-fold blend."
   }
 }

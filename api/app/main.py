@@ -114,7 +114,7 @@ def _validate(request: Request, content: bytes):
     try:
         frame = quality.read_csv(content)
     except (ValueError, UnicodeDecodeError) as e:
-        raise HTTPException(422, f"File bukan CSV yang valid: {e.__class__.__name__}") from None
+        raise HTTPException(422, f"File bukan CSV yang valid ({e.__class__.__name__}).") from None
     return quality.validate(frame, request.app.state.schema)
 
 
@@ -143,7 +143,7 @@ def create_cohort(request: Request, file: UploadFile = File(...), name: str = Fo
                                       model_version=model.meta["model_version"], quality_report=report,
                                       drift_report=drift_report)
     except httpx.HTTPError as e:
-        raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
+        raise HTTPException(502, f"Gagal menyimpan ke Supabase ({e.__class__.__name__}).") from None
     request.state.cohort_id = cohort_id
     _remember_context(request, cohort_id, ctx)
     return {"cohort_id": cohort_id, "summary": summarize(scored), "quality_report": report,
@@ -177,7 +177,7 @@ def _student_frame(request: Request, student_id: int, user: User, store: Supabas
         try:
             content = store.get_cohort_csv(cohort_id)
         except httpx.HTTPError as e:
-            raise HTTPException(502, f"Gagal membaca file kohort: {e.__class__.__name__}") from None
+            raise HTTPException(502, f"Gagal membaca file kohort ({e.__class__.__name__}).") from None
         _, typed = _validate(request, content)
         if typed is None:
             raise HTTPException(409, "File kohort tidak lagi lolos pemeriksaan data.")
@@ -209,7 +209,7 @@ def student_simulate(student_id: int, body: SimulateBody, request: Request, user
                      store: SupabaseStore = Depends(get_store)) -> dict:
     unknown = set(body.levers) - set(scenarios.LEVERS)
     if unknown:
-        raise HTTPException(422, f"Lever tidak dikenal: {', '.join(sorted(unknown))}")
+        raise HTTPException(422, f"Lever tidak dikenal ({', '.join(sorted(unknown))}).")
     raw, ctx = _student_frame(request, student_id, user, store)
     model = request.app.state.model
     p = scenarios.simulate(model, raw, body.levers, request.app.state.targets, ctx)[0]
@@ -235,7 +235,7 @@ class PlanBody(BaseModel):
 def _plan(request: Request, body: PlanBody, user: User, store: SupabaseStore) -> dict:
     unknown = set(body.overrides) - set(rules.ARCHETYPES)
     if unknown:
-        raise HTTPException(422, f"Archetype tidak dikenal: {', '.join(sorted(unknown))}")
+        raise HTTPException(422, f"Archetype tidak dikenal ({', '.join(sorted(unknown))}).")
     request.state.cohort_id = body.cohort_id
     cache = request.app.state.plan_cache
     if body.cohort_id not in cache:
@@ -266,7 +266,7 @@ def plan_save(body: PlanBody, request: Request, user: User = Depends(require_rol
     try:
         plan_id = store.save_plan(cohort_id=body.cohort_id, user_id=user.id, params=body.model_dump(), result=result)
     except httpx.HTTPError as e:
-        raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
+        raise HTTPException(502, f"Gagal menyimpan ke Supabase ({e.__class__.__name__}).") from None
     return {"id": plan_id, **result}
 
 

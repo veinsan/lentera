@@ -40,7 +40,7 @@ export function CapacityGlance({ cohortId }: { cohortId: string }) {
     <section className="plate flex flex-col gap-5 p-5 sm:p-6" aria-busy={!plan}>
       <header>
         <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">Kapasitas minggu ini</h2>
-        <p className="mt-1 text-sm text-ink-3">Ubah jumlah konselor dan jam; jangkauan dihitung ulang dari probabilitas terkalibrasi.</p>
+        <p className="mt-1 text-sm text-ink-3">Ubah jumlah konselor dan jam, lalu jangkauan dihitung ulang dari probabilitas terkalibrasi.</p>
       </header>
       <div className="grid grid-cols-2 gap-3">
         <Stepper label="Konselor" value={advisors} max={24} onChange={setAdvisors} />
@@ -48,7 +48,7 @@ export function CapacityGlance({ cohortId }: { cohortId: string }) {
       </div>
       {error ? (
         <p role="alert" className="text-sm text-danger">
-          Rencana gagal dihitung. API model belum menjawab; coba lagi sebentar lagi.
+          Rencana gagal dihitung karena API model belum menjawab. Coba lagi sebentar lagi.
         </p>
       ) : (
         <>

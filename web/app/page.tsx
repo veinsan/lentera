@@ -53,7 +53,7 @@ export default function Landing() {
           <span className="inline-flex items-center gap-2 text-night-ink">
             <LanternMark className="h-5" star="var(--starlight)" /> Lentera, untuk babak final DSCO 2026
           </span>
-          <span>Data: {cohort.name}, ID mahasiswa anonim dari data kompetisi.</span>
+          <span>Data dari {cohort.name} dengan ID mahasiswa anonim dari kompetisi.</span>
         </div>
       </footer>
     </div>
@@ -123,8 +123,8 @@ function Hero() {
           <div className="rise mt-12 max-w-md" style={{ "--i": 3 } as React.CSSProperties}>
             <p className="text-sm leading-relaxed text-night-muted">
               Setiap titik di langit ini adalah satu dari <b className="font-semibold text-night-ink">{fmtInt(cohort.scored)}</b> mahasiswa
-              kohort uji DSCO. Titik hangat adalah <b className="font-semibold text-night-ink">{fmtInt(cohort.flagged)}</b> yang ter-flag;
-              makin besar dan hangat, makin tinggi risikonya. Garis kuning menghubungkan bintang paling berisiko di setiap gugus.
+              kohort uji DSCO. Titik hangat adalah <b className="font-semibold text-night-ink">{fmtInt(cohort.flagged)}</b> yang ter-flag.
+              Makin besar dan hangat titiknya, makin tinggi risikonya. Garis kuning menghubungkan bintang paling berisiko di setiap gugus.
             </p>
             <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-night-muted">
               {TIERS.map(([t, label]) => (
@@ -244,12 +244,12 @@ function Stages() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-ink-3">Angka kanan: mahasiswa ter-flag per archetype.</p>
+              <p className="mt-3 text-xs text-ink-3">Angka di kanan adalah jumlah mahasiswa ter-flag per archetype.</p>
             </Record>
           }
         >
-          Setiap skor punya alasan dari {model.signals} sinyal; {model.actionable_signals} di antaranya bisa ditindaklanjuti, sisanya
-          konteks yang tidak pernah dijadikan alasan intervensi. Pola perilaku menentukan satu dari {model.archetypes} archetype, dan
+          Setiap skor punya alasan dari {model.signals} sinyal. Sebanyak {model.actionable_signals} di antaranya bisa ditindaklanjuti, sedangkan sisanya
+          berupa konteks yang tidak pernah dijadikan alasan intervensi. Pola perilaku menentukan satu dari {model.archetypes} archetype, dan
           archetype menentukan tindakannya.
         </StageRow>
 
@@ -331,7 +331,7 @@ function Safety() {
     {
       icon: UserRoundCheck,
       title: "Keputusan tetap di tangan konselor",
-      text: "Lentera tidak mengirim pesan dan tidak menulis teks dengan AI. Template disusun dari playbook; konselor yang memutuskan dan mencatat hasil kontak.",
+      text: "Lentera tidak mengirim pesan dan tidak menulis teks dengan AI. Template disusun dari playbook, sedangkan konselor yang memutuskan dan mencatat hasil kontak.",
     },
   ];
   return (
@@ -388,7 +388,7 @@ function Proof() {
     [
       `F1 validasi silang ${model.folds}-fold`,
       `${fmtNum(model.cv_f1, 4)} ± ${fmtNum(model.cv_f1_sd, 4)}`,
-      "prediksi out-of-fold; ambang plug-in dari probabilitas, tanpa melihat label",
+      "prediksi out-of-fold dengan ambang plug-in dari probabilitas, tanpa melihat label",
     ],
     ["Kalibrasi (ECE)", fmtNum(model.ece, 4), "selisih rata-rata antara peluang yang diberikan dan kejadian sebenarnya"],
     [
@@ -420,7 +420,7 @@ function Proof() {
         ))}
       </dl>
       <p className="mt-4 text-xs text-ink-3">
-        Ambang ter-flag: {fmtPct(model.threshold, 1)} probabilitas, dari aturan plug-in expected F1 pada kohort uji, tanpa label.
+        Ambang ter-flag adalah probabilitas {fmtPct(model.threshold, 1)}, dari aturan plug-in expected F1 pada kohort uji tanpa label.
       </p>
     </section>
   );

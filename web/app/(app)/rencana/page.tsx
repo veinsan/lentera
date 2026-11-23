@@ -43,7 +43,7 @@ async function PlannerContent() {
     <>
       <PageHeader
         title="Setiap jam konselor dihitung sebagai mahasiswa berisiko yang terjangkau."
-        description={`${cohort.name}. Ubah kapasitas dan asumsi playbook; papan, kurva, dan alokasi dihitung ulang langsung.`}
+        description={`${cohort.name}. Ubah kapasitas dan asumsi playbook, lalu papan, kurva, dan alokasi langsung dihitung ulang.`}
       />
       <div className="flex flex-col gap-5">
         <CapacityPlanner cohortId={cohort.id} ece={card.ok ? card.data.calibration.ece : null} />

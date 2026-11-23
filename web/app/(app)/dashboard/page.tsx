@@ -72,7 +72,7 @@ async function DashboardContent() {
         title={
           manager ? (
             <>
-              {fmtInt(flagged.length)} dari {fmtInt(preds.length)} mahasiswa ter&#8209;flag; {fmtInt(critical)} di antaranya kritis.
+              {fmtInt(flagged.length)} dari {fmtInt(preds.length)} mahasiswa ter&#8209;flag, {fmtInt(critical)} di antaranya kritis.
             </>
           ) : (
             <>
@@ -103,7 +103,7 @@ async function DashboardContent() {
                 Langit kohort
               </h2>
               <p className="mt-1 text-sm text-night-muted">
-                Satu titik satu mahasiswa, dikelompokkan per archetype; makin besar dan hangat, makin tinggi risikonya. Klik nama kelompok untuk membuka mahasiswanya.
+                Satu titik mewakili satu mahasiswa, dikelompokkan per archetype. Makin besar dan hangat titiknya, makin tinggi risikonya. Klik nama kelompok untuk membuka mahasiswanya.
               </p>
             </div>
             <ul aria-label="Arti warna titik" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-night-muted">
@@ -139,7 +139,7 @@ async function DashboardContent() {
 
       <div className="mt-5 flex flex-col gap-5">
         {!manager && <CallFirst preds={flagged} />}
-        <Section title="Distribusi tier risiko" description="Tier menentukan seberapa mendesak; archetype di bawah menentukan tindakannya. Klik tier untuk membuka daftarnya.">
+        <Section title="Distribusi tier risiko" description="Tier menentukan seberapa mendesak, sedangkan archetype di bawah menentukan tindakannya. Klik tier untuk membuka daftarnya.">
           <SegmentedBar
             ariaLabel="Distribusi tier risiko"
             segments={TIER_VALUES.map((t) => ({

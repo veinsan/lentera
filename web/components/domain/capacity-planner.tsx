@@ -236,7 +236,7 @@ function AdvisorBoard({ plan, revision }: { plan: PlanResult; revision: number }
   return (
     <Section
       title="Papan konselor minggu ini"
-      description="Setiap kolom satu konselor; contoh mahasiswa per tindakan, diurutkan dari nilai harapan tertinggi per menit."
+      description="Setiap kolom mewakili satu konselor dan berisi contoh mahasiswa per tindakan, diurutkan dari nilai harapan tertinggi per menit."
       actions={
         <ul aria-label="Arti warna titik" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
           {TIER_ORDER.slice(0, 3).map((t) => (
@@ -265,7 +265,7 @@ function AdvisorBoard({ plan, revision }: { plan: PlanResult; revision: number }
           <b className="font-semibold text-ink tabular-nums">{fmtInt(s.automated_contacts)}</b> dapat pesan otomatis
         </p>
         <p className="text-ink-3">
-          Di bawah garis: <b className="font-semibold text-ink tabular-nums">{fmtInt(s.unassigned)}</b> mahasiswa ter-flag menunggu kapasitas
+          Di bawah garis ada <b className="font-semibold text-ink tabular-nums">{fmtInt(s.unassigned)}</b> mahasiswa ter-flag yang menunggu kapasitas
           {plan.board.unplaced > 0 && <>, {fmtInt(plan.board.unplaced)} di antaranya muat di total jam tapi tidak utuh di satu konselor</>}.
         </p>
       </div>

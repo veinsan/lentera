@@ -49,7 +49,7 @@ export function HeatmapTable({
                   return (
                     <td
                       key={c}
-                      title={`${fmtModule(r)} ${fmtModule(c)}: ${label} ${format(cell.value)} dari ${fmtInt(cell.n)} mahasiswa`}
+                      title={`${fmtModule(r)} ${fmtModule(c)}, ${label} ${format(cell.value)} dari ${fmtInt(cell.n)} mahasiswa`}
                       className="rounded-xl px-2 py-2.5 text-center font-semibold text-ink tabular-nums"
                       style={{ background: `color-mix(in oklch, var(--chart-risk) ${share(cell.value)}%, white)` }}
                     >

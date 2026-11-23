@@ -39,7 +39,7 @@ export async function DriftPanel() {
   return (
     <Section
       title="Drift data"
-      description={`${latest.name}: ${fmtInt(drift.n)} mahasiswa dibandingkan dengan ${fmtInt(drift.reference_n)} baris train. PSI di bawah ${fmtNum(moderate, 1)} stabil, ${fmtNum(moderate, 1)} sampai ${fmtNum(shift, 1)} perlu dipantau, di atas ${fmtNum(shift, 1)} bergeser.`}
+      description={`Sebanyak ${fmtInt(drift.n)} mahasiswa di ${latest.name} dibandingkan dengan ${fmtInt(drift.reference_n)} baris train. PSI di bawah ${fmtNum(moderate, 1)} stabil, ${fmtNum(moderate, 1)} sampai ${fmtNum(shift, 1)} perlu dipantau, di atas ${fmtNum(shift, 1)} bergeser.`}
     >
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div className="flex flex-col gap-3">
@@ -53,7 +53,7 @@ export async function DriftPanel() {
           <p className="text-xs leading-relaxed text-ink-3">
             {shifted.length === 0
               ? "Tidak ada fitur yang bergeser, jadi metrik validasi di halaman ini berlaku untuk kohort ini."
-              : `${shifted.length} fitur bergeser. Metrik validasi mungkin tidak berlaku penuh; periksa apakah kohort hanya berisi sebagian modul atau ada perubahan cara data dicatat.`}
+              : `Sebanyak ${shifted.length} fitur bergeser. Metrik validasi mungkin tidak berlaku penuh. Periksa apakah kohort hanya berisi sebagian modul atau ada perubahan cara data dicatat.`}
           </p>
         </div>
         <DataTable

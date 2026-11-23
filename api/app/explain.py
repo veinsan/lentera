@@ -109,7 +109,7 @@ def sentence(signal: str, r: pd.Series, x: pd.Series) -> str:
     if signal == "volume":
         return f"Total {round(r.interaction_volume)} interaksi ({_pct(x.rk_interaction_volume)})"
     if signal == "week4_trend":
-        return f"Interaksi minggu 4: {round(r.week4_interactions)} (minggu 1: {round(r.week1_interactions)})"
+        return f"Interaksi minggu 4 sebanyak {round(r.week4_interactions)}, minggu 1 sebanyak {round(r.week1_interactions)}"
     if signal == "breadth":
         return f"Mengakses {round(r.unique_sites)} materi dan {round(r.unique_activity_types)} jenis aktivitas"
     if signal == "no_lms_record":

@@ -327,7 +327,7 @@ export default function Constellation({ sky, wide = true, onCluster, drift = fal
             onFocus={() => setHovered(c.key)}
             onBlur={() => setHovered(null)}
             className={cn(common, "glass-night rounded-2xl text-left", compact ? "px-2.5 py-1" : "px-3 py-1.5")}
-            aria-label={`Buka daftar prioritas ${ARCHETYPE_LABELS[c.key]}: ${c.flagged} dari ${c.n} mahasiswa ter-flag`}
+            aria-label={`Buka daftar prioritas ${ARCHETYPE_LABELS[c.key]}, ${c.flagged} dari ${c.n} mahasiswa ter-flag`}
           >
             {text}
           </button>
