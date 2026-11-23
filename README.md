@@ -8,7 +8,7 @@ At the week 4 cutoff, an institution knows which students the model flags but no
 
 ## Key Features
 
-The model service reproduces the DSCO submission; the app features are planned. See `PRD.md` for scope and `TODO.md` for status.
+The model service reproduces the DSCO submission and every feature below is implemented. See `PRD.md` for scope and `TODO.md` for status.
 
 - Upload a week 4 cohort CSV and review a data quality report before scoring.
 - See the cohort's risk tiers, archetypes, and module by presentation risk heatmap.
@@ -17,7 +17,7 @@ The model service reproduces the DSCO submission; the app features are planned. 
 - Open a student profile with reason codes, a what-if simulator, a counterfactual target, and a message template.
 - Log interventions and follow-ups.
 - Read course design insights per module.
-- Read the model card, fairness breakdown, drift report, and API monitoring. (Sign-in, cohort upload, the model card, fairness breakdown, and course insights work; the rest are planned.)
+- Read the model card, fairness breakdown, drift report, and API monitoring.
 
 ## Screenshot or Demo
 

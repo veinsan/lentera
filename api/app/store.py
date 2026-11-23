@@ -28,7 +28,7 @@ class SupabaseStore:
         self.storage = httpx.Client(base_url=f"{url}/storage/v1", headers=headers, timeout=60)
 
     def save_cohort(self, *, name: str, user_id: str, csv_bytes: bytes, raw: pd.DataFrame, scored: pd.DataFrame,
-                    model_version: str, quality_report: dict) -> str:
+                    model_version: str, quality_report: dict, drift_report: dict | None = None) -> str:
         """Store file, cohort, students, and predictions. On any failure the cohort and file are removed."""
         cohort_id = str(uuid.uuid4())
         path = f"{cohort_id}.csv"
@@ -37,7 +37,7 @@ class SupabaseStore:
         try:
             self._insert("cohorts", [dict(id=cohort_id, name=name, uploaded_by=user_id, storage_path=path,
                                           n_rows=len(raw), model_version=model_version, status="scored",
-                                          quality_report=quality_report)])
+                                          quality_report=quality_report, drift_report=drift_report)])
             raw = raw.reset_index(drop=True)
             ids = {}
             for start in range(0, len(raw), BATCH):
@@ -84,6 +84,28 @@ class SupabaseStore:
     def save_plan(self, *, cohort_id: str, user_id: str, params: dict, result: dict) -> int:
         return self._insert("plans", [dict(cohort_id=cohort_id, created_by=user_id, params=params, result=result)],
                             returning="id")[0]["id"]
+
+    def set_drift_report(self, cohort_id: str, drift_report: dict) -> None:
+        body = json.dumps({"drift_report": drift_report})
+        self.rest.patch("/cohorts", params={"id": f"eq.{cohort_id}"}, content=body,
+                        headers={"Content-Type": "application/json"}).raise_for_status()
+
+    def log_request(self, row: dict) -> None:
+        self._insert("request_log", [row])
+
+    def get_request_log(self, since_iso: str, max_rows: int = 20_000) -> list[dict]:
+        """Request rows since a timestamp, newest first, in pages of 1,000 (capped for the stats endpoint)."""
+        rows: list[dict] = []
+        while len(rows) < max_rows:
+            r = self.rest.get("/request_log", params={"select": "endpoint,status_code,latency_ms,created_at",
+                                                      "created_at": f"gte.{since_iso}", "order": "created_at.desc"},
+                              headers={"Range": f"{len(rows)}-{len(rows) + BATCH - 1}"})
+            r.raise_for_status()
+            page = r.json()
+            rows += page
+            if len(page) < BATCH:
+                break
+        return rows
 
     def delete_cohort(self, cohort_id: str, path: str) -> None:
         # Students, predictions, and plans cascade from the cohort row.

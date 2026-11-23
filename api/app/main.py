@@ -1,19 +1,22 @@
 """Lentera API. Run from api/: uv run --env-file .env python -m uvicorn app.main:app --reload"""
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
 
 import httpx
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from app import planner, quality, rules, scenarios
+from app import drift, monitoring, planner, quality, rules, scenarios
 from app.auth import User, current_user, require_role
 from app.explain import Explainer
 from app.model import ARTIFACTS, Model
@@ -21,6 +24,8 @@ from app.scoring import score_cohort, summarize
 from app.store import SupabaseStore
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+NOT_LOGGED = {"/health", "/docs", "/docs/oauth2-redirect", "/redoc", "/openapi.json"}  # probes and API docs
+log = logging.getLogger("lentera")
 
 
 @asynccontextmanager
@@ -33,6 +38,10 @@ async def lifespan(app: FastAPI):
     app.state.plan_cache = {}  # cohort_id -> predictions frame; stored predictions never change
     app.state.model_card = json.loads((ARTIFACTS / "model_card.json").read_text(encoding="utf-8"))
     app.state.insights = json.loads((ARTIFACTS / "insights.json").read_text(encoding="utf-8"))
+    app.state.drift_reference = drift.load_reference(ARTIFACTS / "drift_reference.json")
+    # Request logging needs the Supabase secret key; without it (tests, CI smoke test) nothing is logged.
+    keys = os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    app.state.request_log = SupabaseStore() if keys else None
     yield
 
 
@@ -47,6 +56,33 @@ app.add_middleware(
 
 def get_store() -> SupabaseStore:
     return SupabaseStore()
+
+
+def _write_log(store: SupabaseStore, row: dict) -> None:
+    try:
+        store.log_request(row)
+    except Exception as e:  # a failed log write must never fail the request
+        log.warning("request_log write failed: %s", e.__class__.__name__)
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """One request_log row per API call, written off the request path after the response is ready."""
+    started = time.perf_counter()
+    status_code = 500  # stays 500 if the handler raises
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        store = getattr(request.app.state, "request_log", None)
+        if store is not None and request.method != "OPTIONS" and request.url.path not in NOT_LOGGED:
+            route = request.scope.get("route")
+            row = dict(endpoint=f"{request.method} {route.path if route else 'unmatched'}",
+                       status_code=status_code, latency_ms=round((time.perf_counter() - started) * 1000, 1),
+                       user_id=getattr(request.state, "user_id", None),
+                       cohort_id=getattr(request.state, "cohort_id", None))
+            asyncio.get_running_loop().run_in_executor(None, _write_log, store, row)
 
 
 @app.get("/health")
@@ -99,13 +135,16 @@ def create_cohort(request: Request, file: UploadFile = File(...), name: str = Fo
         return JSONResponse(status_code=422, content={"detail": "Data tidak lolos pemeriksaan.", "quality_report": report})
     model = request.app.state.model
     scored = score_cohort(model, request.app.state.explainer, typed)
+    drift_report = drift.report(typed, scored.probability.to_numpy(), request.app.state.drift_reference)
     try:
         cohort_id = store.save_cohort(name=name.strip(), user_id=user.id, csv_bytes=content, raw=typed, scored=scored,
-                                      model_version=model.meta["model_version"], quality_report=report)
+                                      model_version=model.meta["model_version"], quality_report=report,
+                                      drift_report=drift_report)
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
+    request.state.cohort_id = cohort_id
     return {"cohort_id": cohort_id, "summary": summarize(scored), "quality_report": report,
-            "seconds": round(time.perf_counter() - started, 2)}
+            "drift_report": drift_report, "seconds": round(time.perf_counter() - started, 2)}
 
 
 def _student_frame(request: Request, student_id: int, user: User, store: SupabaseStore):
@@ -169,6 +208,7 @@ def _plan(request: Request, body: PlanBody, user: User, store: SupabaseStore) ->
     unknown = set(body.overrides) - set(rules.ARCHETYPES)
     if unknown:
         raise HTTPException(422, f"Archetype tidak dikenal: {', '.join(sorted(unknown))}")
+    request.state.cohort_id = body.cohort_id
     cache = request.app.state.plan_cache
     if body.cohort_id not in cache:
         try:
@@ -200,3 +240,14 @@ def plan_save(body: PlanBody, request: Request, user: User = Depends(require_rol
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Gagal menyimpan ke Supabase: {e.__class__.__name__}") from None
     return {"id": plan_id, **result}
+
+
+@app.get("/monitoring/requests")
+def request_stats(days: int = Query(7, ge=1, le=30), user: User = Depends(require_role("coordinator", "admin")),
+                  store: SupabaseStore = Depends(get_store)) -> dict:
+    since = (datetime.now(UTC) - timedelta(days=days)).isoformat()
+    try:
+        rows = store.get_request_log(since)
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal membaca Supabase: {e.__class__.__name__}") from None
+    return monitoring.request_stats(rows, days)

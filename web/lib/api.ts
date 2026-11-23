@@ -28,6 +28,37 @@ export type PlanResult = {
   playbook: PlaybookRow[];
 };
 
+export type DriftStatus = "stable" | "moderate" | "shift";
+
+export type DriftReport = {
+  n: number;
+  reference_n: number;
+  thresholds: { moderate: number; shift: number };
+  features: {
+    feature: string;
+    label: string;
+    kind: "numeric" | "categorical";
+    psi: number;
+    status: DriftStatus;
+    missing_reference?: number;
+    missing_current?: number;
+  }[];
+  probability: { psi: number; status: DriftStatus; bins: { lower: number; upper: number; reference: number; current: number }[] };
+};
+
+type Latency = { p50: number; p95: number };
+
+export type RequestStats = {
+  days: number;
+  total: number;
+  server_errors: number;
+  client_errors: number;
+  error_rate: number | null;
+  latency_ms: Latency | null;
+  endpoints: ({ endpoint: string; requests: number; server_errors: number; client_errors: number } & Latency)[];
+  daily: { day: string; requests: number; server_errors: number }[];
+};
+
 export type Binary = {
   n: number;
   base_rate: number;
@@ -190,5 +221,6 @@ async function get<T>(path: string, token: string): Promise<Result<T>> {
 // token: the signed-in user's Supabase access token (getCurrentUser().accessToken); the API verifies it.
 export const getModelCard = (token: string) => get<ModelCard>("/model", token);
 export const getInsights = (token: string) => get<Insights>("/insights", token);
+export const getRequestStats = (days: number, token: string) => get<RequestStats>(`/monitoring/requests?days=${days}`, token);
 export const getCounterfactual = (studentId: number, token: string) =>
   get<Counterfactual>(`/students/${studentId}/counterfactual`, token);

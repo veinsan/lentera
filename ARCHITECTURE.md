@@ -31,7 +31,7 @@ flowchart LR
   end
   subgraph Azure["Azure Container Apps"]
     API["FastAPI<br/>validate, preprocess, score,<br/>SHAP, archetype, plan, simulate"]
-    ART["api/artifacts<br/>model.cbm, fit_state, model_meta.json,<br/>model_card.json, insights.json, train_reference.parquet"]
+    ART["api/artifacts<br/>model.cbm, fit_state, model_meta.json,<br/>model_card.json, insights.json, drift_reference.json"]
   end
   subgraph Supabase
     AUTH["Auth"]
@@ -65,6 +65,8 @@ flowchart LR
 
   The counterfactual tries every combination of up to three levers in one batch prediction. The model is not monotonic in every feature, and a lever raises the probability for 3.9% to 12.9% of flagged test students, so only levers that lower a student's probability on their own are offered. The result has the smallest helpful combination below 0.375 (ties go to the lowest probability), the helpful combination with the largest reduction, and the effect of each helpful lever. Rows with the placeholder activity block get an administrative check instead. On the 3,875 flagged test students: 710 have a combination below the threshold, 2,221 have only a reduction, 944 have the placeholder block; the batch takes 0.57 s.
 - **Planner (`api/app/planner.py`).** Greedy allocation by value per advisor minute, where value is probability times assumed effectiveness. Zero-minute interventions are always assigned (channel `automated`); a student who does not fit is skipped and cheaper students are still tried (channel `unassigned`). The summary reports advisor and automated reach as summed probabilities and labels effectiveness-weighted totals as scenarios. The reach curve re-runs the allocation over 21 points from zero to the hours that cover every flagged student. With effectiveness 1.0 the planner fills capacity with the cheapest high-probability checks (5 and 10 minute administrative checks), so effectiveness settings decide whether calls to students with missed submissions get priority.
+- **Drift (`api/app/drift.py`).** PSI of 9 numeric and 4 categorical inputs behind the top model features, and of the predicted probability, against the training data (`drift_reference.json`: train decile edges and shares; the probability reference is the DSCO out-of-fold probability in 10 equal bins). Features are compared on the cleaned raw scale, not the cohort percentile ranks the model reads, because ranks are uniform within every cohort by construction. Missing values form their own bin. Below 0.1 is stable, 0.1 to 0.2 moderate, above 0.2 shift. Computed in `POST /cohorts` and stored in `cohorts.drift_report`.
+- **Request log (`api/app/main.py`, `api/app/monitoring.py`).** A middleware writes one `request_log` row per call (method and route template, status, latency, user, cohort) in a worker thread after the response is ready; a failed write is logged and never fails the request. `/health`, the API docs, and CORS preflights are not logged. Logging is off when the Supabase secret key is not set (tests, the CI smoke test).
 - **Data quality gate (`api/app/quality.py`).** Reads the CSV as text, then checks it against `api/artifacts/input_schema.json` (the 63-column `test.csv` header, numeric and categorical columns, train categories). Errors block scoring: empty file, more than 50,000 rows, missing columns, missing or duplicate ids, non-numeric values. Warnings do not: extra columns, empty cells, rates outside 0 to 1, negative counts, early/late sums that differ from the weekly columns, unknown categories. Repairs are listed with counts: GGG to M07, the M05/P12/261-day row, and relabeled categories. The report compares placeholder, no-score, and missed-submission shares with train.
 - **Scoring and storage (`api/app/scoring.py`, `api/app/store.py`).** Scoring adds probability, flag, tier, uncertain band, archetype, playbook action, and reason codes, with the normalized module code (`m07` for GGG). Storage uploads the CSV to the private `cohorts` bucket, inserts the cohort, students (raw row as jsonb), and predictions in batches of 1,000 with the secret key, and removes the cohort and file if any step fails.
 - **Offline artifacts (`api/scripts/`).** `train.py` trains the final model on all training rows and writes `model.cbm` and `fit_state.json`. `build_model_card.py` reads the DSCO evaluation outputs and OOF predictions and writes `model_card.json` (nested CV per seed, ablation, calibration bins, per-module, per-segment, and fairness metrics). `build_insights.py` writes `insights.json` (per-module AUC, uncertain share, graded-score share, weekly medians by outcome, and rule-based course recommendations with cutoffs AUC below 0.75, uncertain share above 0.40, at-risk rate from 0.58). `build_input_schema.py` writes `input_schema.json`. `build_reference.py` writes the training feature sample used for PSI. `seed_demo_users.py` creates the demo accounts.
@@ -86,11 +88,11 @@ flowchart LR
 | Method and path | Role | Purpose |
 | --- | --- | --- |
 | `GET /health` | Public | Liveness and loaded model version |
-| `GET /model` | Signed in | `model_card.json` plus request statistics from `request_log` |
+| `GET /model` | Signed in | `model_card.json` |
 | `GET /insights` | Signed in | `insights.json` |
 | `POST /cohorts/validate` | Coordinator, admin | Data quality report for an uploaded CSV, without scoring |
 | `POST /cohorts` | Coordinator, admin | Validate, score, explain, and store a cohort |
-| `GET /cohorts/{id}/drift` | Signed in | PSI report for a stored cohort |
+| `GET /monitoring/requests?days=7` | Coordinator, admin | Request volume, 4xx and 5xx counts, and p50 and p95 latency overall and per endpoint, from `request_log`. The drift report has no endpoint: `POST /cohorts` stores it in `cohorts.drift_report`, which the web app reads from Supabase. |
 | `POST /students/{id}/simulate` | Signed in | Probability for user-chosen lever values |
 | `GET /students/{id}/counterfactual` | Signed in | Smallest lever set below the threshold, largest reduction, helpful single levers, plus the playbook entry, the filled message template, and the lever list for the what-if panel |
 | `POST /plans/preview` | Coordinator, admin | Allocation, reach curve, effective playbook, and the marginal reach of one more advisor, for the user's modules; predictions are cached per cohort in the API process |
@@ -101,9 +103,9 @@ flowchart LR
 ```text
 web/                  Next.js app
 api/
-  app/                FastAPI service: main.py, auth.py, pipeline/, explain.py, rules.py, scenarios.py, planner.py, drift.py
-  artifacts/          model.cbm, fit_state.json, model_meta.json, model_card.json, insights.json, scenario_reference.json, train_reference.parquet
-  scripts/            train.py, build_model_card.py, build_insights.py, build_reference.py, parity_check.py
+  app/                FastAPI service: main.py, auth.py, pipeline/, explain.py, rules.py, scenarios.py, planner.py, drift.py, monitoring.py
+  artifacts/          model.cbm, fit_state.json, model_meta.json, model_card.json, insights.json, scenario_reference.json, drift_reference.json
+  scripts/            train.py, build_model_card.py, build_insights.py, build_drift_reference.py, backfill_drift.py, parity_check.py
   tests/              pytest
   Dockerfile
 supabase/

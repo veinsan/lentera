@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Activity } from "lucide-react";
 import { AblationChart } from "@/components/charts/ablation-chart";
 import { CalibrationChart } from "@/components/charts/calibration-chart";
 import { CapacityChart } from "@/components/charts/capacity-chart";
 import { ImportanceChart } from "@/components/charts/importance-chart";
 import { ApiError } from "@/components/domain/api-error";
-import { EmptyState } from "@/components/domain/empty-state";
 import { FairnessTable } from "@/components/domain/fairness-table";
 import { KpiCard } from "@/components/domain/kpi-card";
+import { DriftPanel, RequestPanel } from "@/components/domain/monitoring";
 import { Section } from "@/components/domain/section";
 import { TierBadge } from "@/components/domain/tier-badge";
 import { PageHeader } from "@/components/layout/page-header";
@@ -278,13 +277,12 @@ async function ModelContent() {
         <FairnessTable fairness={card.fairness} />
       </Section>
 
-      <Section title="Drift dan kesehatan API" description="Perbandingan distribusi kohort dengan data train (PSI), latency, dan error rate.">
-        <EmptyState
-          icon={Activity}
-          title="Belum ada kohort dan log request"
-          description="Drift dihitung setiap kali kohort diunggah, dan statistik request tersedia setelah logging API aktif."
-        />
-      </Section>
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat laporan drift...</p>}>
+        <DriftPanel />
+      </Suspense>
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat statistik API...</p>}>
+        <RequestPanel />
+      </Suspense>
     </div>
   );
 }

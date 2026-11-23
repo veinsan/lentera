@@ -74,7 +74,8 @@ api/
     rules.py               Tier, uncertain band, archetype, playbook
     scenarios.py           Levers, what-if, counterfactual
     planner.py             Capacity planner
-    drift.py               PSI
+    drift.py               PSI against the training data
+    monitoring.py          Request statistics from request_log
   artifacts/               Model and generated JSON, committed
   scripts/                 Offline training and artifact builders
   tests/
@@ -116,17 +117,10 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
 - [x] Student profile: reason codes, scenario panel (what-if and counterfactual), message template, weekly chart, intervention log and history
 - [x] Capacity planner: advisor capacity inputs, live preview, reach curve, allocation table, editable playbook assumptions with scenario labeling, saved plans
-- [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts (drift and API health pending)
+- [x] Model & Monitoring page: KPIs, nested validation, ablation, method comparison, calibration, capacity curve, tiers, segment and module reliability, signal importance, fairness, presentation stress test, artifacts, drift report (PSI per feature and probability distribution), API health (requests, errors, latency per endpoint)
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
-- [ ] Sign-in with three roles
-- [ ] Cohort upload with data quality report
-- [ ] Dashboard
-- [ ] Capacity planner
-- [ ] Advisor worklist
-- [ ] Student profile with reason codes, what-if, counterfactual, message template
-- [ ] Intervention log
-- [ ] Course insights
-- [ ] Model and monitoring
+- [x] Drift report stored per scored cohort (`api/app/drift.py`) and request logging middleware with `GET /monitoring/requests`
+- [x] Deployment: API on Azure Container Apps through GitHub Actions, web on Vercel (see Production)
 
 ## Do Not
 

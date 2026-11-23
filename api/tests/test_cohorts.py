@@ -48,6 +48,8 @@ def test_create_scores_and_stores(client):
     call = client.store.calls[0]
     assert call["name"] == "Uji 200 baris" and call["user_id"] == "u-coord" and len(call["scored"]) == 200
     assert {"reasons", "tier", "archetype", "code_module"} <= set(call["scored"].columns)
+    drift = call["drift_report"]
+    assert drift == body["drift_report"] and drift["n"] == 200 and len(drift["features"]) == 13
 
 
 def test_invalid_csv_is_422_and_not_stored(client):
