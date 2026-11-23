@@ -18,7 +18,7 @@ export function LanternMark({ className, star = "currentColor" }: { className?: 
 
 export function Wordmark({ className, star }: { className?: string; star?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span className={cn("flex items-center gap-2.5", className)}>
       <LanternMark className="h-7" star={star} />
       <span className="display text-[1.35rem] leading-none tracking-[-0.03em]">Lentera</span>
     </span>
