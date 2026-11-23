@@ -48,7 +48,7 @@ async function LatestOutcomeUpload() {
   return (
     <Section
       title="Cek prediksi dengan hasil akhir"
-      description="Setelah semester selesai, unggah hasil akhir kohort terbaru. Lentera menghitung F1, kalibrasi, dan apakah rencana kontak menjangkau mahasiswa yang benar-benar berisiko."
+      description="Setelah semester selesai, unggah hasil akhir kohort terbaru. Lentera mengukur apakah kontak konselor menurunkan kegagalan, lalu seberapa tepat prediksi dan rencana kontaknya."
     >
       <OutcomeUpload cohortId={cohort.id} cohortName={cohort.name} />
     </Section>

@@ -62,6 +62,47 @@ def _binary(y: np.ndarray, p: np.ndarray, flag: np.ndarray) -> dict:
                 tp=tp, fp=fp, fn=fn, tn=tn)
 
 
+MIN_GROUP = 30  # students per group before the impact estimate is reported as readable
+
+
+def _gap(y: np.ndarray, p: np.ndarray) -> dict:
+    """Observed at-risk against the calibrated expectation, the model's estimate of the outcome without help."""
+    n = len(y)
+    d = y - p
+    return dict(n=int(n), at_risk=int(y.sum()), expected_at_risk=float(p.sum()),
+                at_risk_rate=float(y.mean()) if n else None, expected_rate=float(p.mean()) if n else None,
+                gap=float(d.mean()) if n else None, se=float(d.std(ddof=1) / np.sqrt(n)) if n > 1 else None)
+
+
+def intervention_impact(frame: pd.DataFrame, contacted: np.ndarray, threshold: float) -> dict:
+    """Did the contacts lower failure? Compares flagged students who were contacted with flagged students who were not.
+
+    The calibrated probability is each student's expected outcome without help, so (observed - expected) per group
+    measures what happened beyond the model's expectation. The not-contacted gap is the control: it absorbs any drift
+    in calibration, and the difference between the two gaps is the estimate. Advisors choose whom to contact, so this
+    is an observational estimate, not a randomized test.
+    """
+    y = frame.at_risk.to_numpy(dtype=int)
+    p = frame.probability.to_numpy(dtype=float)
+    flagged = p >= threshold
+    contacted = np.asarray(contacted, dtype=bool)
+    c, n = flagged & contacted, flagged & ~contacted
+    gc, gn = _gap(y[c], p[c]), _gap(y[n], p[n])
+    enough = gc["n"] >= MIN_GROUP and gn["n"] >= MIN_GROUP
+    effect = se = low = high = None
+    if gc["n"] > 1 and gn["n"] > 1:
+        effect = gc["gap"] - gn["gap"]
+        se = float(np.hypot(gc["se"], gn["se"]))
+        low, high = effect - 1.96 * se, effect + 1.96 * se
+    tiers = frame.tier.to_numpy()
+    by_tier = {t: dict(contacted=_gap(y[c & (tiers == t)], p[c & (tiers == t)]),
+                       not_contacted=_gap(y[n & (tiers == t)], p[n & (tiers == t)]))
+               for _, t in rules.TIERS if t != "low"}
+    return dict(contacted=gc, not_contacted=gn, effect=effect, se=se, ci_low=low, ci_high=high,
+                enough=enough, clear=bool(enough and low is not None and (high < 0 or low > 0)),
+                min_group=MIN_GROUP, by_tier=by_tier)
+
+
 def evaluate(frame: pd.DataFrame, threshold: float, groups: dict[str, pd.Series] | None = None,
              plan_capacity: tuple[int, float] | None = None) -> dict:
     """frame: one row per labelled student with probability, tier, archetype, code_module, at_risk, and source_id.

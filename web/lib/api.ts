@@ -85,6 +85,30 @@ export type Binary = {
 /** Binary metrics with the confusion counts, from api/app/evaluation.py. */
 export type OutcomeMetrics = Binary & { accuracy: number; tp: number; fp: number; fn: number; tn: number };
 
+export type ImpactGroup = {
+  n: number;
+  at_risk: number;
+  expected_at_risk: number;
+  at_risk_rate: number | null;
+  expected_rate: number | null;
+  gap: number | null;
+  se: number | null;
+};
+
+/** Flagged students who were contacted against those who were not (api/app/evaluation.py intervention_impact). */
+export type OutcomeImpact = {
+  contacted: ImpactGroup;
+  not_contacted: ImpactGroup;
+  effect: number | null;
+  se: number | null;
+  ci_low: number | null;
+  ci_high: number | null;
+  enough: boolean;
+  clear: boolean;
+  min_group: number;
+  by_tier: Record<"critical" | "high" | "watch", { contacted: ImpactGroup; not_contacted: ImpactGroup }>;
+};
+
 /** Predictions against real outcomes (api/app/evaluation.py): the test cohort artifact or an uploaded outcome file. */
 export type OutcomeReport = {
   coverage: { cohort: number; labels: number; matched: number; without_label: number; unknown_ids: number };
@@ -97,6 +121,8 @@ export type OutcomeReport = {
   capacity: { share: number; n: number; expected_at_risk: number; at_risk: number; precision: number; recall: number }[];
   expected_at_risk: number;
   at_risk: number;
+  /** Uploaded outcome files only: contacts logged during the semester against the outcomes. */
+  impact?: OutcomeImpact;
   plan?: { advisors: number; hours_per_advisor: number; contacted: number; expected_at_risk: number; at_risk: number };
   fairness?: Record<string, Record<string, OutcomeMetrics>>;
   /** Test cohort artifact only. */

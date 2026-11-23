@@ -279,8 +279,8 @@ async function LatestOutcome({ role }: { role: Role }) {
   return (
     <div className="flex flex-col gap-5">
       <p className="max-w-[75ch] text-sm leading-relaxed text-ink-2">
-        Prediksi {latest.name} dibandingkan dengan hasil akhir yang diunggah{uploaded && <> pada {uploaded}</>}. Status akhir per mahasiswa tidak disimpan,
-        hanya angka ringkasnya.
+        Prediksi {latest.name} dibandingkan dengan hasil akhir yang diunggah{uploaded && <> pada {uploaded}</>}. Bagian pertama menjawab apakah
+        kontak konselor menurunkan kegagalan, bagian berikutnya seberapa tepat modelnya. Status akhir per mahasiswa tidak disimpan, hanya angka ringkasnya.
       </p>
       <OutcomeEvaluation report={latest.outcome} />
     </div>

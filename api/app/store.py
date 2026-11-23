@@ -94,6 +94,21 @@ class SupabaseStore:
                 return rows
             start += BATCH
 
+    def get_contacted(self, cohort_id: str) -> set[int]:
+        """Students of a cohort with at least one intervention marked contacted (an advisor reached them)."""
+        ids, start = set(), 0
+        while True:
+            r = self.rest.get("/interventions", params={"select": "student_id,students!inner(cohort_id)",
+                                                        "students.cohort_id": f"eq.{cohort_id}",
+                                                        "contact_status": "eq.contacted", "order": "id"},
+                              headers={"Range": f"{start}-{start + BATCH - 1}"})
+            r.raise_for_status()
+            page = r.json()
+            ids.update(row["student_id"] for row in page)
+            if len(page) < BATCH:
+                return ids
+            start += BATCH
+
     def save_plan(self, *, cohort_id: str, user_id: str, params: dict, result: dict) -> int:
         return self._insert("plans", [dict(cohort_id=cohort_id, created_by=user_id, params=params, result=result)],
                             returning="id")[0]["id"]

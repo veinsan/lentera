@@ -20,6 +20,9 @@ class FakeStore:
     def get_predictions(self, cohort_id):
         return self.rows if cohort_id == COHORT else []
 
+    def get_contacted(self, cohort_id):
+        return {r["student_id"] for r in self.rows[:120]}  # an advisor reached the first 120 students
+
     def set_outcome_report(self, cohort_id, report):
         self.reports[cohort_id] = report
 
@@ -49,6 +52,9 @@ def test_outcomes_store_an_aggregate_report(client):
     report = client.store.reports[COHORT]
     assert report["coverage"] == dict(cohort=300, labels=251, matched=250, without_label=50, unknown_ids=1)
     assert report["metrics"]["n"] == 250 and "plan" in report
+    impact = report["impact"]
+    flagged_contacted = sum(r["probability"] >= rules.THRESHOLD for r in client.store.rows[:120])
+    assert impact["contacted"]["n"] == flagged_contacted and impact["not_contacted"]["n"] > 0
     assert "fairness" not in report  # demographic columns are not in stored predictions
 
 

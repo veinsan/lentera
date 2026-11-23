@@ -138,7 +138,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] Insight Course page: risk heatmap, per-module metrics, recommendations, weekly interaction small multiples
 - [x] Drift report stored per scored cohort (`api/app/drift.py`) and request logging middleware with `GET /monitoring/requests`
 - [x] Deployment: API on Azure Container Apps through GitHub Actions, web on Vercel (see Production)
-- [x] Evaluation against real outcomes: the DSCO test cohort's final outcomes (`scripts/build_test_evaluation.py`, Kohort uji tab, landing proof rows) and outcome upload per cohort (`POST /cohorts/{id}/outcomes`, Hasil akhir tab); only aggregates are stored
+- [x] Evaluation against real outcomes: the DSCO test cohort's final outcomes (`scripts/build_test_evaluation.py`, Kohort uji tab, landing proof rows) and outcome upload per cohort (`POST /cohorts/{id}/outcomes`, Hasil akhir tab) that first estimates the impact of advisor contacts (flagged contacted vs not contacted, observed against the calibrated expectation, labelled as an observational estimate) and then the model's accuracy; only aggregates are stored
 - [x] Star atlas redesign: public landing page (cohort sky, four stages, safety, proof, role entry), liquid glass shell, X-Ray dashboard with the 3D cohort sky, student side sheet over the worklist, command palette, HeroUI kit; landing numbers from `api/scripts/build_landing.py`
 
 ## Do Not

@@ -1,6 +1,7 @@
 import { CalibrationChart } from "@/components/charts/calibration-chart";
 import { ReachCheckChart } from "@/components/charts/reach-check-chart";
 import { FairnessTable } from "@/components/domain/fairness-table";
+import { ImpactPanel } from "@/components/domain/impact-panel";
 import { Section } from "@/components/domain/section";
 import { Stat } from "@/components/domain/stat";
 import { TierBadge } from "@/components/domain/tier-badge";
@@ -15,8 +16,18 @@ const TIER_ORDER: Tier[] = ["critical", "high", "watch", "low"];
 export function OutcomeEvaluation({ report }: { report: OutcomeReport }) {
   const { metrics: m, coverage, plan } = report;
   const partial = coverage.without_label > 0 || coverage.unknown_ids > 0;
+  const contacted = report.impact?.contacted.n ?? 0;
   return (
     <div className="flex flex-col gap-5">
+      {report.impact && <ImpactPanel impact={report.impact} />}
+
+      {contacted > 0 && (
+        <p className="plate px-5 py-4 text-sm leading-relaxed text-ink-2">
+          Angka akurasi di bawah mencampur efek kontak. Mahasiswa yang berhasil dibantu tidak lagi gagal, sehingga presisi model terlihat lebih rendah
+          daripada saat tidak ada intervensi.
+        </p>
+      )}
+
       <section className="plate grid grid-cols-2 gap-x-6 gap-y-7 p-5 sm:grid-cols-3 sm:p-6 2xl:grid-cols-5" aria-label="Ringkasan hasil akhir">
         <Stat label="F1" value={m.f1} format="dec4" tone="blue" size="lg" note={`${fmtInt(m.n)} mahasiswa`} />
         <Stat label="Presisi" value={m.precision} format="dec4" note={`${fmtInt(m.tp)} dari ${fmtInt(m.tp + m.fp)} yang ter-flag`} />

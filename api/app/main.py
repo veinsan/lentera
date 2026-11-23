@@ -302,8 +302,14 @@ def cohort_outcomes(request: Request, cohort_id: str = Path(..., pattern=UUID_PA
     merged, coverage = evaluation.match(preds, labels)
     if coverage["matched"] == 0:
         raise HTTPException(422, "Tidak ada id yang cocok dengan mahasiswa di kohort ini.")
+    try:
+        contacted = merged.student_id.isin(store.get_contacted(cohort_id)).to_numpy()
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"Gagal membaca Supabase ({e.__class__.__name__}).") from None
+    threshold = request.app.state.model.threshold
     report = dict(coverage=coverage, uploaded_at=datetime.now(UTC).isoformat(),
-                  **evaluation.evaluate(merged, request.app.state.model.threshold, plan_capacity=planner.OPENING))
+                  impact=evaluation.intervention_impact(merged, contacted, threshold),
+                  **evaluation.evaluate(merged, threshold, plan_capacity=planner.OPENING))
     try:
         store.set_outcome_report(cohort_id, report)
     except httpx.HTTPError as e:

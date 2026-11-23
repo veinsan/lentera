@@ -94,6 +94,13 @@ export function OutcomeUpload({ cohortId, cohortName }: { cohortId: string; coho
             <Stat label="Recall" value={report.metrics.recall} format="dec4" />
             <Stat label="Kalibrasi (ECE)" value={report.calibration.ece} format="dec4" />
           </div>
+          {report.impact && (
+            <p className="text-sm text-ink-2">
+              {report.impact.contacted.n === 0
+                ? "Belum ada kontak berstatus dihubungi di kohort ini, jadi dampak intervensi belum bisa diukur."
+                : `Dari ${fmtInt(report.impact.contacted.n)} mahasiswa ter-flag yang dihubungi, ${fmtInt(report.impact.contacted.at_risk)} gagal, dibanding perkiraan ${fmtInt(report.impact.contacted.expected_at_risk)} tanpa bantuan.`}
+            </p>
+          )}
           <div className="flex justify-end">
             <LinkButton href="/model">Lihat evaluasi lengkap</LinkButton>
           </div>
