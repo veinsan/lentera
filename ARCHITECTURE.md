@@ -111,6 +111,7 @@ supabase/
   seed.sql            demo profiles
 skills/               project skills
 .github/workflows/    api.yml (test, build, push, deploy)
+infra/                azure-setup.sh (one-time Azure Container Apps and OIDC setup)
 data/                 local only, gitignored: train.csv, test.csv, sample_submission.csv
 ```
 

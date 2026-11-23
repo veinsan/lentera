@@ -1,0 +1,91 @@
+# Test the API, build its image, push it to ghcr.io, and deploy it to Azure Container Apps.
+name: api
+
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", ".github/workflows/api.yml"]
+  pull_request:
+    paths: ["api/**", ".github/workflows/api.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/lentera-api
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run python -m pytest -q
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t "$IMAGE:${{ github.sha }}" api
+      - name: Smoke test GET /health
+        run: |
+          docker run -d --name api -p 8000:8000 -e IMAGE_TAG=${{ github.sha }} "$IMAGE:${{ github.sha }}"
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs api
+          exit 1
+      - name: Push
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag "$IMAGE:${{ github.sha }}" "$IMAGE:latest"
+          docker push "$IMAGE:${{ github.sha }}"
+          docker push "$IMAGE:latest"
+
+  deploy:
+    needs: image
+    # Runs once infra/azure-setup.sh has created the app and the repository variables are set.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.AZURE_CONTAINERAPP != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy new revision
+        run: |
+          az containerapp update -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --image "$IMAGE:${{ github.sha }}" --set-env-vars IMAGE_TAG=${{ github.sha }}
+      - name: Check public /health reports the new image
+        run: |
+          fqdn=$(az containerapp show -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          for i in $(seq 1 30); do
+            tag=$(curl -fsS "https://$fqdn/health" | jq -r .image_tag || true)
+            if [ "$tag" = "${{ github.sha }}" ]; then echo "live: $tag"; exit 0; fi
+            sleep 10
+          done
+          echo "public /health still reports '$tag'"
+          exit 1

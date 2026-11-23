@@ -28,8 +28,8 @@
 | API-05 | Plan endpoints | Done | `POST /plans/preview` and `POST /plans` (coordinator, admin); predictions are cached per cohort in the API process; results limited to the user's modules; summary adds the marginal reach of one more advisor. Preview on the stored cohort: 0.27 s. pytest: 69 pass. |
 | API-06 | Drift report | Pending | None |
 | API-07 | Request logging | Pending | None |
-| API-08 | Dockerfile and tests | Pending | None |
-| API-09 | GitHub Actions deploy to Azure | Pending | Depends on DEC-04. |
+| API-08 | Dockerfile and tests | In progress | `api/Dockerfile` (python:3.13-slim, uv sync --locked --no-dev, non-root, one uvicorn worker) and `.dockerignore`. Docker is not installed locally, so the build and the container `GET /health` check run in the `api` workflow; every locked dependency resolves to a manylinux x86_64 cp313 wheel. pytest: 69 pass. Done when the first workflow run is green. |
+| API-09 | GitHub Actions deploy to Azure | In progress | `.github/workflows/api.yml` (test, build, smoke test, push to ghcr.io, deploy with OIDC, check the public `/health` image tag) and `infra/azure-setup.sh` (one-time setup, run in Azure Cloud Shell). Waiting for DEC-04 and the owner running the setup script. |
 | W-01 | Design tokens and app shell | Done | Tokens in `web/app/globals.css`; sidebar with six routes, active state (student profile highlights Daftar Prioritas), Plus Jakarta Sans and JetBrains Mono. Checked in the browser at 1280 px: redirect `/` to `/dashboard`, client navigation, no console errors. |
 | W-02 | Sign-in and role-aware layout | In progress | Login form, `proxy.ts` session refresh and redirect, role-filtered sidebar with user panel and sign-out, role gate on Rencana and Unggah; `pnpm build` and `pnpm lint` pass; signed-out visit to `/model` redirects to `/login`. Coordinator UI checked: six links, user panel, gated pages open. Pending: advisor and admin UI check (RLS for both already verified through the API). |
 | W-03 | Cohort upload page | Done | Checked as the coordinator at 1440 px: an 8-row file showed the quality report (1 placeholder row, 5 relabeled `highest_education` values), scoring returned the summary, and the cohort list refreshed; the test cohort was then deleted. |
@@ -40,6 +40,6 @@
 | W-08 | Intervention log | Done | A saved note appeared in the history and the worklist status filter showed the student as contacted; the test note was then deleted. |
 | W-09 | Course insights page | Done | Renders `insights.json` from the API: risk heatmap, per-module metrics with warnings, recommendations, weekly small multiples on a shared axis. Checked at 1440 px with the local API; error state shown when the API is down. |
 | W-10 | Model and monitoring page | In progress | Model card sections, fairness tabs, and charts render from `/model` and were checked at 1440 px. Chart palette and tier ramp pass the dataviz validator. Drift and request statistics wait for API-06 and API-07. |
-| W-11 | Vercel deployment | Pending | None |
+| W-11 | Vercel deployment | Pending | Steps in `README.md` Deployment. Needs the Azure API URL from API-09, then `CORS_ORIGINS` on the API set to the Vercel domain. |
 | D-01 | Demo accounts and demo cohort | In progress | `api/scripts/seed_demo_users.py` created admin, coordinator (all modules), and advisor (M03, M06) on Supabase; the password is `DEMO_PASSWORD` in `api/.env`. Demo cohort `Kohort uji DSCO (test.csv)` (6,502 rows) is stored. |
 | D-02 | Architecture diagram and demo script | Pending | None |

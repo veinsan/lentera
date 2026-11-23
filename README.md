@@ -45,3 +45,22 @@ API and model, from the repository root:
 5. Rebuild the input schema with `uv run python scripts/build_input_schema.py`, and the model card and course insights with `uv run python scripts/build_model_card.py <path-to-dsco-workspace>` and `uv run python scripts/build_insights.py <path-to-dsco-workspace>`.
 6. Run the tests with `uv run python -m pytest`.
 7. Start the API with `uv run python -m uvicorn app.main:app --reload` and open `http://localhost:8000/docs`.
+
+## Deployment
+
+The API runs on Azure Container Apps and the web app on Vercel. Secrets go into Azure and Vercel settings, never into the repository.
+
+API:
+
+1. Push to `main`. The `api` workflow runs pytest, builds `api/Dockerfile`, checks `GET /health` in the container, and pushes `ghcr.io/veinsan/lentera-api` with the commit SHA and `latest` tags.
+2. Create a GitHub classic token with only the `read:packages` scope. Container Apps uses it to pull the private image.
+3. Open Azure Cloud Shell (Bash), upload `infra/azure-setup.sh`, and run `bash azure-setup.sh`. It asks for `SUPABASE_URL`, the Supabase service role key, and the token, then creates the resource group, the Container Apps environment, the app (1 vCPU, 2 GiB, scale 0 to 1), and an OIDC sign-in for GitHub Actions limited to the resource group.
+4. Set the five repository variables the script prints (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, `AZURE_CONTAINERAPP`). From then on, every push to `main` that touches `api/` deploys a new revision and checks that the public `/health` reports the new commit SHA.
+
+Web:
+
+1. Import `veinsan/lentera` in Vercel and set the root directory to `web`.
+2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and set both `API_URL` and `NEXT_PUBLIC_API_URL` to the Azure API URL.
+3. After the first deploy, allow the Vercel origin on the API: `az containerapp update -n lentera-api -g lentera-rg --set-env-vars CORS_ORIGINS=https://<vercel-domain>`.
+
+With scale to zero, the first request after an idle period waits for the container to start. Before a demo, keep one replica warm with `az containerapp update -n lentera-api -g lentera-rg --min-replicas 1`, and set it back to 0 afterwards.
