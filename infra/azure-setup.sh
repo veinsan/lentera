@@ -6,6 +6,10 @@ set -euo pipefail
 
 GH_OWNER=${GH_OWNER:-veinsan}
 GH_REPO=${GH_REPO:-lentera}
+# GitHub OIDC subjects use immutable ids: repo:<owner>@<owner_id>/<repo>@<repo_id>. Read them with
+# gh api repos/<owner>/<repo> --jq '"\(.owner.id) \(.id)"'
+GH_OWNER_ID=${GH_OWNER_ID:-157286510}
+GH_REPO_ID=${GH_REPO_ID:-1467677443}
 LOCATION=${LOCATION:-malaysiawest}   # Azure for Students allows only eastasia, centralindia, japanwest, koreacentral, malaysiawest.
 RG=${RG:-lentera-rg}
 ENV_NAME=${ENV_NAME:-lentera-env}
@@ -47,7 +51,7 @@ az role assignment create --assignee "$CLIENT_ID" --role Contributor \
 az ad app federated-credential create --id "$CLIENT_ID" --parameters "{
   \"name\": \"lentera-main\",
   \"issuer\": \"https://token.actions.githubusercontent.com\",
-  \"subject\": \"repo:${GH_OWNER}/${GH_REPO}:ref:refs/heads/main\",
+  \"subject\": \"repo:${GH_OWNER}@${GH_OWNER_ID}/${GH_REPO}@${GH_REPO_ID}:ref:refs/heads/main\",
   \"audiences\": [\"api://AzureADTokenExchange\"]
 }" -o none
 

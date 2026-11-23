@@ -75,10 +75,10 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Deploy new revision
+        # No --revision-suffix: the environment is an express environment, which rejects it and names revisions itself.
         run: |
           az containerapp update -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --image "$IMAGE:${{ github.sha }}" --set-env-vars IMAGE_TAG=${{ github.sha }} \
-            --revision-suffix "r${{ github.run_number }}-${GITHUB_SHA::7}"  # short and unique per run
+            --image "$IMAGE:${{ github.sha }}" --set-env-vars IMAGE_TAG=${{ github.sha }}
       - name: Check public /health reports the new image
         run: |
           fqdn=$(az containerapp show -n "${{ vars.AZURE_CONTAINERAPP }}" -g "${{ vars.AZURE_RESOURCE_GROUP }}" \
