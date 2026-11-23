@@ -37,7 +37,7 @@ export function FairnessTable({ fairness }: { fairness: Record<string, Record<st
             aria-selected={a === attr}
             onClick={() => setAttr(a)}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-xs font-medium",
+              "rounded-full border px-3 py-1.5 text-xs font-medium",
               a === attr ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted",
             )}
           >

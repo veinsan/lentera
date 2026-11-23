@@ -14,7 +14,7 @@ export function EmptyState({
   action?: { href: string; label: string };
 }) {
   return (
-    <div className="flex flex-col items-center rounded-lg border border-dashed bg-card px-6 py-16 text-center">
+    <div className="flex flex-col items-center rounded-2xl border-[1.5px] border-dashed border-input bg-card/60 px-6 py-16 text-center">
       <Icon className="size-8 text-muted-foreground" aria-hidden />
       <h2 className="mt-4 text-lg font-semibold">{title}</h2>
       <p className="mt-1 max-w-md text-sm text-muted-foreground">{description}</p>

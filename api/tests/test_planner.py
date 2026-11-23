@@ -45,3 +45,27 @@ def test_effectiveness_override_marks_scenario_and_changes_priority(students):
 def test_invalid_override_is_rejected():
     with pytest.raises(AssertionError):
         planner.playbook_table({"fading": {"effectiveness": 1.5}})
+
+
+def test_board_balances_advisors_without_overflow(students):
+    result = planner.plan(students, advisors=3, hours_per_advisor=2)
+    cols = result["board"]["columns"]
+    assert len(cols) == 3
+    assert all(c["minutes_used"] <= c["capacity_minutes"] for c in cols)
+    assert sum(c["students"] for c in cols) + result["board"]["unplaced"] == result["summary"]["advisor_contacts"]
+    first = [c["top"][0]["probability"] for c in cols if c["top"]]
+    assert first and all(len(c["top"]) <= 6 for c in cols)
+
+
+def test_board_is_empty_without_advisors(students):
+    assert planner.plan(students, advisors=0, hours_per_advisor=10)["board"] == dict(columns=[], unplaced=0)
+
+
+def test_board_columns_report_mix_and_sample_across_actions(students):
+    result = planner.plan(students, advisors=2, hours_per_advisor=4)
+    for c in result["board"]["columns"]:
+        assert sum(c["tiers"].values()) == c["students"] == sum(a["students"] for a in c["actions"])
+        sampled = {s["action"] for s in c["top"]}
+        assert len(sampled) == min(len(c["actions"]), len(c["top"]))  # one of each action before any repeat
+        assert all(s["tier"] in c["tiers"] for s in c["top"])
+    assert result["rules"]["threshold"] == 0.375

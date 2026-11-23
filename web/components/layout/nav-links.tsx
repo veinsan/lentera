@@ -10,7 +10,7 @@ export function NavLinksFallback() {
   return (
     <ul className="flex flex-col gap-1" aria-hidden>
       {NAV_ITEMS.slice(0, 4).map((item) => (
-        <li key={item.href} className="h-9 animate-pulse rounded-md bg-white/10" />
+        <li key={item.href} className="h-10 animate-pulse rounded-xl bg-slate-raised" />
       ))}
     </ul>
   );
@@ -22,7 +22,7 @@ export function NavLinks({ allowed }: { allowed: string[] }) {
   // The student profile belongs to the worklist.
   const active = pathname.startsWith("/mahasiswa") ? "/prioritas" : pathname;
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="-mx-1 flex gap-1 overflow-x-auto px-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
       {NAV_ITEMS.filter((item) => allowed.includes(item.href)).map(({ href, label, icon: Icon }) => {
         const isActive = active === href || active.startsWith(`${href}/`);
         return (
@@ -31,13 +31,13 @@ export function NavLinks({ allowed }: { allowed: string[] }) {
               href={href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-white/10 hover:text-sidebar-foreground",
+                  : "text-slate-muted hover:bg-slate-raised hover:text-sidebar-foreground",
               )}
             >
-              <Icon className="size-4" aria-hidden />
+              <Icon className={cn("size-4", isActive && "text-brand-accent")} aria-hidden />
               {label}
             </Link>
           </li>

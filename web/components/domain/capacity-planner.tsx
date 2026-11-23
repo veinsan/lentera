@@ -90,7 +90,7 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
         <p className="text-sm text-muted-foreground">Menghitung rencana...</p>
       ) : (
         <>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
             <KpiCard label="Dihubungi konselor" value={fmtInt(s.advisor_contacts)} note={`${fmtInt(s.minutes_used / 60)} dari ${fmtInt(capacityHours)} jam terpakai`} />
             <KpiCard
               highlight
@@ -103,7 +103,7 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
             <KpiCard label="Belum terjangkau" value={fmtInt(s.unassigned)} note="Ter-flag, butuh konselor, belum masuk kapasitas" />
           </div>
 
-          <div className="flex items-start gap-3 rounded-md border bg-card px-4 py-3 text-sm">
+          <div className="sheet flex items-start gap-3 px-5 py-4 text-sm">
             <Info className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
             <p>
               Menambah 1 konselor ({fmtInt(hours)} jam) menjangkau sekitar{" "}
@@ -113,7 +113,7 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
           </div>
 
           {s.is_scenario && (
-            <div className="rounded-md border border-uncertain bg-muted p-4 text-sm">
+            <div className="rounded-2xl border border-dashed border-uncertain bg-muted p-5 text-sm">
               <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                 <FlaskConical className="size-4" aria-hidden />
                 Skenario model, bukan efek kausal
@@ -126,7 +126,7 @@ export function CapacityPlanner({ cohortId }: { cohortId: string }) {
             </div>
           )}
 
-          <div className="grid grid-cols-[3fr_2fr] gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr]">
             <Section title="Kurva jangkauan" description="Perkiraan mahasiswa berisiko yang terjangkau konselor untuk setiap tambahan jam.">
               <ReachCurveChart curve={result.curve} currentHours={capacityHours} />
             </Section>

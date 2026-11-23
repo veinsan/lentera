@@ -71,7 +71,7 @@ export function UploadFlow() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-4">
+      <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-[1fr_1fr_auto]">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="file">File CSV minggu ke-4</Label>
           <Input id="file" type="file" accept=".csv,text/csv" onChange={(e) => pick(e.target.files?.[0] ?? null)} />
@@ -87,7 +87,7 @@ export function UploadFlow() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
@@ -118,13 +118,13 @@ function Result({ created }: { created: Created }) {
       <p className="text-sm text-muted-foreground">
         Kohort tersimpan dan dinilai dalam {created.seconds.toLocaleString("id-ID")} detik.
       </p>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <KpiCard label="Mahasiswa dinilai" value={fmtInt(s.rows)} />
         <KpiCard highlight label="Ter-flag (threshold 0,375)" value={fmtInt(s.flagged)} />
         <KpiCard label="Perkiraan benar-benar berisiko" value={fmtInt(s.expected_at_risk)} note="Jumlah probabilitas terkalibrasi" />
         <KpiCard label="Di zona tidak pasti" value={fmtInt(s.uncertain)} note="Probabilitas 0,25 sampai 0,55" />
       </div>
-      <div className="grid grid-cols-3 gap-4 text-sm">
+      <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
         <List title="Tier" rows={TIERS.map((t) => [<TierBadge key={t} tier={t} />, s.tiers[t]])} />
         <List title="Archetype" rows={Object.entries(s.archetypes).map(([a, n]) => [ARCHETYPE_LABELS[a] ?? a, n])} />
         <List title="Modul" rows={Object.entries(s.modules).map(([m, n]) => [fmtModule(m), n])} />
@@ -143,7 +143,7 @@ function Result({ created }: { created: Created }) {
 
 function List({ title, rows }: { title: string; rows: [React.ReactNode, number][] }) {
   return (
-    <div className="rounded-md border p-3">
+    <div className="rounded-xl border p-3">
       <p className="mb-2 text-xs font-semibold text-muted-foreground">{title}</p>
       <ul className="flex flex-col gap-1.5">
         {rows.map(([label, n], i) => (

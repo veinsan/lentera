@@ -23,7 +23,7 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Model & Monitoring"
+        title="Model yang di-deploy menghasilkan ulang submission Kaggle, baris demi baris."
         description="Cara model dibangun, divalidasi, dan seberapa jauh prediksinya bisa dipercaya."
       />
       <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat model card...</p>}>
@@ -53,7 +53,7 @@ async function ModelContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <KpiCard
           highlight
           label="F1 validasi bertingkat"
@@ -70,7 +70,7 @@ async function ModelContent() {
         <KpiCard label="Kalibrasi (ECE)" value={fmtNum(calibration.ece, 4)} note={`Brier ${fmtNum(calibration.brier, 3)}`} />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Validasi bertingkat" description={`${sentence(card.protocol.inference)}.`}>
           <ul className="mb-4 list-disc space-y-1 pl-5 text-sm">
             <li>Outer: {card.protocol.outer}.</li>
@@ -145,7 +145,7 @@ async function ModelContent() {
         </Table>
       </Section>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section
           title="Kalibrasi probabilitas"
           description="Titik dekat garis diagonal berarti probabilitas bisa dibaca apa adanya: dari 100 mahasiswa dengan prediksi 0,8, sekitar 80 benar-benar berisiko."
@@ -160,7 +160,7 @@ async function ModelContent() {
         </Section>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Tier risiko" description={card.evaluation_notes.calibration_and_tiers}>
           <Table>
             <TableHeader>
@@ -218,7 +218,7 @@ async function ModelContent() {
         </Section>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section
           title="Sinyal yang paling memengaruhi model"
           description="Importance CatBoost (PredictionValuesChange) dijumlahkan per sinyal; 77 fitur dikelompokkan menjadi 14 sinyal."

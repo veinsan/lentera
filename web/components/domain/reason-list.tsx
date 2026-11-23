@@ -29,7 +29,7 @@ export function ReasonList({ title, items, maxAbs, note }: { title: string; item
                     }}
                   />
                 </span>
-                <span className="w-9 text-right font-mono text-[11px] text-muted-foreground">
+                <span className="w-10 text-right font-mono text-xs text-muted-foreground">
                   {raises ? "+" : ""}
                   {fmtNum(r.shap, 2)}
                 </span>

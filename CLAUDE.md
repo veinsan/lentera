@@ -39,7 +39,8 @@ The ML library versions match `dsco/outputs/audit/requirements-lock.txt`, except
 ```text
 web/
   app/
-    (auth)/login/          Sign-in page
+    (auth)/login/          One-click demo sign-in (role sheets, Alt+1/2/3)
+    demo/[role]/           Presenter deep link that signs in as a demo role
     (app)/                 Pages behind sign-in, sharing the sidebar layout
       dashboard/
       rencana/             Capacity planner
@@ -112,7 +113,7 @@ The planned pages and their steps are in `ARCHITECTURE.md`.
 - [x] API endpoints `GET /health`, `/model`, `/insights` (no sign-in yet)
 - [x] App shell: sidebar navigation, page headers, and empty states for every page
 - [x] Supabase schema with RLS (`supabase/migrations/0001_init.sql`), demo accounts (`api/scripts/seed_demo_users.py`)
-- [x] Sign-in, role-filtered sidebar, sign-out, role gate for coordinator and admin pages; API token verification
+- [x] One-click demo sign-in (no email or password; `DEMO_PASSWORD` stays on the web server), role switch in the rail, role-filtered navigation, role gate for coordinator and admin pages; API token verification
 - [x] Cohort upload: data quality gate, scoring with reason codes, storage in Supabase, upload page with report and summary
 - [x] Dashboard for the latest cohort and the advisor worklist with filters, pagination, and CSV export (`/prioritas/export`)
 - [x] Student profile: reason codes, scenario panel (what-if and counterfactual), message template, weekly chart, intervention log and history
@@ -152,6 +153,10 @@ Windows Smart App Control on the owner's machine blocks unsigned executables and
 - API: `https://lentera-api.delightfulforest-3e8ecdc4.malaysiawest.azurecontainerapps.io` (Azure for Students, resource group `lentera-rg`, region `malaysiawest`, 1 vCPU, 2 GiB, scale 0 to 1). The `api` workflow deploys it with OIDC; the federated credential subject uses GitHub's id form `repo:veinsan@157286510/lentera@1467677443:ref:refs/heads/main`, and the name-only form fails with AADSTS700213. The environment is an express environment: it rejects `--revision-suffix` and keeps one revision named `lentera-api--latest`. Secrets live in the Container App; `CORS_ORIGINS` lists the Vercel domain and the local ports.
 - Azure CLI is installed but not on the shell PATH here: call `C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`. The active `gh` account is not `veinsan`; use `GH_TOKEN=$(gh auth token --user veinsan)` for one command instead of switching accounts.
 - Piping values into `vercel env add` from Windows PowerShell 5.1 prepends a UTF-8 BOM. Pipe from Bash into `node <npm>/vercel/dist/vc.js` instead and check the pulled value byte for byte.
+
+## Visual World
+
+The redesign follows the direction contract in `.impeccable/surfaces/web-app.md` (campus noticeboard: putty board, paper sheets, slate rail and contrast panels, one lime highlighter, tier pins with labels; Archivo for headlines and numerals, Geist for UI, Geist Mono for data). Product truth for design work is `PRODUCT.md`. Each page title is the screen's finding as one sentence; no eyebrow or kicker above a heading. `DESIGN.md` is rewritten from the built world at the end of the redesign.
 
 ## Build
 

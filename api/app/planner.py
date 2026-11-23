@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from app.rules import PLAYBOOK, THRESHOLD
+from app.rules import PLAYBOOK, THRESHOLD, TIERS, tier
 
 
 def playbook_table(overrides: dict | None = None) -> pd.DataFrame:
@@ -84,6 +84,64 @@ def reach_curve(students: pd.DataFrame, playbook: pd.DataFrame, points: int = 21
     return out
 
 
+def _opt_int(v):
+    return None if v is None or v != v else int(v)
+
+
+MAX_BOARD_COLUMNS = 24  # the board shows one column per advisor; more than this is a staffing table, not a board
+
+
+def _sample(col: list, per_column: int) -> list:
+    """First students of a column taken round-robin across its actions, in priority order, so the sample shows
+    the column's mix instead of six copies of the cheapest action."""
+    by_action: dict[str, list] = {}
+    for r in col:
+        by_action.setdefault(r.action, []).append(r)
+    queues, out = list(by_action.values()), []
+    while len(out) < per_column and any(queues):
+        for q in queues:
+            if q and len(out) < per_column:
+                out.append(q.pop(0))
+    return out
+
+
+def board(result: pd.DataFrame, advisors: int, hours_per_advisor: float, per_column: int = 6) -> dict:
+    """Split the advisor channel into one column per advisor, in priority order.
+
+    Each student goes to the advisor with the most minutes left, so columns stay balanced and none overflows its
+    hours. A column reports its tier and action counts and a sample across its actions. The plan pools all advisor
+    minutes, so a contact can fit the pool but no single advisor; `unplaced` counts those instead of overfilling.
+    """
+    n = min(advisors, MAX_BOARD_COLUMNS)
+    if n == 0:
+        return dict(columns=[], unplaced=0)
+    cap = hours_per_advisor * 60
+    rows = result[result.channel == "advisor"].assign(ratio=lambda r: r.value / r.minutes)
+    rows = rows.sort_values(["ratio", "probability"], ascending=False)
+    rows = rows.assign(tier=tier(rows.probability))
+    left, cols, unplaced = [cap] * n, [[] for _ in range(n)], 0
+    for row in rows.itertuples():
+        i = max(range(n), key=lambda k: left[k])
+        if row.minutes > left[i]:
+            unplaced += 1  # fits the pooled minutes, not one advisor (or advisors exceed the column limit)
+            continue
+        left[i] -= row.minutes
+        cols[i].append(row)
+    columns = []
+    for i, col in enumerate(cols):
+        tiers = {name: sum(r.tier == name for r in col) for _, name in TIERS}
+        actions: dict[str, int] = {}
+        for r in col:
+            actions[r.action] = actions.get(r.action, 0) + 1
+        columns.append(dict(
+            advisor=i + 1, capacity_minutes=cap, minutes_used=cap - left[i], students=len(col), tiers=tiers,
+            actions=[dict(action=a, students=k) for a, k in sorted(actions.items(), key=lambda kv: -kv[1])],
+            top=[dict(id=int(r.id), source_id=_opt_int(getattr(r, "source_id", None)), code_module=getattr(r, "code_module", None),
+                      probability=float(r.probability), tier=r.tier, archetype=r.archetype, action=r.action,
+                      minutes=float(r.minutes)) for r in _sample(col, per_column)]))
+    return dict(columns=columns, unplaced=unplaced)
+
+
 def plan(students: pd.DataFrame, advisors: int, hours_per_advisor: float, overrides: dict | None = None) -> dict:
     book = playbook_table(overrides)
     capacity = advisors * hours_per_advisor * 60
@@ -95,4 +153,6 @@ def plan(students: pd.DataFrame, advisors: int, hours_per_advisor: float, overri
                                             - summary["expected_at_risk_reached_advisor"])
     return dict(summary=summary, curve=reach_curve(students, book),
                 playbook=book.reset_index(names="archetype").to_dict("records"),
+                board=board(result, advisors, hours_per_advisor),
+                rules=dict(threshold=THRESHOLD, tiers=[dict(tier=name, min_probability=cut) for cut, name in TIERS]),
                 assignments=result[["id", "action", "channel", "probability"]].to_dict("records"))

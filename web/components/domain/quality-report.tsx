@@ -28,14 +28,14 @@ export function QualityReportView({ report }: { report: QualityReport }) {
   const shares = report.shares;
   return (
     <div className="flex flex-col gap-4">
-      <div className={cn("flex items-center gap-3 rounded-md border px-4 py-3", status.className)}>
+      <div className={cn("flex items-center gap-3 rounded-xl border px-4 py-3", status.className)}>
         <status.icon className="size-5 shrink-0" aria-hidden />
         <p className="text-sm font-semibold">
           {status.label} · {fmtInt(report.rows)} baris
         </p>
       </div>
 
-      <ul className="flex flex-col divide-y rounded-md border">
+      <ul className="flex flex-col divide-y rounded-xl border">
         {report.checks.map((c) => {
           const level = LEVEL[c.level];
           const extra = details(c.details);
@@ -66,7 +66,7 @@ export function QualityReportView({ report }: { report: QualityReport }) {
       </ul>
 
       {shares && (
-        <dl className="grid grid-cols-3 gap-4 text-sm">
+        <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
           <Share label="Tanpa catatan LMS valid" value={shares.placeholder_activity} train={shares.placeholder_activity_train} />
           <Share label="Belum ada nilai" value={shares.no_graded_score} train={shares.no_graded_score_train} />
           <Share label="Ada tugas jatuh tempo belum dikumpulkan" value={shares.no_submission} train={shares.no_submission_train} />

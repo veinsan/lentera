@@ -3,39 +3,45 @@
 @import "shadcn/tailwind.css";
 
 /*
-  Tokens from DESIGN.md. Change a value here and in DESIGN.md together.
-  shadcn/ui names (--primary, --muted, --accent, ...) map onto DESIGN.md roles; shadcn's --accent is the hover
-  surface, so the DESIGN.md amber accent is --brand-accent (Tailwind: brand-accent).
+  Tokens for the Papan Minggu Ke-4 world (see .impeccable/surfaces/web-app.md; DESIGN.md is rewritten from the build).
+  shadcn names map onto roles: --card is the paper sheet, --background the putty board, --sidebar the slate rail.
+  shadcn's --accent is the hover surface, so the lime highlighter is --brand-accent (Tailwind: brand-accent).
 */
 :root {
-  --background: #f6f5f1;
-  --foreground: #16203a;
-  --card: #ffffff;
-  --card-foreground: #16203a;
-  --popover: #ffffff;
-  --popover-foreground: #16203a;
-  --primary: #1e2a5a;
-  --primary-hover: #2c3b78;
-  --primary-foreground: #ffffff;
-  --secondary: #eeede7;
-  --secondary-foreground: #16203a;
-  --muted: #eeede7;
-  --muted-foreground: #5a6378;
-  --accent: #eeede7;
-  --accent-foreground: #16203a;
-  --brand-accent: #f2a93b;
-  --brand-accent-foreground: #16203a;
+  --background: #ece7dd;
+  --foreground: #16140f;
+  --card: #fbfaf6;
+  --card-foreground: #16140f;
+  --popover: #fbfaf6;
+  --popover-foreground: #16140f;
+  --primary: #16140f;
+  --primary-hover: #34302a;
+  --primary-foreground: #fbfaf6;
+  --secondary: #e3dcce;
+  --secondary-foreground: #16140f;
+  --muted: #e3dcce;
+  --muted-foreground: #625d52;
+  --accent: #e8e1d3;
+  --accent-foreground: #16140f;
+  --brand-accent: #d9f24a;
+  --brand-accent-foreground: #16140f;
   --destructive: #b42318;
   --success: #2f7d5b;
-  --border: #dddbd3;
-  --input: #dddbd3;
-  --ring: #3b5bdb;
+  --border: #d9d1c1;
+  --input: #cfc6b4;
+  --ring: #1f2b2e;
+
+  --slate: #1f2b2e;
+  --slate-raised: #2c3a3e;
+  --slate-line: #3a4a4f;
+  --slate-foreground: #e9e6dd;
+  --slate-muted: #a4aba3;
 
   --risk-low: #e2a27a;
   --risk-watch: #cf7448;
   --risk-high: #b04a26;
   --risk-critical: #7a2610;
-  --on-risk-light: #16203a;
+  --on-risk-light: #16140f;
   --on-risk-dark: #ffffff;
   --uncertain: #7a7f8c;
 
@@ -43,22 +49,24 @@
   --chart-2: #2f6db5; /* not at risk */
   --chart-3: #9aa1ae; /* neutral */
 
-  --sidebar: #1e2a5a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #f2a93b;
-  --sidebar-primary-foreground: #16203a;
-  --sidebar-accent: #f2a93b;
-  --sidebar-accent-foreground: #16203a;
-  --sidebar-border: rgb(255 255 255 / 0.12);
-  --sidebar-ring: #3b5bdb;
+  --sidebar: #1f2b2e;
+  --sidebar-foreground: #e9e6dd;
+  --sidebar-primary: #d9f24a;
+  --sidebar-primary-foreground: #16140f;
+  --sidebar-accent: #2c3a3e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3a4a4f;
+  --sidebar-ring: #d9f24a;
 
-  --shadow-overlay: 0 8px 24px rgb(22 32 58 / 0.12);
+  --shadow-overlay: 0 10px 28px -10px rgb(22 20 15 / 0.28);
+  --shadow-sheet: 0 1px 0 rgb(22 20 15 / 0.06), 0 14px 30px -18px rgb(22 20 15 / 0.28);
 }
 
 @theme inline {
-  --font-sans: var(--font-jakarta);
-  --font-heading: var(--font-jakarta);
-  --font-mono: var(--font-jetbrains);
+  --font-sans: var(--font-geist);
+  --font-heading: var(--font-archivo);
+  --font-display: var(--font-archivo);
+  --font-mono: var(--font-geist-mono);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -82,6 +90,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-slate: var(--slate);
+  --color-slate-raised: var(--slate-raised);
+  --color-slate-line: var(--slate-line);
+  --color-slate-foreground: var(--slate-foreground);
+  --color-slate-muted: var(--slate-muted);
 
   --color-risk-low: var(--risk-low);
   --color-risk-watch: var(--risk-watch);
@@ -104,10 +117,13 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
   --shadow-overlay: var(--shadow-overlay);
+  --shadow-sheet: var(--shadow-sheet);
 }
 
 @layer base {
@@ -119,5 +135,72 @@
   }
   html {
     @apply font-sans;
+    scrollbar-color: #bdb3a0 transparent;
+  }
+  ::selection {
+    background: var(--brand-accent);
+    color: var(--brand-accent-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .bg-slate :focus-visible,
+  [data-slate] :focus-visible {
+    outline-color: var(--brand-accent);
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* The paper sheet pinned to the board. */
+  .sheet {
+    background: var(--card);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sheet);
+  }
+  /* The lime highlighter stroke behind a key number. */
+  .marker {
+    background: linear-gradient(transparent 58%, var(--brand-accent) 58%, var(--brand-accent) 94%, transparent 94%);
+    padding-inline: 0.08em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* On slate the half-height stroke leaves dark ink on a dark ground; the stroke covers the whole line there. */
+  .marker-solid {
+    background: var(--brand-accent);
+    color: var(--brand-accent-foreground);
+    border-radius: 0.12em;
+    padding-inline: 0.12em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* The board refills when capacity changes: cards settle in from an already-visible state, staggered. */
+  .board-in {
+    animation: board-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 22ms);
+  }
+  @keyframes board-in {
+    from {
+      opacity: 0.45;
+      transform: translateY(6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .board-in {
+      animation: none;
+    }
+  }
+  .display-numeral {
+    font-family: var(--font-archivo);
+    font-stretch: 80%;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
   }
 }

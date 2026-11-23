@@ -18,7 +18,7 @@ export type PredictionLite = {
   uncertain: boolean;
   archetype: string;
   recommended_action: string;
-  students: { code_presentation: string };
+  students: { code_presentation: string; source_id: number };
 };
 
 export type Reason = { signal: string; label: string; shap: number; text: string };
@@ -56,7 +56,7 @@ export async function getLatestDrift(): Promise<{ name: string; uploaded_at: str
 /** Every prediction the user may see in the cohort, fetched in parallel pages of 1,000. */
 export async function getCohortPredictions(cohortId: string): Promise<PredictionLite[]> {
   const supabase = await createClient();
-  const columns = "student_id, code_module, probability, flagged, tier, uncertain, archetype, recommended_action, students(code_presentation)";
+  const columns = "student_id, code_module, probability, flagged, tier, uncertain, archetype, recommended_action, students(code_presentation, source_id)";
   const { count } = await supabase.from("predictions").select("student_id", { count: "exact", head: true }).eq("cohort_id", cohortId);
   const pages = Math.ceil((count ?? 0) / PAGE);
   const results = await Promise.all(

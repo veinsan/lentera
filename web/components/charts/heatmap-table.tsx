@@ -53,7 +53,7 @@ export function HeatmapTable({
                     style={{ background: `color-mix(in oklch, var(--chart-1) ${share(cell.value)}%, var(--card))` }}
                   >
                     {format(cell.value)}
-                    <span className="block text-[10px] opacity-80">n={fmtInt(cell.n)}</span>
+                    <span className="block text-xs opacity-80">n={fmtInt(cell.n)}</span>
                   </td>
                 );
               })}

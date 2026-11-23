@@ -7,7 +7,7 @@ type Row = { name: string; value: string; color: string };
 /** Value first, series name second, keyed by a short line in the series color (dataviz interaction rules). */
 export function ChartTooltip({ title, rows }: { title: string; rows: Row[] }) {
   return (
-    <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-overlay">
+    <div className="rounded-xl bg-popover px-3 py-2 text-xs shadow-overlay">
       <p className="mb-1 text-muted-foreground">{title}</p>
       {rows.map((r) => (
         <p key={r.name} className="flex items-center gap-2">

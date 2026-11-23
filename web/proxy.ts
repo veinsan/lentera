@@ -23,8 +23,9 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
   const onLogin = request.nextUrl.pathname.startsWith("/login");
+  const onDemoLink = request.nextUrl.pathname.startsWith("/demo/"); // signs in itself, also switches roles
 
-  if (!signedIn && !onLogin) return redirectWithCookies(request, "/login", response);
+  if (!signedIn && !onLogin && !onDemoLink) return redirectWithCookies(request, "/login", response);
   if (signedIn && onLogin) return redirectWithCookies(request, "/dashboard", response);
   return response;
 }

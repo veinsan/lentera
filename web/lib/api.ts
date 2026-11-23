@@ -26,6 +26,19 @@ export type PlanResult = {
   };
   curve: { hours: number; advisor_contacts: number; expected_at_risk_reached: number; value: number }[];
   playbook: PlaybookRow[];
+  board: {
+    columns: {
+      advisor: number;
+      capacity_minutes: number;
+      minutes_used: number;
+      students: number;
+      tiers: Record<Tier, number>;
+      actions: { action: string; students: number }[];
+      top: { id: number; source_id: number | null; code_module: string | null; probability: number; tier: Tier; archetype: string; action: string; minutes: number }[];
+    }[];
+    unplaced: number;
+  };
+  rules: { threshold: number; tiers: { tier: Tier; min_probability: number }[] };
 };
 
 export type DriftStatus = "stable" | "moderate" | "shift";

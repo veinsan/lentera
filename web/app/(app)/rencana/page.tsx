@@ -42,7 +42,7 @@ async function PlannerContent() {
   return (
     <>
       <PageHeader
-        title="Rencana Intervensi"
+        title="Setiap jam konselor dihitung sebagai mahasiswa berisiko yang terjangkau."
         description={`${cohort.name} · berapa mahasiswa berisiko yang terjangkau dengan kapasitas konselor yang ada.`}
       />
       <div className="flex flex-col gap-6">

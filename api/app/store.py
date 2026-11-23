@@ -71,11 +71,13 @@ class SupabaseStore:
         """All predictions of a cohort for planning, in pages of 1,000 (the PostgREST row limit)."""
         rows, start = [], 0
         while True:
-            r = self.rest.get("/predictions", params={"select": "student_id,code_module,probability,archetype",
+            r = self.rest.get("/predictions", params={"select": "student_id,code_module,probability,archetype,students(source_id)",
                                                       "cohort_id": f"eq.{cohort_id}", "order": "student_id"},
                               headers={"Range": f"{start}-{start + BATCH - 1}"})
             r.raise_for_status()
             page = r.json()
+            for row in page:  # flatten the joined student: the board shows the institution's student number
+                row["source_id"] = (row.pop("students", None) or {}).get("source_id")
             rows += page
             if len(page) < BATCH:
                 return rows

@@ -5,18 +5,18 @@ import { Upload } from "lucide-react";
 import { HeatmapTable } from "@/components/charts/heatmap-table";
 import { SegmentedBar, type Segment } from "@/components/charts/segmented-bar";
 import { EmptyState } from "@/components/domain/empty-state";
-import { KpiCard } from "@/components/domain/kpi-card";
 import { Section } from "@/components/domain/section";
-import { TIER_LABELS } from "@/components/domain/tier-badge";
+import { TIER_LABELS, TierPin } from "@/components/domain/tier-badge";
+import { TER_FLAG, WeekBoard, type CohortFacts } from "@/components/domain/week-board";
 import { PageHeader } from "@/components/layout/page-header";
-import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getModelCard } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth";
 import { ARCHETYPE_VALUES, getCohortPredictions, getLatestCohort, TIER_VALUES, type PredictionLite } from "@/lib/data";
 import { fmtInt, fmtModule, fmtProb, fmtPct } from "@/lib/format";
 import { ACTION_LABELS, ARCHETYPE_LABELS } from "@/lib/labels";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Papan Minggu Ini" };
 
 const TIER_STYLE: Record<string, Pick<Segment, "className" | "textClassName">> = {
   critical: { className: "bg-risk-critical", textClassName: "text-on-risk-dark" },
@@ -30,7 +30,7 @@ export default function Page() {
     <Suspense
       fallback={
         <>
-          <PageHeader title="Dashboard" description="Memuat kohort..." />
+          <PageHeader title="Papan minggu ini" description="Memuat kohort..." />
         </>
       }
     >
@@ -45,7 +45,7 @@ async function DashboardContent() {
   if (!cohort) {
     return (
       <>
-        <PageHeader title="Dashboard" description="Ringkasan risiko kohort pada cutoff minggu ke-4." />
+        <PageHeader title="Papan minggu ini" description="Ringkasan risiko kohort pada cutoff minggu ke-4." />
         <EmptyState
           icon={Upload}
           title="Belum ada kohort yang dinilai"
@@ -60,40 +60,28 @@ async function DashboardContent() {
     );
   }
 
-  const preds = await getCohortPredictions(cohort.id);
+  const [preds, card] = await Promise.all([getCohortPredictions(cohort.id), getModelCard(user.accessToken)]);
   const flagged = preds.filter((p) => p.flagged);
   const expected = preds.reduce((s, p) => s + p.probability, 0);
   const allModules = new Set(preds.map((p) => p.code_module)).size === 7 && user.modules.length >= 7;
   const scope = user.role === "admin" || allModules ? "semua modul" : user.modules.map(fmtModule).join(", ");
   const uploaded = new Date(cohort.uploaded_at).toLocaleDateString("id-ID", { dateStyle: "medium", timeZone: "Asia/Jakarta" });
 
+  const context = `${cohort.name} · diunggah ${uploaded} · cutoff hari ke-28 · ${scope}`;
+  const facts = {
+    scored: preds.length,
+    flagged: flagged.length,
+    expected,
+    critical: count(preds, (p) => p.tier === "critical"),
+    uncertain: count(preds, (p) => p.uncertain),
+    ece: card.ok ? card.data.calibration.ece : null,
+    context,
+  };
+
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        description={`${cohort.name} · diunggah ${uploaded} · cutoff hari ke-28 · ${scope}`}
-        actions={
-          <div className="flex gap-2">
-            <Link href="/prioritas" className={buttonVariants({ variant: "outline" })}>
-              Daftar prioritas
-            </Link>
-            {manager && (
-              <Link href="/rencana" className={buttonVariants({ className: "hover:bg-primary-hover" })}>
-                Susun rencana intervensi
-              </Link>
-            )}
-          </div>
-        }
-      />
+      <div className="mb-6">{manager ? <WeekBoard cohortId={cohort.id} facts={facts} /> : <AdvisorWeek preds={preds} facts={facts} />}</div>
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-5 gap-4">
-          <KpiCard label="Mahasiswa dinilai" value={fmtInt(preds.length)} note={`dari ${fmtInt(cohort.n_rows)} di kohort`} />
-          <KpiCard highlight label="Ter-flag berisiko" value={fmtInt(flagged.length)} note={`${fmtPct(flagged.length / preds.length)} · threshold 0,375`} />
-          <KpiCard label="Perkiraan benar-benar berisiko" value={fmtInt(expected)} note="Jumlah probabilitas terkalibrasi" />
-          <KpiCard label="Tier kritis" value={fmtInt(count(preds, (p) => p.tier === "critical"))} note="Probabilitas 0,85 ke atas" />
-          <KpiCard label="Zona tidak pasti" value={fmtInt(count(preds, (p) => p.uncertain))} note="Butuh tinjauan konselor" />
-        </div>
-
         <Section title="Distribusi tier risiko" description="Tier menentukan seberapa mendesak; archetype di bawah menentukan tindakannya.">
           <SegmentedBar
             ariaLabel="Distribusi tier risiko"
@@ -101,7 +89,7 @@ async function DashboardContent() {
           />
         </Section>
 
-        <div className="grid grid-cols-[3fr_2fr] gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr]">
           <Section title="Archetype dan tindakan" description="Alasan utama mahasiswa berisiko dan intervensi yang direkomendasikan playbook.">
             <ArchetypeTable preds={preds} />
           </Section>
@@ -115,6 +103,45 @@ async function DashboardContent() {
         </Section>
       </div>
     </>
+  );
+}
+
+/** The advisor's board: no capacity control (planning is the coordinator's), the first students to call instead. */
+function AdvisorWeek({ preds, facts }: { preds: PredictionLite[]; facts: CohortFacts }) {
+  const first = preds.filter((p) => p.flagged).sort((a, b) => b.probability - a.probability).slice(0, 10);
+  return (
+    <div className="flex flex-col gap-5">
+      <section className="sheet relative px-8 pt-8 pb-7">
+        <span aria-hidden className="absolute -top-1.5 left-1/2 size-4 -translate-x-1/2 rounded-full bg-foreground" />
+        <h1 className="max-w-4xl font-heading text-[2rem] leading-[1.06] sm:text-[2.75rem] font-bold tracking-[-0.025em] text-balance [font-stretch:88%]">
+          <span className="marker">{fmtInt(facts.flagged)}</span> mahasiswa di modul Anda {TER_FLAG}. Mulai dari{" "}
+          <span className="marker">{fmtInt(facts.critical)}</span> yang kritis.
+        </h1>
+        <p className="mt-5 text-xs text-muted-foreground">{facts.context}</p>
+      </section>
+      <section className="rounded-2xl bg-secondary p-5">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="font-heading text-xl font-bold [font-stretch:92%]">Hubungi lebih dulu</h2>
+          <Link href="/prioritas" className="text-sm font-semibold hover:underline">Buka daftar prioritas</Link>
+        </div>
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+          {first.map((p) => (
+            <li key={p.student_id}>
+              <Link href={`/mahasiswa/${p.student_id}`} className="group relative block rounded-xl bg-card py-2.5 pr-3 pl-8 transition hover:-translate-y-0.5 hover:shadow-overlay">
+                <TierPin tier={p.tier} className="absolute top-3.5 left-3 ring-0" />
+                <span className="flex items-baseline justify-between gap-2">
+                  <b className="font-mono text-[13px] font-semibold">{p.students.source_id}</b>
+                  <span className="font-mono text-[13px] font-semibold">{fmtProb(p.probability)}</span>
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {fmtModule(p.code_module)} · {ACTION_LABELS[p.recommended_action] ?? p.recommended_action}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }
 

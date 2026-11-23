@@ -36,7 +36,7 @@ async function Worklist({ searchParams }: Pick<PageProps<"/prioritas">, "searchP
   ]);
   const header = (
     <PageHeader
-      title="Daftar Prioritas"
+      title="Hubungi dari atas: urutannya mengikuti probabilitas terkalibrasi."
       description={
         cohort
           ? `Mahasiswa ter-flag di ${cohort.name}, diurutkan dari probabilitas tertinggi.`
@@ -61,7 +61,7 @@ async function Worklist({ searchParams }: Pick<PageProps<"/prioritas">, "searchP
   return (
     <>
       {header}
-      <div className="flex flex-col gap-4 rounded-lg border bg-card p-6">
+      <div className="sheet flex flex-col gap-4 p-6">
         <WorklistFiltersBar filters={filters} modules={modules} />
         <p className="text-sm text-muted-foreground">
           {fmtInt(total)} mahasiswa ter-flag{total > 0 && `, menampilkan ${fmtInt(offset + 1)} sampai ${fmtInt(offset + rows.length)}`}.

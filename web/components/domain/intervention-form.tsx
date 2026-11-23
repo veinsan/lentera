@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ACTION_LABELS, CONTACT_STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/client";
 
-const SELECT = "h-8 w-full rounded-md border bg-card px-2 text-sm focus-visible:outline-2 focus-visible:outline-ring";
+const SELECT = "h-10 w-full rounded-xl border border-input bg-card px-3 text-sm focus-visible:outline-2 focus-visible:outline-ring";
 
 /** Logs one contact. RLS allows the insert only for students in the user's modules; advisor_id defaults to auth.uid(). */
 export function InterventionForm({
@@ -95,7 +95,7 @@ export function InterventionForm({
           name="notes"
           rows={3}
           maxLength={2000}
-          className="rounded-md border bg-card px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-ring"
+          className="rounded-xl border border-input bg-card px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-ring"
         />
       </div>
       <div className="flex items-center justify-end gap-3">

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T00:00:00Z",
+  "title": "Design System: Lentera",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "primary", "displayName": "Noticeboard Ink", "canonical": "#16140f", "tonalRamp": ["#16140f", "#34302a", "#4b463e", "#625d52", "#857f72", "#aaa395", "#d0c9bb", "#f3efe7"] },
+      "lime": { "role": "primary", "displayName": "Highlighter Lime", "canonical": "#d9f24a", "tonalRamp": ["#2a3008", "#454f0f", "#636f17", "#83921f", "#a6b92a", "#c6dd38", "#d9f24a", "#eef9b8"] },
+      "slate": { "role": "secondary", "displayName": "Rail Slate", "canonical": "#1f2b2e", "tonalRamp": ["#0f1617", "#1f2b2e", "#2c3a3e", "#3a4a4f", "#5c6e72", "#8a9a9d", "#bcc7c9", "#e6eced"] },
+      "putty": { "role": "neutral", "displayName": "Putty Board", "canonical": "#ece7dd", "tonalRamp": ["#2b2822", "#4a453b", "#6c665a", "#8f887a", "#b3ab9c", "#d9d1c1", "#ece7dd", "#f7f4ee"] },
+      "paper": { "role": "neutral", "displayName": "Pinned Paper", "canonical": "#fbfaf6", "tonalRamp": ["#2b2822", "#4a453b", "#6c665a", "#8f887a", "#b3ab9c", "#d9d1c1", "#ece7dd", "#fbfaf6"] },
+      "putty-deep": { "role": "neutral", "displayName": "Putty Deep", "canonical": "#e3dcce" },
+      "ink-muted": { "role": "neutral", "displayName": "Muted Ink", "canonical": "#625d52" },
+      "rule-strong": { "role": "neutral", "displayName": "Rule Strong", "canonical": "#cfc6b4" },
+      "risk-critical": { "role": "tertiary", "displayName": "Tier Kritis", "canonical": "#7a2610", "tonalRamp": ["#7a2610", "#b04a26", "#cf7448", "#e2a27a"] },
+      "risk-high": { "role": "tertiary", "displayName": "Tier Tinggi", "canonical": "#b04a26", "tonalRamp": ["#7a2610", "#b04a26", "#cf7448", "#e2a27a"] },
+      "risk-watch": { "role": "tertiary", "displayName": "Tier Pantau", "canonical": "#cf7448", "tonalRamp": ["#7a2610", "#b04a26", "#cf7448", "#e2a27a"] },
+      "risk-low": { "role": "tertiary", "displayName": "Tier Rendah", "canonical": "#e2a27a", "tonalRamp": ["#7a2610", "#b04a26", "#cf7448", "#e2a27a"] },
+      "chart-at-risk": { "role": "tertiary", "displayName": "Chart At Risk", "canonical": "#a93a1c" },
+      "chart-not-at-risk": { "role": "tertiary", "displayName": "Chart Not At Risk", "canonical": "#2f6db5" },
+      "chart-neutral": { "role": "tertiary", "displayName": "Chart Neutral", "canonical": "#9aa1ae" },
+      "uncertain": { "role": "tertiary", "displayName": "Uncertain Grey", "canonical": "#7a7f8c" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Numeral", "purpose": "The one lever result per screen, Archivo condensed to 80% width." },
+      "headline": { "displayName": "Finding", "purpose": "The screen's finding as a sentence, up to two numbers under the marker." },
+      "title": { "displayName": "Title", "purpose": "Panel and section titles." },
+      "body": { "displayName": "Board Body", "purpose": "All other text on the board screen (four-size scale)." },
+      "body-app": { "displayName": "App Body", "purpose": "Descriptions and table text on other screens." },
+      "label": { "displayName": "Label", "purpose": "Field labels, KPI labels, table headers, role buttons." },
+      "data": { "displayName": "Data", "purpose": "IDs, probabilities, counts, hours; tabular figures, id-ID formatting." }
+    },
+    "shadows": [
+      { "name": "sheet", "value": "0 1px 0 rgb(22 20 15 / 0.06), 0 14px 30px -18px rgb(22 20 15 / 0.28)", "purpose": "Every paper sheet at rest." },
+      { "name": "card-hairline", "value": "0 1px 0 rgb(22 20 15 / 0.06)", "purpose": "Student cards at rest on the board tray." },
+      { "name": "overlay", "value": "0 10px 28px -10px rgb(22 20 15 / 0.28)", "purpose": "Hover lift of student cards and role sheets; popovers." }
+    ],
+    "motion": [
+      { "name": "board-in", "value": "420ms cubic-bezier(0.16, 1, 0.3, 1), 22ms stagger, from opacity 0.45 and translateY(6px)", "purpose": "Student cards settle in when capacity changes; disabled under reduced motion." },
+      { "name": "plan-debounce", "value": "250ms", "purpose": "Delay before a capacity change recomputes the board." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The ink pill; the only loud button.",
+      "html": "<button class=\"ds-btn-primary\">Simpan rencana</button>",
+      "css": ".ds-btn-primary { height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 9999px; background: var(--primary, #16140f); color: var(--primary-foreground, #fbfaf6); font: 500 14px/1 var(--font-geist, Geist, sans-serif); cursor: pointer; transition: background 0.15s, transform 0.1s; } .ds-btn-primary:hover { background: var(--primary-hover, #34302a); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--ring, #1f2b2e); outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Paper pill with a strong rule stroke for secondary actions.",
+      "html": "<button class=\"ds-btn-outline\">Unduh CSV</button>",
+      "css": ".ds-btn-outline { height: 40px; padding: 0 16px; border: 1px solid var(--input, #cfc6b4); border-radius: 9999px; background: var(--card, #fbfaf6); color: var(--foreground, #16140f); font: 500 14px/1 var(--font-geist, Geist, sans-serif); cursor: pointer; transition: background 0.15s; } .ds-btn-outline:hover { background: var(--muted, #e3dcce); } .ds-btn-outline:focus-visible { outline: 2px solid var(--ring, #1f2b2e); outline-offset: 2px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Paper field, 20px corners, slate focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Cari ID mahasiswa\" />",
+      "css": ".ds-input { height: 40px; width: 260px; padding: 4px 12px; border: 1px solid var(--input, #cfc6b4); border-radius: 20px; background: var(--card, #fbfaf6); color: var(--foreground, #16140f); font: 400 14px/1.4 var(--font-geist, Geist, sans-serif); outline: none; transition: border-color 0.15s, box-shadow 0.15s; } .ds-input::placeholder { color: var(--muted-foreground, #625d52); } .ds-input:focus-visible { border-color: var(--ring, #1f2b2e); box-shadow: 0 0 0 3px rgb(31 43 46 / 0.5); }"
+    },
+    {
+      "name": "Slate Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Rail items on slate; the active item is raised with a lime icon.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-nav-active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1\"/></svg>Papan Minggu Ini</a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 6h18M3 12h18M3 18h12\"/></svg>Daftar Prioritas</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 4px; width: 208px; padding: 16px; background: var(--sidebar, #1f2b2e); border-radius: 24px; } .ds-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 20px; color: var(--slate-muted, #a4aba3); font: 500 14px/1.2 var(--font-geist, Geist, sans-serif); text-decoration: none; transition: background 0.15s, color 0.15s; } .ds-nav-item:hover { background: var(--slate-raised, #2c3a3e); color: var(--sidebar-foreground, #e9e6dd); } .ds-nav-item:focus-visible { outline: 2px solid var(--brand-accent, #d9f24a); outline-offset: 2px; } .ds-nav-active { background: var(--sidebar-accent, #2c3a3e); color: #fff; } .ds-nav-active svg { color: var(--brand-accent, #d9f24a); }"
+    },
+    {
+      "name": "Tier Pin Badge",
+      "kind": "chip",
+      "refersTo": "tier-pin",
+      "description": "Round tier pin plus its label; colour never stands alone.",
+      "html": "<span class=\"ds-tier\"><span class=\"ds-pin ds-pin-critical\"></span>Kritis</span> <span class=\"ds-tier\"><span class=\"ds-pin ds-pin-high\"></span>Tinggi</span> <span class=\"ds-tier\"><span class=\"ds-pin ds-pin-watch\"></span>Pantau</span> <span class=\"ds-tier\"><span class=\"ds-pin ds-pin-low\"></span>Rendah</span>",
+      "css": ".ds-tier { display: inline-flex; align-items: center; gap: 6px; margin-right: 12px; color: var(--foreground, #16140f); font: 600 12px/1 var(--font-geist, Geist, sans-serif); } .ds-pin { width: 10px; height: 10px; border-radius: 9999px; box-shadow: 0 0 0 2px var(--card, #fbfaf6); } .ds-pin-critical { background: var(--risk-critical, #7a2610); } .ds-pin-high { background: var(--risk-high, #b04a26); } .ds-pin-watch { background: var(--risk-watch, #cf7448); } .ds-pin-low { background: var(--risk-low, #e2a27a); }"
+    },
+    {
+      "name": "Finding Sheet",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "Pinned paper sheet with the finding headline and two marked numbers.",
+      "html": "<section class=\"ds-sheet\"><span class=\"ds-sheet-pin\"></span><h1 class=\"ds-finding\"><span class=\"ds-marker\">3.875</span> dari 6.502 mahasiswa ter-flag. Lima konselor menjangkau <span class=\"ds-marker\">353</span> yang benar-benar berisiko minggu ini.</h1><div class=\"ds-fact\"><b>1.583</b><span>tier kritis</span></div></section>",
+      "css": ".ds-sheet { position: relative; max-width: 640px; padding: 32px; background: var(--card, #fbfaf6); color: var(--foreground, #16140f); border-radius: 24px; box-shadow: var(--shadow-sheet, 0 1px 0 rgb(22 20 15 / 0.06), 0 14px 30px -18px rgb(22 20 15 / 0.28)); } .ds-sheet-pin { position: absolute; top: -6px; left: 50%; width: 16px; height: 16px; transform: translateX(-50%); border-radius: 9999px; background: var(--foreground, #16140f); box-shadow: inset -3px -3px 0 rgb(255 255 255 / 0.18); } .ds-finding { margin: 0; font: 700 44px/1.06 var(--font-archivo, Archivo, sans-serif); font-stretch: 88%; letter-spacing: -0.025em; } .ds-marker { background: linear-gradient(transparent 58%, var(--brand-accent, #d9f24a) 58%, var(--brand-accent, #d9f24a) 94%, transparent 94%); padding-inline: 0.08em; box-decoration-break: clone; -webkit-box-decoration-break: clone; } .ds-fact { display: flex; flex-direction: column; margin-top: 24px; } .ds-fact b { font: 600 20px/1.25 var(--font-geist-mono, 'Geist Mono', monospace); font-variant-numeric: tabular-nums; } .ds-fact span { color: var(--muted-foreground, #625d52); font: 400 13px/1.375 var(--font-geist, Geist, sans-serif); }"
+    },
+    {
+      "name": "Capacity Panel",
+      "kind": "custom",
+      "refersTo": "slate-panel",
+      "description": "Flat slate panel with a stepper and the lime display numeral.",
+      "html": "<section class=\"ds-slate\"><h2 class=\"ds-slate-title\">Kapasitas konselor</h2><div class=\"ds-stepper\"><p>Konselor</p><div><button aria-label=\"Kurangi\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M5 12h14\"/></svg></button><output>5</output><button aria-label=\"Tambah\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 5v14M5 12h14\"/></svg></button></div></div><p class=\"ds-numeral\">+59</p></section>",
+      "css": ".ds-slate { width: 300px; padding: 24px; border-radius: 24px; background: var(--slate, #1f2b2e); color: var(--slate-foreground, #e9e6dd); } .ds-slate-title { margin: 0 0 16px; font: 700 20px/1.25 var(--font-archivo, Archivo, sans-serif); font-stretch: 92%; } .ds-stepper { padding: 12px; border-radius: 20px; background: var(--slate-raised, #2c3a3e); } .ds-stepper p { margin: 0; color: var(--slate-muted, #a4aba3); font: 400 13px/1.375 var(--font-geist, Geist, sans-serif); } .ds-stepper div { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; } .ds-stepper button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 9999px; background: transparent; color: var(--slate-foreground, #e9e6dd); cursor: pointer; } .ds-stepper button:hover { background: var(--slate-line, #3a4a4f); } .ds-stepper button:focus-visible { outline: 2px solid var(--brand-accent, #d9f24a); outline-offset: 2px; } .ds-stepper output { color: #fff; font: 600 20px/1.25 var(--font-geist-mono, 'Geist Mono', monospace); } .ds-numeral { margin: 16px 0 0; color: var(--brand-accent, #d9f24a); font: 800 64px/1 var(--font-archivo, Archivo, sans-serif); font-stretch: 80%; letter-spacing: -0.03em; }"
+    },
+    {
+      "name": "Student Card",
+      "kind": "card",
+      "refersTo": "student-card",
+      "description": "Paper card on the board tray: tier pin, ID, probability, module and action.",
+      "html": "<div class=\"ds-tray\"><a class=\"ds-student\" href=\"#\"><span class=\"ds-student-pin\"></span><span class=\"ds-student-top\"><b>31249</b><b>0,99+</b></span><span class=\"ds-student-sub\">M05 · Cek akses LMS</span></a><div class=\"ds-hole\">Sisa 45 menit</div></div>",
+      "css": ".ds-tray { display: flex; flex-direction: column; gap: 8px; width: 220px; padding: 20px; border-radius: 24px; background: var(--secondary, #e3dcce); } .ds-student { position: relative; display: block; padding: 10px 12px 10px 32px; border-radius: 20px; background: var(--card, #fbfaf6); color: var(--foreground, #16140f); text-decoration: none; box-shadow: 0 1px 0 rgb(22 20 15 / 0.06); transition: transform 0.15s, box-shadow 0.15s; } .ds-student:hover { transform: translateY(-2px); box-shadow: var(--shadow-overlay, 0 10px 28px -10px rgb(22 20 15 / 0.28)); } .ds-student:focus-visible { outline: 2px solid var(--ring, #1f2b2e); outline-offset: 2px; } .ds-student-pin { position: absolute; top: 14px; left: 12px; width: 10px; height: 10px; border-radius: 9999px; background: var(--risk-critical, #7a2610); } .ds-student:hover .ds-student-pin { box-shadow: 0 0 0 2px var(--brand-accent, #d9f24a); } .ds-student-top { display: flex; justify-content: space-between; font: 600 13px/1.375 var(--font-geist-mono, 'Geist Mono', monospace); font-variant-numeric: tabular-nums; } .ds-student-sub { display: block; color: var(--muted-foreground, #625d52); font: 400 13px/1.375 var(--font-geist, Geist, sans-serif); } .ds-hole { display: grid; place-items: center; height: 44px; border: 1.5px dashed var(--input, #cfc6b4); border-radius: 20px; color: var(--muted-foreground, #625d52); font: 400 13px/1 var(--font-geist, Geist, sans-serif); }"
+    },
+    {
+      "name": "Role Switch",
+      "kind": "custom",
+      "refersTo": "role-switch-active",
+      "description": "One-click demo role switch on slate; the selected role is lime.",
+      "html": "<div class=\"ds-roles\"><button class=\"ds-role ds-role-on\" aria-pressed=\"true\">Koordinator</button><button class=\"ds-role\">Konselor</button><button class=\"ds-role\">Admin</button></div>",
+      "css": ".ds-roles { display: grid; gap: 2px; width: 200px; padding: 4px; border-radius: 20px; background: var(--slate, #1f2b2e); } .ds-role { padding: 6px 10px; border: 0; border-radius: 16px; background: transparent; color: var(--slate-muted, #a4aba3); font: 600 12px/1.33 var(--font-geist, Geist, sans-serif); text-align: left; cursor: pointer; transition: background 0.15s, color 0.15s; } .ds-role:hover { background: var(--slate-line, #3a4a4f); color: var(--slate-foreground, #e9e6dd); } .ds-role:focus-visible { outline: 2px solid var(--brand-accent, #d9f24a); outline-offset: 2px; } .ds-role-on, .ds-role-on:hover { background: var(--brand-accent, #d9f24a); color: var(--brand-accent-foreground, #16140f); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Week 4 Noticeboard",
+    "overview": "Lentera is a campus noticeboard for one week. The ground is warm putty, every piece of content is a paper sheet pinned to it, and the controls live on a dark slate rail and slate panels beside the board. Flagged students are small paper cards with a round tier pin; each advisor is a column whose open capacity shows as a dashed pin hole. One lime highlighter marks the numbers that matter, the way a coordinator would mark a printed list.\n\nThe interface is dense but calm. It ranks by weight, case, and family rather than by many sizes: condensed Archivo carries findings and the one big numeral, Geist carries the interface, Geist Mono carries every ID, count, and probability. Colour is spent sparingly: ink on paper does the work, the tier ramp carries risk, and lime appears only where the eye should land first. The screen is read from a projector, so contrast and size hold up at distance.\n\nThe previous navy, amber, and Plus Jakarta Sans system is retired. None of it remains in code and none of it should return.",
+    "keyCharacteristics": [
+      "Putty board, paper sheets with a soft pinned shadow, slate for controls and navigation.",
+      "One lime highlighter: a half-height marker stroke behind key numbers on paper, a solid fill on slate.",
+      "Tier shown as a round pin plus a label, never colour alone.",
+      "Condensed Archivo for findings and numerals; Geist Mono with tabular figures for all data.",
+      "Indonesian interface copy with id-ID number formatting (comma decimals, dot thousands)."
+    ],
+    "rules": [
+      { "name": "The One Highlighter Rule", "body": "Lime is the only accent. On paper it is never a fill or a text colour, only the stroke behind ink; on slate it may fill a selected control or set one numeral. If two lime marks compete for the first look, remove one.", "section": "colors" },
+      { "name": "The Pin Plus Label Rule", "body": "A tier is always a round pin with its Indonesian label nearby (legend, screen reader text, or badge). Colour alone never carries tier identity.", "section": "colors" },
+      { "name": "The Validated Pair Rule", "body": "Chart colours mean the same thing on every screen: chart-at-risk is at risk, chart-not-at-risk is not at risk, chart-neutral is everything else.", "section": "colors" },
+      { "name": "The Four Sizes Rule", "body": "The board screen uses exactly four sizes: 64, 44, 20, 13 px. Rank inside a size by weight, case, and family, not by adding a fifth size.", "section": "typography" },
+      { "name": "The Condensed Numeral Rule", "body": "Big standalone numbers are Archivo 800 at reduced width with tight tracking (-0.03em). Inline data numbers are Geist Mono.", "section": "typography" },
+      { "name": "The Probability Format Rule", "body": "Probabilities in tables and cards show two decimals with an id-ID comma (0,87); 0.995 and above prints as 0,99+, never as certainty. In sentences, use percentages. Scenario results are always labelled \"Skenario model, bukan efek kausal\".", "section": "typography" },
+      { "name": "The Below The Line Rule", "body": "Capacity never overflows a column. Students who do not fit are counted below a dashed rule under the board, not squeezed into it.", "section": "layout" },
+      { "name": "The Pinned Sheet Rule", "body": "A primary sheet may carry a pin: a 14 to 16px ink dot centred on its top edge. The pin is the sheet's only ornament. Slate never casts a shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** set every screen on putty with content on paper sheets and controls on slate.",
+      "**Do** put at most two key numbers of a finding under the lime marker.",
+      "**Do** show tier as a pin plus a label, using the validated ramp unchanged.",
+      "**Do** set IDs, counts, and probabilities in Geist Mono with tabular figures and id-ID formatting.",
+      "**Do** keep the board screen to 64, 44, 20, and 13 px.",
+      "**Do** mark empty capacity with a dashed pin hole and send overflow below the dashed line.",
+      "**Do** label every scenario result \"Skenario model, bukan efek kausal\"."
+    ],
+    "donts": [
+      "**Don't** use lime as a fill or text colour on paper, or add a second accent colour.",
+      "**Don't** let colour alone identify a tier or a chart series.",
+      "**Don't** print a probability as 1,00; use 0,99+.",
+      "**Don't** give slate surfaces shadows or give sheets borders.",
+      "**Don't** use hard offset shadows; depth is the soft pinned sheet only.",
+      "**Don't** bring back the retired navy, amber, or Plus Jakarta Sans system."
+    ]
+  }
+}

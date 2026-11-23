@@ -61,12 +61,14 @@ async function StudentProfilePage({ params }: Pick<PageProps<"/mahasiswa/[id]">,
         }
       />
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="rounded-lg border border-l-4 border-l-brand-accent bg-card p-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="sheet p-5">
             <p className="text-xs font-semibold text-muted-foreground">Probabilitas berisiko</p>
             <p className="mt-1 flex items-center gap-3">
               {/* One decimal so 0.996 does not read as a certain 100%. */}
-              <span className="font-mono text-[1.75rem] font-semibold leading-tight">{fmtPct(pred.probability, 1)}</span>
+              <span className="text-[2.5rem] display-numeral">
+                <span className="marker">{fmtPct(pred.probability, 1)}</span>
+              </span>
               <TierBadge tier={pred.tier} />
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -74,7 +76,7 @@ async function StudentProfilePage({ params }: Pick<PageProps<"/mahasiswa/[id]">,
               {pred.uncertain && " · zona tidak pasti, tinjau dengan percakapan"}
             </p>
           </div>
-          <div className="rounded-lg border bg-card p-4">
+          <div className="sheet p-5">
             <p className="text-xs font-semibold text-muted-foreground">Archetype dan tindakan</p>
             <div className="mt-2">
               <ArchetypeChip archetype={pred.archetype} />
@@ -87,7 +89,7 @@ async function StudentProfilePage({ params }: Pick<PageProps<"/mahasiswa/[id]">,
               </p>
             )}
           </div>
-          <div className="rounded-lg border bg-card p-4">
+          <div className="sheet p-5">
             <p className="text-xs font-semibold text-muted-foreground">Kontak terakhir</p>
             <p className="mt-2 text-sm font-semibold">{last ? CONTACT_STATUS_LABELS[last.contact_status] : NOT_CONTACTED}</p>
             <p className="text-xs text-muted-foreground">
@@ -98,7 +100,7 @@ async function StudentProfilePage({ params }: Pick<PageProps<"/mahasiswa/[id]">,
           </div>
         </div>
 
-        <div className="grid grid-cols-[3fr_2fr] gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_2fr]">
           <Section title="Mengapa mahasiswa ini ter-flag" description="Kontribusi SHAP per sinyal: merah menaikkan risiko, biru menurunkannya.">
             <div className="flex flex-col gap-6">
               <ReasonList title="Sinyal yang bisa ditindaklanjuti" items={pred.reasons.actionable} maxAbs={maxAbs} />
@@ -143,7 +145,7 @@ async function StudentProfilePage({ params }: Pick<PageProps<"/mahasiswa/[id]">,
           )}
         </Section>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Section title="Catat intervensi">
             <InterventionForm studentId={student.id} codeModule={student.code_module} defaultAction={pred.recommended_action} />
           </Section>
@@ -165,7 +167,7 @@ function History({ items, userId }: { items: Intervention[]; userId: string }) {
   return (
     <ol className="flex flex-col gap-3">
       {items.map((i) => (
-        <li key={i.id} className="rounded-md border p-3 text-sm">
+        <li key={i.id} className="rounded-xl bg-muted/60 p-3 text-sm">
           <p className="flex flex-wrap items-center gap-x-2 font-semibold">
             {ACTION_LABELS[i.action_type] ?? i.action_type}
             <span className="text-xs font-normal text-muted-foreground">· {CONTACT_STATUS_LABELS[i.contact_status]}</span>

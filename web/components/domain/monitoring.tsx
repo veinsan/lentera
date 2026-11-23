@@ -44,7 +44,7 @@ export async function DriftPanel() {
       title="Drift data"
       description={`${latest.name}: ${fmtInt(drift.n)} mahasiswa dibandingkan dengan ${fmtInt(drift.reference_n)} baris train. PSI di bawah ${fmtNum(moderate, 1)} stabil, ${fmtNum(moderate, 1)} sampai ${fmtNum(shift, 1)} perlu dipantau, di atas ${fmtNum(shift, 1)} bergeser.`}
     >
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             <span>
@@ -102,7 +102,7 @@ export async function RequestPanel() {
         <EmptyState icon={Activity} title="Belum ada request tercatat" description="Setiap panggilan API menulis satu baris log." />
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <KpiCard label="Request" value={fmtInt(res.data.total)} note={`${fmtInt(res.data.client_errors)} ditolak (4xx)`} />
             <KpiCard label="Error server (5xx)" value={fmtPct(res.data.error_rate, 1)} note={`${fmtInt(res.data.server_errors)} request`} />
             <KpiCard label="Latency p50" value={`${fmtInt(res.data.latency_ms?.p50)} ms`} note="Waktu proses di API" />

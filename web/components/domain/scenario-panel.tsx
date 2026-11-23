@@ -30,7 +30,7 @@ export function ScenarioPanel({ studentId, cf }: { studentId: number; cf: Counte
   }
 
   return (
-    <div className="rounded-md border border-uncertain bg-muted p-4">
+    <div className="rounded-2xl border border-dashed border-uncertain bg-muted p-5">
       <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
         <FlaskConical className="size-4" aria-hidden />
         Skenario model, bukan efek kausal

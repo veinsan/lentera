@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Unggah Kohort"
+        title="Data minggu ke-4 diperiksa dulu, baru dinilai."
         description="Unggah CSV minggu ke-4 dengan skema test.csv DSCO, periksa kualitas data, lalu nilai kohort."
       />
       <Suspense fallback={null}>

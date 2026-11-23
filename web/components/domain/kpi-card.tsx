@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+/** A fact on paper: label, a condensed numeral, a note. `highlight` marks the number with the lime stroke. */
 export function KpiCard({
   label,
   value,
@@ -12,10 +13,12 @@ export function KpiCard({
   highlight?: boolean;
 }) {
   return (
-    <div className={cn("rounded-lg border bg-card p-4", highlight && "border-l-4 border-l-brand-accent")}>
+    <div className="sheet px-5 py-4">
       <p className="text-xs font-semibold text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-[1.75rem] font-semibold leading-tight">{value}</p>
-      {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
+      <p className="mt-2 text-[2rem] display-numeral">
+        <span className={cn(highlight && "marker")}>{value}</span>
+      </p>
+      {note && <p className="mt-1.5 text-xs text-muted-foreground">{note}</p>}
     </div>
   );
 }

@@ -57,7 +57,7 @@ function Select({
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
-        className="h-8 min-w-36 rounded-md border bg-card px-2 text-sm font-normal text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+        className="h-10 min-w-36 rounded-xl border border-input bg-card px-3 text-sm font-normal text-foreground focus-visible:outline-2 focus-visible:outline-ring"
       >
         <option value="">Semua</option>
         {options.map(([v, l]) => (

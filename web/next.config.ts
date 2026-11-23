@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  devIndicators: false, // the dev badge covered the rail footer in every capture
   partialPrefetching: true,
   turbopack: {
     rules: {

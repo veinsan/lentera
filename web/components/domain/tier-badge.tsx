@@ -3,17 +3,22 @@ import type { Tier } from "@/lib/api";
 
 export const TIER_LABELS: Record<Tier, string> = { low: "Rendah", watch: "Pantau", high: "Tinggi", critical: "Kritis" };
 
-// Text color per tier follows the contrast checks recorded in DESIGN.md.
-const STYLES: Record<Tier, string> = {
-  low: "bg-risk-low text-on-risk-light",
-  watch: "bg-risk-watch text-on-risk-light",
-  high: "bg-risk-high text-on-risk-dark",
-  critical: "bg-risk-critical text-on-risk-dark",
+export const PIN: Record<Tier, string> = {
+  low: "bg-risk-low",
+  watch: "bg-risk-watch",
+  high: "bg-risk-high",
+  critical: "bg-risk-critical",
 };
+
+/** A tier is a round pin plus its label, so identity never rests on colour alone. */
+export function TierPin({ tier, className }: { tier: Tier; className?: string }) {
+  return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full ring-2 ring-card", PIN[tier], className)} />;
+}
 
 export function TierBadge({ tier }: { tier: Tier }) {
   return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-0.5 font-sans text-xs font-semibold", STYLES[tier])}>
+    <span className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold whitespace-nowrap">
+      <TierPin tier={tier} />
       {TIER_LABELS[tier]}
     </span>
   );

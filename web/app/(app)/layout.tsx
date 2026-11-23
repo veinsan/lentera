@@ -4,7 +4,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <>
       <Sidebar />
-      <main className="ml-60 min-h-screen p-8">{children}</main>
+      <main className="min-h-screen p-4 sm:p-6 lg:ml-60 lg:p-8">{children}</main>
     </>
   );
 }

@@ -18,7 +18,7 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Insight Course"
+        title="Modul tanpa asesmen yang dinilai di minggu ke-4 paling sulit diprediksi."
         description="Apa yang bisa diubah di desain course agar risiko terdeteksi lebih awal, per modul."
       />
       <Suspense fallback={<p className="text-sm text-muted-foreground">Memuat insight...</p>}>
@@ -40,7 +40,7 @@ async function InsightContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <KpiCard highlight label="Modul dengan rekomendasi" value={`${flagged} dari ${modules.length}`} note={insights.source} />
         <KpiCard label="Tingkat at-risk seluruh modul" value={fmtPct(insights.overall.at_risk_rate, 1)} />
         <KpiCard
@@ -54,7 +54,7 @@ async function InsightContent() {
         <RiskHeatmap insights={insights} />
       </Section>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {modules.map(([code, m]) => (
           <ModuleCard key={code} code={code} module={m} yMax={yMax} cutoffs={insights.cutoffs} />
         ))}
@@ -83,7 +83,7 @@ function ModuleCard({
   ];
   return (
     <Section title={`Modul ${fmtModule(code)}`}>
-      <dl className="grid grid-cols-5 gap-2">
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {stats.map((s) => (
           <div key={s.label}>
             <dt className="text-xs text-muted-foreground">{s.label}</dt>

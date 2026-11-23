@@ -20,7 +20,8 @@ export function fmtInt(value: number | null | undefined): string {
 }
 
 /** Probabilities in tables: two decimals (DESIGN.md Typography). */
-export const fmtProb = (value: number | null | undefined) => fmtNum(value, 2);
+// Two decimals, but a calibrated probability never prints as certainty: 0.995 and above shows as "0,99+".
+export const fmtProb = (value: number | null | undefined) => (value != null && value >= 0.995 ? "0,99+" : fmtNum(value, 2));
 
 export function fmtModule(code: string): string {
   return code.toUpperCase();
