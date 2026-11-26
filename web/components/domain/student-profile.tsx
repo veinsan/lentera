@@ -12,7 +12,7 @@ import { TierBadge } from "@/components/domain/tier-badge";
 import { getCounterfactual, getInsights } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth";
 import { getStudentProfile, type Intervention } from "@/lib/data";
-import { fmtInt, fmtModule, fmtPct } from "@/lib/format";
+import { fmtInt, fmtModule, fmtPct, fmtProbPct } from "@/lib/format";
 import { ACTION_LABELS, CONTACT_STATUS_LABELS, ISSUE_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
@@ -52,8 +52,7 @@ export async function StudentProfileView({ id, panel = false }: { id: string; pa
             </p>
           </div>
           <div className="text-right">
-            {/* One decimal so 0.996 does not read as a certain 100%. */}
-            <p className="numeral text-[2.6rem] text-ink">{fmtPct(pred.probability, 1)}</p>
+            <p className="numeral text-[2.6rem] text-ink">{fmtProbPct(pred.probability)}</p>
             <p className="mt-1 text-xs text-ink-3">probabilitas berisiko</p>
           </div>
         </div>

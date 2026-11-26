@@ -23,6 +23,9 @@ export function fmtInt(value: number | null | undefined): string {
 // Two decimals, but a calibrated probability never prints as certainty: 0.995 and above shows as "0,99+".
 export const fmtProb = (value: number | null | undefined) => (value != null && value >= 0.995 ? "0,99+" : fmtNum(value, 2));
 
+/** A probability as a one-decimal percent that never prints as a certain 100,0%. */
+export const fmtProbPct = (value: number | null | undefined) => (value != null && value >= 0.9995 ? ">99,9%" : fmtPct(value, 1));
+
 export function fmtModule(code: string): string {
   return code.toUpperCase();
 }

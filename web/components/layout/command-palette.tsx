@@ -7,6 +7,7 @@ import { Modal } from "@heroui/react";
 import { ArrowRight, CornerDownLeft, LogOut, Search, UserRound } from "lucide-react";
 import { DEMO_ROLES } from "@/lib/demo";
 import { signInAs, signOut } from "@/lib/demo-actions";
+import { findStudent } from "@/lib/student-actions";
 import { ARCHETYPE_LABELS } from "@/lib/labels";
 import { NAV_ITEMS } from "@/lib/nav";
 import type { Role } from "@/lib/auth";
@@ -83,6 +84,14 @@ export function CommandPalette({ allowed, role }: { allowed: string[]; role: Rol
     router.push(href);
   };
   const id = query.trim().match(/^\d{1,9}$/)?.[0];
+  const [missing, setMissing] = useState<string | null>(null);
+  // The ID on screen is the DSCO id (source_id); the profile route takes the database row id.
+  const openStudent = (sourceId: string) =>
+    start(async () => {
+      const row = await findStudent(Number(sourceId));
+      if (row == null) setMissing(sourceId);
+      else go(`/mahasiswa/${row}`);
+    });
 
   return (
     <Modal.Backdrop isOpen={open} onOpenChange={setOpen} variant="blur">
@@ -106,8 +115,16 @@ export function CommandPalette({ allowed, role }: { allowed: string[]; role: Rol
               </Command.Empty>
               {id && (
                 <Command.Group heading="Mahasiswa">
-                  <Item value={`mahasiswa ${id}`} onSelect={() => go(`/mahasiswa/${id}`)} icon={<UserRound className="size-4" />}>
-                    Buka mahasiswa <span className="font-mono font-semibold">{id}</span>
+                  <Item value={`mahasiswa ${id}`} onSelect={() => openStudent(id)} icon={<UserRound className="size-4" />}>
+                    {missing === id ? (
+                      <span>
+                        Mahasiswa <span className="font-mono font-semibold">{id}</span> tidak ada di kohort terbaru atau di luar modul Anda
+                      </span>
+                    ) : (
+                      <span>
+                        Buka mahasiswa <span className="font-mono font-semibold">{id}</span>
+                      </span>
+                    )}
                   </Item>
                 </Command.Group>
               )}
@@ -151,7 +168,7 @@ export function CommandPalette({ allowed, role }: { allowed: string[]; role: Rol
                 <CornerDownLeft className="size-3.5" aria-hidden /> buka
               </span>
               <span>↑ ↓ pilih</span>
-              <span>1 sampai 6 pindah halaman</span>
+              <span>1 sampai {NAV_ITEMS.length} pindah halaman</span>
             </div>
           </Command>
         </Modal.Dialog>
