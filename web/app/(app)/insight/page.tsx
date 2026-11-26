@@ -4,6 +4,7 @@ import { CircleAlert } from "lucide-react";
 import { HeatmapTable } from "@/components/charts/heatmap-table";
 import { WeeklyChart } from "@/components/charts/weekly-chart";
 import { ApiError } from "@/components/domain/api-error";
+import { CampusActions } from "@/components/domain/campus-actions";
 import { Section } from "@/components/domain/section";
 import { Stat } from "@/components/domain/stat";
 import { PageHeader } from "@/components/layout/page-header";
@@ -21,8 +22,8 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Modul tanpa asesmen yang dinilai di minggu ke-4 paling sulit diprediksi."
-        description="Apa yang bisa diubah di desain course agar risiko terdeteksi lebih awal, per modul, dari data train DSCO."
+        title="Tiga sinyal di empat minggu pertama bisa langsung dijadikan aturan kampus."
+        description="Aturan yang bisa dipasang pimpinan kampus, lalu apa yang bisa diubah di desain course agar risiko terdeteksi lebih awal, per modul, dari data train DSCO."
       />
       <Suspense fallback={<div className="plate h-40 animate-pulse" aria-label="Memuat insight" />}>
         <InsightContent />
@@ -55,6 +56,8 @@ async function InsightContent() {
         <Stat label="Tingkat at-risk seluruh modul" value={insights.overall.at_risk_rate} format="pct1" />
         <Stat label="Mahasiswa di zona tidak pasti" value={insights.overall.uncertain_share} format="pct1" note="butuh tinjauan manusia sebelum bertindak" />
       </section>
+
+      <CampusActions />
 
       <Section title="Tingkat at-risk per course" description="Modul dan presentation pada data train. Sel kosong berarti course tersebut tidak ada.">
         <RiskHeatmap insights={insights} />

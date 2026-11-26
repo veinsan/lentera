@@ -72,6 +72,7 @@ web/
       mahasiswa/[id]/      Student profile as a full page (direct link or refresh)
       insight/             Course insights
       unggah/              Cohort upload and end-of-semester outcome upload
+      panduan/             In-app guide: one-minute demo path, weekly workflow, usage principles
       model/               Model and monitoring (tabs: model card, test cohort, final outcomes, fairness, drift, API health)
   components/
     ui/                    DataTable (HeroUI table from column definitions) and LinkButton
@@ -81,7 +82,7 @@ web/
     charts/                Recharts wrappers that apply chart tokens, plus the HTML heatmap and segmented bar
     domain/                Section, stat, tier badge, archetype chip, student profile and panel, planner, upload, monitoring, outcome evaluation and impact
   lib/
-    nav.ts                 Sidebar items and presenter shortcuts (1 to 6)
+    nav.ts                 Sidebar items and presenter shortcuts (1 to 7)
     landing.ts             Typed view of generated/landing.json (api/scripts/build_landing.py)
     sky.ts                 Cohort sky shape and the night tier colours
     utils.ts               cn() class merging

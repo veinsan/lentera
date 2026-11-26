@@ -14,6 +14,10 @@ LOW_SCORE = 60
 
 ARCHETYPES = ["silent", "no_lms_record", "missed_submission", "low_score", "fading", "engaged"]
 
+# Cost scenario defaults for the planner (rupiah per semester). Assumptions, not data: users override them per plan,
+# and the interface labels every number built from them as a scenario.
+ECONOMICS = dict(cost_per_student=350_000, tuition=7_500_000, success_rate=0.2)
+
 # Minutes and effectiveness are planner defaults; users override them per plan.
 PLAYBOOK = {
     "silent": dict(

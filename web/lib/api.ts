@@ -39,7 +39,11 @@ export type PlanResult = {
     unplaced: number;
   };
   rules: { threshold: number; tiers: { tier: Tier; min_probability: number }[] };
+  /** Cost scenario defaults from api/app/rules.py ECONOMICS; absent on an older API. */
+  economics?: Economics;
 };
+
+export type Economics = { cost_per_student: number; tuition: number; success_rate: number };
 
 export type DriftStatus = "stable" | "moderate" | "shift";
 

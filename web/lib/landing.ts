@@ -38,7 +38,20 @@ export type Landing = {
     plan_contacted: number;
     plan_expected: number;
     plan_at_risk: number;
+    /** Students in the test cohort whose final outcome was at risk. */
+    at_risk: number;
+    /** Share of each tier, and of each archetype, whose final outcome was at risk. */
+    tier_at_risk: Record<string, number>;
+    archetype_at_risk: Record<string, number>;
   } | null;
+  /** Behavioural triggers with their historical at-risk rate on the labelled training data (build_landing.py). */
+  findings: {
+    early_day: number;
+    train_n: number;
+    train_rate: number;
+    triggers: { code: "no_submission" | "no_lms" | "stopped_early"; n_train: number; rate: number; rate_rest: number; n_cohort: number }[];
+    pilot: { modules: string[]; critical: number };
+  };
   quality: { rows: number; status: string; repairs: { code: string; count: number }[] };
   plan: { advisors: number; hours: number; contacts: number; reached: number; marginal: number; automated: number; waiting: number };
   sky: Sky;

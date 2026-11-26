@@ -26,3 +26,12 @@ export const fmtProb = (value: number | null | undefined) => (value != null && v
 export function fmtModule(code: string): string {
   return code.toUpperCase();
 }
+
+/** Rupiah in words for scenario figures: Rp350.000, Rp7,5 juta, Rp1,2 miliar. */
+export function fmtRp(value: number | null | undefined): string {
+  if (value == null) return EMPTY;
+  const abs = Math.abs(value);
+  const [div, unit] = abs >= 1e9 ? [1e9, " miliar"] : abs >= 1e6 ? [1e6, " juta"] : [1, ""];
+  const n = new Intl.NumberFormat("id-ID", { maximumFractionDigits: div === 1 ? 0 : 1 }).format(abs / div);
+  return `${value < 0 ? "-" : ""}Rp${n}${unit}`;
+}

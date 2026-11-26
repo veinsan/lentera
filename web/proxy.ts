@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // App routes that need a session. Anything else (landing, sign-in, demo links, unknown paths) passes through, so an
 // unknown URL shows the 404 page instead of the sign-in page.
-const APP_ROUTES = ["/dashboard", "/prioritas", "/rencana", "/insight", "/model", "/unggah", "/mahasiswa"];
+const APP_ROUTES = ["/dashboard", "/prioritas", "/rencana", "/insight", "/model", "/unggah", "/mahasiswa", "/panduan"];
 const PROTECTED = (path: string) => APP_ROUTES.some((r) => path === r || path.startsWith(`${r}/`));
 
 /**

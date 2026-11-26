@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { TableBody, TableCell, TableColumn, TableContent, TableHeader, TableRoot, TableRow, TableScrollContainer } from "@heroui/react";
+import { Fragment, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { DataTableClient } from "./data-table-client";
 
 export type Column<T> = {
   id: string;
@@ -12,8 +12,8 @@ export type Column<T> = {
 };
 
 /**
- * HeroUI (React Aria) table from column definitions. Named parts, not Table.X, so server pages can render it
- * (a server component cannot dot into a client module). rowHref turns whole rows into router links.
+ * HeroUI (React Aria) table from column definitions. Cells are computed here, so server pages can pass cell
+ * functions; the table is built in DataTableClient. rowHref turns whole rows into router links.
  */
 export function DataTable<T>({
   label,
@@ -32,39 +32,13 @@ export function DataTable<T>({
   className?: string;
   dense?: boolean;
 }) {
-  const hasHeader = columns.some((c) => c.rowHeader);
   return (
-    <TableRoot
-      variant="secondary"
-      className={cn("lentera-table", dense && "lentera-table--dense", rowHref && "lentera-table--links", className)}
-    >
-      <TableScrollContainer>
-        <TableContent aria-label={label}>
-          <TableHeader>
-            {columns.map((c, i) => (
-              <TableColumn
-                key={c.id}
-                id={c.id}
-                isRowHeader={c.rowHeader ?? (!hasHeader && i === 0)}
-                className={cn(c.align === "end" && "text-end", c.className)}
-              >
-                {c.label}
-              </TableColumn>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {rows.map((r) => (
-              <TableRow key={rowId(r)} id={rowId(r)} href={rowHref?.(r)}>
-                {columns.map((c) => (
-                  <TableCell key={c.id} className={cn(c.align === "end" && "text-end tabular-nums", c.className)}>
-                    {c.cell(r)}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </TableContent>
-      </TableScrollContainer>
-    </TableRoot>
+    <DataTableClient
+      label={label}
+      columns={columns.map(({ id, label, align, rowHeader, className }) => ({ id, label, align, rowHeader, className }))}
+      rows={rows.map((r) => ({ id: rowId(r), href: rowHref?.(r), cells: columns.map((c) => <Fragment key={c.id}>{c.cell(r)}</Fragment>) }))}
+      links={!!rowHref}
+      className={cn(dense && "lentera-table--dense", className)}
+    />
   );
 }

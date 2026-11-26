@@ -9,9 +9,9 @@ import { ReachCurveChart } from "@/components/charts/reach-curve-chart";
 import { Section } from "@/components/domain/section";
 import { Num, Stat } from "@/components/domain/stat";
 import { TIER_LABELS, TierDot } from "@/components/domain/tier-badge";
-import type { PlanResult, PlaybookRow, Tier } from "@/lib/api";
+import type { Economics, PlanResult, PlaybookRow, Tier } from "@/lib/api";
 import { postJson } from "@/lib/api-browser";
-import { fmtInt, fmtModule, fmtNum, fmtProb } from "@/lib/format";
+import { fmtInt, fmtModule, fmtNum, fmtPct, fmtProb, fmtRp } from "@/lib/format";
 import { ACTION_LABELS, ARCHETYPE_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
@@ -112,9 +112,11 @@ export function CapacityPlanner({ cohortId, ece }: { cohortId: string; ece: numb
             <b className="font-semibold text-blue">
               <Num value={s.marginal_per_advisor} prefix="+" />
             </b>{" "}
-            mahasiswa berisiko lagi. Perkiraan memakai probabilitas terkalibrasi{ece != null && ` (ECE ${fmtNum(ece, 4)})`}, bukan jumlah
-            mahasiswa yang pasti tertolong.
+            mahasiswa berisiko lagi. <CounselorGap summary={s} hours={hours} /> Perkiraan memakai probabilitas terkalibrasi
+            {ece != null && ` (ECE ${fmtNum(ece, 4)})`}, bukan jumlah mahasiswa yang pasti tertolong.
           </p>
+
+          {result.economics && <CostScenario summary={s} defaults={result.economics} />}
 
           {s.is_scenario && (
             <div className="rounded-2xl border border-dashed border-uncertain bg-surface-secondary p-5 text-sm">
@@ -224,6 +226,96 @@ export function CapacityPlanner({ cohortId, ece }: { cohortId: string; ece: numb
         </>
       )}
     </div>
+  );
+}
+
+/** How many more advisors at the same hours would fit everyone still waiting for a counsellor contact. */
+function CounselorGap({ summary: s, hours }: { summary: PlanResult["summary"]; hours: number }) {
+  const minutes = s.per_action.filter((a) => a.channel === "unassigned").reduce((m, a) => m + a.minutes, 0);
+  if (minutes === 0) return <>Semua mahasiswa ter-flag yang butuh konselor sudah muat di kapasitas ini.</>;
+  return (
+    <>
+      Supaya {fmtInt(s.unassigned)} mahasiswa yang menunggu ikut terjangkau, butuh {fmtInt(minutes / 60)} jam lagi per minggu
+      {hours > 0 && (
+        <>
+          , setara <b className="font-semibold text-ink">{fmtInt(Math.ceil(minutes / (hours * 60)))} konselor tambahan</b> dengan {fmtInt(hours)} jam
+        </>
+      )}
+      .
+    </>
+  );
+}
+
+/**
+ * The plan in rupiah: follow-up cost for every counsellor contact against tuition kept when some of the reached at-risk students stay.
+ * Every input is an assumption, so the whole panel carries the scenario label.
+ */
+function CostScenario({ summary: s, defaults }: { summary: PlanResult["summary"]; defaults: Economics }) {
+  const [e, setE] = useState(defaults);
+  const set = (k: keyof Economics, max: number) => (ev: React.ChangeEvent<HTMLInputElement>) =>
+    setE({ ...e, [k]: clamp(ev.target.valueAsNumber, 0, max) });
+  const reached = s.expected_at_risk_reached_advisor;
+  const cost = s.advisor_contacts * e.cost_per_student;
+  const kept = reached * e.success_rate;
+  const net = kept * e.tuition - cost;
+  const breakEven = reached * e.tuition > 0 ? cost / (reached * e.tuition) : null;
+  const fields: { k: keyof Economics; label: string; value: number; step: number; max: number }[] = [
+    { k: "cost_per_student", label: "Biaya pendampingan per mahasiswa yang dihubungi (Rp)", value: e.cost_per_student, step: 50000, max: 100_000_000 },
+    { k: "tuition", label: "UKT per mahasiswa per semester (Rp)", value: e.tuition, step: 500000, max: 100_000_000 },
+    { k: "success_rate", label: "Mahasiswa berisiko yang bertahan berkat kontak (0 sampai 1)", value: e.success_rate, step: 0.05, max: 1 },
+  ];
+  return (
+    <section aria-labelledby="skenario-biaya" className="rounded-2xl border border-dashed border-uncertain bg-surface-secondary p-5 text-sm">
+      <h2 id="skenario-biaya" className="flex items-center gap-2 text-xs font-semibold text-ink-2">
+        <FlaskConical className="size-4" aria-hidden />
+        Skenario biaya, bukan efek kausal
+      </h2>
+      <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div className="flex flex-col gap-3">
+          {fields.map((f) => (
+            <label key={f.k} className="flex flex-col gap-1.5 text-[13px] font-medium text-ink-2">
+              {f.label}
+              <Input type="number" min={0} max={f.max} step={f.step} value={String(f.value)} onChange={set(f.k, f.max)} />
+            </label>
+          ))}
+        </div>
+        <div>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <dt className="text-[13px] text-ink-3">Biaya program</dt>
+              <dd className="numeral mt-1 text-2xl text-ink">{fmtRp(cost)}</dd>
+            </div>
+            <div>
+              <dt className="text-[13px] text-ink-3">Mahasiswa bertahan</dt>
+              <dd className="numeral mt-1 text-2xl text-ink">{fmtInt(kept)}</dd>
+            </div>
+            <div>
+              <dt className="text-[13px] text-ink-3">UKT yang tetap masuk</dt>
+              <dd className="numeral mt-1 text-2xl text-ink">{fmtRp(kept * e.tuition)}</dd>
+            </div>
+            <div>
+              <dt className="text-[13px] text-ink-3">Hasil bersih</dt>
+              <dd className={cn("numeral mt-1 text-2xl", net >= 0 ? "text-blue" : "text-danger")}>
+                {net >= 0 ? "+" : ""}
+                {fmtRp(net)}
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-4 leading-relaxed text-ink">
+            {breakEven == null ? (
+              "Tambah jam konselor untuk menghitung titik balik modal."
+            ) : (
+              <>
+                Balik modal bila minimal <b className="font-semibold">{fmtPct(breakEven, 1)}</b> dari {fmtInt(reached)} mahasiswa berisiko yang dihubungi
+                bertahan sampai akhir semester.
+              </>
+            )}{" "}
+            Biaya dihitung untuk {fmtInt(s.advisor_contacts)} mahasiswa yang dihubungi konselor, termasuk sesi lanjutan. Semua masukan adalah asumsi
+            kampus, bukan hasil model.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 

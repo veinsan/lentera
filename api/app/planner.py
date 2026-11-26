@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from app.rules import PLAYBOOK, THRESHOLD, TIERS, tier
+from app.rules import ECONOMICS, PLAYBOOK, THRESHOLD, TIERS, tier
 
 OPENING = (5, 10)  # advisors and hours per advisor: the capacity page's starting values
 
@@ -157,4 +157,5 @@ def plan(students: pd.DataFrame, advisors: int, hours_per_advisor: float, overri
                 playbook=book.reset_index(names="archetype").to_dict("records"),
                 board=board(result, advisors, hours_per_advisor),
                 rules=dict(threshold=THRESHOLD, tiers=[dict(tier=name, min_probability=cut) for cut, name in TIERS]),
+                economics=ECONOMICS,
                 assignments=result[["id", "action", "channel", "probability"]].to_dict("records"))

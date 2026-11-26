@@ -1,6 +1,7 @@
 "use client";
 
-import NumberFlow, { type Format } from "@number-flow/react";
+import NumberFlow, { type Format, type NumberFlowElement } from "@number-flow/react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const FORMATS = {
@@ -13,11 +14,32 @@ const FORMATS = {
 
 export type StatFormat = keyof typeof FORMATS;
 
-/** A number that rolls to its new value when it changes (NumberFlow, id-ID digits); the server HTML holds the real value. */
+/**
+ * A number that rolls to its new value when it changes (NumberFlow, id-ID digits); the server HTML holds the real value.
+ * A number below the fold at hydration drops to 0 while unseen and counts up when it scrolls in; one already on screen never flashes.
+ */
 export function Num({ value, format = "int", prefix, className }: { value: number; format?: StatFormat; prefix?: string; className?: string }) {
+  const ref = useRef<NumberFlowElement>(null);
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) return;
+    setHidden(true);
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        setHidden(false);
+        io.disconnect();
+      }
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return (
     <NumberFlow
-      value={value}
+      ref={ref}
+      value={hidden ? 0 : value}
       locales="id-ID"
       format={FORMATS[format]}
       prefix={prefix}

@@ -42,7 +42,7 @@ export function SearchTrigger() {
 }
 
 /**
- * Presenter keyboard: Ctrl/⌘+K or / opens the palette, 1 to 6 jump to pages (when not typing), Esc closes.
+ * Presenter keyboard: Ctrl/⌘+K or / opens the palette, 1 to 7 jump to pages (when not typing), Esc closes.
  * Students open by ID; the profile route checks access on the server, so the palette needs no student data.
  */
 export function CommandPalette({ allowed, role }: { allowed: string[]; role: Role }) {

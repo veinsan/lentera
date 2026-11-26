@@ -376,8 +376,19 @@
     }
   }
 
+  /* Comparison bars fill from their left edge once, after the plate has risen. */
+  .grow-bar {
+    transform-origin: left;
+    animation: grow-bar 1000ms var(--ease-out-expo) 450ms both;
+  }
+  @keyframes grow-bar {
+    from {
+      transform: scaleX(0.08);
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
+    .grow-bar,
     .rise,
     .sky-in,
     .reveal,

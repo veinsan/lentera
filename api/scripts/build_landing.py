@@ -16,13 +16,34 @@ sys.path.insert(0, str(ROOT))
 from app import planner, quality, rules  # noqa: E402
 from app.explain import ACTIONABLE, SIGNALS  # noqa: E402
 from app.model import Model  # noqa: E402
-from app.pipeline.features import normalize  # noqa: E402
+from app.pipeline.features import normalize, placeholder_activity  # noqa: E402
 
 DATA = ROOT.parent / "data"
 OUT = ROOT.parent / "web/lib/generated/landing.json"
 ADVISORS, HOURS = planner.OPENING
 ADVISOR_MODULES = ["m03", "m06"]  # the demo advisor's modules (scripts/seed_demo_users.py)
 TIER_ORDER = ["low", "watch", "high", "critical"]
+EARLY_DAY = 14  # "stopped before day 14": half of the four-week window
+
+
+def triggers(df: pd.DataFrame) -> dict[str, pd.Series]:
+    """Behavioural triggers a campus can act on in weeks 1 to 4. Context features are never used here."""
+    real = ~placeholder_activity(df)
+    return {
+        "no_submission": df.no_submission_by_cutoff.eq(1),
+        "no_lms": ~real,
+        "stopped_early": real & df.last_activity_day.lt(EARLY_DAY),
+    }
+
+
+def findings(train: pd.DataFrame, cohort: pd.DataFrame) -> list[dict]:
+    """Historical at-risk rate per trigger on the labelled training data, and how many students match it now."""
+    y, now = train.at_risk.astype(bool), triggers(cohort)
+    out = []
+    for code, m in triggers(train).items():
+        out.append(dict(code=code, n_train=int(m.sum()), rate=float(y[m].mean()), rate_rest=float(y[~m].mean()),
+                        n_cohort=int(now[code].sum())))
+    return out
 
 
 def main() -> None:
@@ -40,6 +61,10 @@ def main() -> None:
 
     students = pd.DataFrame(dict(id=typed["id"].astype(int), probability=p, archetype=arch, code_module=modules))
     plan = planner.plan(students, ADVISORS, HOURS)["summary"]
+    train = pd.read_csv(DATA / "train.csv")
+    # Pilot: the two modules with the highest flagged share; critical students there are split into two groups.
+    by_module = students.assign(flagged=flagged, critical=tiers == "critical").groupby("code_module")
+    pilot_modules = by_module.flagged.mean().nlargest(2).index.tolist()
 
     lb = card["leaderboard"]
     data = dict(
@@ -56,7 +81,10 @@ def main() -> None:
             n=test_eval["metrics"]["n"], f1=test_eval["metrics"]["f1"], precision=test_eval["metrics"]["precision"],
             recall=test_eval["metrics"]["recall"], ece=test_eval["calibration"]["ece"],
             plan_contacted=test_eval["plan"]["contacted"], plan_expected=test_eval["plan"]["expected_at_risk"],
-            plan_at_risk=test_eval["plan"]["at_risk"]),
+            plan_at_risk=test_eval["plan"]["at_risk"], at_risk=test_eval["at_risk"],
+            # Share of each tier and archetype whose final outcome was at risk: the per-group proof.
+            tier_at_risk={t: v["at_risk_rate"] for t, v in test_eval["tiers"].items()},
+            archetype_at_risk={a: v["at_risk_rate"] for a, v in test_eval["archetypes"].items()}),
         cohort=dict(
             name="Kohort uji DSCO (test.csv)",
             scored=len(typed), flagged=int(flagged.sum()), expected_at_risk=float(p.sum()),
@@ -68,6 +96,9 @@ def main() -> None:
             advisor_visible=int(np.isin(modules, ADVISOR_MODULES).sum()),
             advisor_modules=ADVISOR_MODULES,
         ),
+        findings=dict(early_day=EARLY_DAY, train_n=len(train), train_rate=float(train.at_risk.mean()),
+                      triggers=findings(train, typed),
+                      pilot=dict(modules=pilot_modules, critical=int(by_module.critical.sum()[pilot_modules].sum()))),
         quality=dict(rows=report["rows"], status=report["status"],
                      repairs=[dict(code=r.get("code"), count=r.get("count")) for r in report["repairs"]]),
         plan=dict(advisors=ADVISORS, hours=HOURS, contacts=plan["advisor_contacts"],

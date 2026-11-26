@@ -83,7 +83,7 @@ export async function getCohortPredictions(cohortId: string): Promise<Prediction
 
 
 /** Student ids with at least one intervention in the cohort (small table; used for status and filters). */
-async function contactedStatus(cohortId: string): Promise<Map<number, string>> {
+export async function contactedStatus(cohortId: string): Promise<Map<number, string>> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("interventions")

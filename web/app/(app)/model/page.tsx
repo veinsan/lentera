@@ -18,7 +18,9 @@ import { DataTable } from "@/components/ui/data-table";
 import { getModelCard, type ModelCard, type Tier } from "@/lib/api";
 import { getCurrentUser, type Role } from "@/lib/auth";
 import { getLatestOutcome } from "@/lib/data";
+import { landing } from "@/lib/landing";
 import { fmtInt, fmtModule, fmtNum, fmtPct } from "@/lib/format";
+import { CircleCheck, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -30,7 +32,11 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        title="Peluang dari model ini terkalibrasi dan stabil antar-fold, jadi bisa dipakai untuk membagi jam konselor."
+        title={
+          landing.test
+            ? `Model ini sudah diuji pada hasil akhir asli: F1 ${fmtNum(landing.test.f1, 3)}, dengan ambang yang ditetapkan sebelum hasilnya dibuka.`
+            : "Peluang dari model ini terkalibrasi dan stabil antar-fold, jadi bisa dipakai untuk membagi jam konselor."
+        }
         description="Cara model dibangun dan divalidasi, seberapa jauh prediksinya bisa dipercaya, dan apakah kohort ini masih mirip data latihnya."
       />
       <Suspense fallback={<div className="plate h-48 animate-pulse" aria-label="Memuat model card" />}>
@@ -60,6 +66,7 @@ async function ModelContent() {
 
   const overview = (
     <div className="flex flex-col gap-5">
+      <OutcomeProof threshold={card.model.threshold} />
       <section className="plate grid grid-cols-2 gap-x-6 gap-y-7 p-5 sm:p-6 lg:grid-cols-4" aria-label="Ringkasan model">
         <Stat
           label="F1 out-of-fold"
@@ -191,6 +198,8 @@ async function ModelContent() {
           </Section>
         </div>
       </div>
+
+      <ProvenLimits />
     </div>
   );
 
@@ -295,4 +304,89 @@ function DecisionBadge({ decision }: { decision: ModelCard["comparison"][number]
   } as const;
   const labels = { dipilih: "Dipilih", ditolak: "Ditolak", pembanding: "Pembanding" } as const;
   return <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold", styles[decision])}>{labels[decision]}</span>;
+}
+
+/** The strongest evidence first: the served model against the test cohort's real final outcomes. */
+function OutcomeProof({ threshold }: { threshold: number }) {
+  const t = landing.test;
+  if (!t) return null;
+  const stats = [
+    { label: "Presisi", value: fmtNum(t.precision, 3), note: "yang ter-flag memang berisiko" },
+    { label: "Recall", value: fmtNum(t.recall, 3), note: "yang berisiko berhasil ter-flag" },
+    { label: "Kalibrasi (ECE)", value: fmtNum(t.ece, 4), note: "peluang tetap jujur di data baru" },
+  ];
+  return (
+    <section aria-labelledby="bukti-hasil-akhir" className="plate rise grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-center">
+      <div>
+        <h2 id="bukti-hasil-akhir" className="text-[17px] font-semibold tracking-[-0.01em] text-ink">
+          Diuji pada status akhir {fmtInt(t.n)} mahasiswa kohort uji DSCO
+        </h2>
+        <p className="mt-1 flex items-baseline gap-3">
+          <span className="numeral text-[3rem] text-blue">{fmtNum(t.f1, 3)}</span>
+          <span className="text-sm text-ink-3">F1 pada hasil akhir asli</span>
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-ink-2">
+          Ambang {fmtNum(threshold, 3)} ditetapkan dari data latih sebelum status akhir dibuka, jadi angka ini bukan hasil tuning. Validasi silang di
+          bawah menjelaskan cara model dipilih.
+        </p>
+      </div>
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-2xl bg-surface-secondary p-4">
+            <dt className="text-[13px] text-ink-3">{s.label}</dt>
+            <dd className="numeral mt-1 text-2xl text-ink">{s.value}</dd>
+            <dd className="mt-1 text-xs text-ink-3">{s.note}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/** What the evidence shows and what it does not, so the numbers above are read at their real strength. */
+function ProvenLimits() {
+  const t = landing.test;
+  const proven = t
+    ? [
+        `Urutan risikonya benar: ${fmtPct(t.tier_at_risk.critical)} mahasiswa Kritis terbukti berisiko di hasil akhir, Rendah hanya ${fmtPct(t.tier_at_risk.low)}.`,
+        `Rencana kontak tepat sasaran: ${fmtInt(t.plan_at_risk)} dari ${fmtInt(t.plan_contacted)} mahasiswa yang dihubungi konselor memang berisiko.`,
+        `Jumlah perkiraan bisa dipegang: rencana memperkirakan ${fmtInt(t.plan_expected)} berisiko sebelum hasilnya keluar.`,
+      ]
+    : [];
+  const open = [
+    "Efek kontak konselor terhadap kelulusan. Ini butuh uji coba terkontrol; desainnya ada di halaman Insight course.",
+    "Kampus lain. Model dilatih dari satu dataset, jadi data baru perlu dicek di tab Drift data sebelum dipakai.",
+    "Masalah tanpa jejak akademik. Model membaca LMS dan tugas, jadi mahasiswa yang butuh bantuan pribadi tanpa tanda akademik tetap perlu jalur rujukan lain.",
+    "Dasar sanksi. Skor dipakai untuk menawarkan bantuan, dan tidak pernah disebut kepada mahasiswa.",
+  ];
+  return (
+    <Section title="Yang sudah dan belum dibuktikan" description="Batas bukti ini perlu dibaca bersama semua angka di halaman ini.">
+      <div className="grid gap-5 md:grid-cols-2">
+        {proven.length > 0 && (
+          <div>
+          <h3 className="mb-3 text-[13px] font-semibold text-ink-2">Sudah dibuktikan</h3>
+          <ul className="flex flex-col gap-2.5 text-sm leading-relaxed text-ink">
+            {proven.map((p) => (
+              <li key={p} className="flex gap-2.5">
+                <CircleCheck className="mt-0.5 size-4 shrink-0 text-blue" aria-hidden />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+          </div>
+        )}
+        <div>
+        <h3 className="mb-3 text-[13px] font-semibold text-ink-2">Belum dibuktikan</h3>
+        <ul className="flex flex-col gap-2.5 text-sm leading-relaxed text-ink-2">
+          {open.map((p) => (
+            <li key={p} className="flex gap-2.5">
+              <CircleDashed className="mt-0.5 size-4 shrink-0 text-ink-3" aria-hidden />
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+        </div>
+      </div>
+    </Section>
+  );
 }

@@ -69,3 +69,8 @@ def test_board_columns_report_mix_and_sample_across_actions(students):
         assert len(sampled) == min(len(c["actions"]), len(c["top"]))  # one of each action before any repeat
         assert all(s["tier"] in c["tiers"] for s in c["top"])
     assert result["rules"]["threshold"] == rules.THRESHOLD
+
+
+def test_plan_carries_cost_scenario_defaults(students):
+    econ = planner.plan(students, advisors=1, hours_per_advisor=5)["economics"]
+    assert econ["cost_per_student"] > 0 and econ["tuition"] > 0 and 0 < econ["success_rate"] <= 1
